@@ -7,11 +7,11 @@ export default class MainScene extends Phaser.Scene {
   }
 
   preload() {
-    this.load.image('logo', '/assets/logo.png');
+    this.load.image('logo', '/assets/Shrek.png');
   }
 
   create() {
-    const logo = this.add.image(400, 300, 'logo').setScale(0.5);
+    const logo = this.add.image(400, 300, 'Shrek').setScale(0.5);
     logo.setInteractive();
     this.input.on('pointerdown', () => {
       this.tweens.add({
@@ -23,7 +23,7 @@ export default class MainScene extends Phaser.Scene {
       });
     });
 
-    this.add.text(8, 8, 'TSA Video Game — Phaser starter', {
+    this.add.text(8, 8, 'TSA Video Game â€” Phaser starter', {
       font: '18px Arial',
       fill: '#ffffff'
     });
