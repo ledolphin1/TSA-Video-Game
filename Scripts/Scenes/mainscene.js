@@ -7,7 +7,7 @@ export default class MainScene extends Phaser.Scene {
   }
 
   preload() {
-    this.load.image('logo', '/Assets/Shrek.png');
+    this.load.image('logo', 'Assets/Shrek.png');
   }
 
   create() {
