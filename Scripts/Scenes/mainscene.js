@@ -7,11 +7,11 @@ export default class MainScene extends Phaser.Scene {
   }
 
   preload() {
-    this.load.image('logo', 'Assets/Shrek.png');
+    this.load.image('shrek', 'Assets/Shrek.png');
   }
 
   create() {
-    const logo = this.add.image(400, 300, 'Shrek').setScale(0.5);
+    const logo = this.add.image(400, 300, 'shrek').setScale(0.5);
     logo.setInteractive();
     this.input.on('pointerdown', () => {
       this.tweens.add({
