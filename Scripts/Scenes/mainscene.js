@@ -8,6 +8,7 @@ export default class MainScene extends Phaser.Scene {
 
   preload() {
     this.load.image('shrek', 'Assets/Shrek.png');
+    this.load.audio('heheheha', 'Assets/audio/scotland.mp3');
   }
 
   create() {
@@ -37,10 +38,24 @@ export default class MainScene extends Phaser.Scene {
                 this.cursors = this.input.keyboard.createCursorKeys();
 
                 // --- Text ---
-                this.add.text(8, 8, 'Shrek Platformer!', {
+                this.add.text(8, 8, 'Shrek Platformer!\n(Click game to start audio)', {
                     font: '18px Arial',
                     fill: '#ffffff'
                 });
+
+                // --- Add and Play Distorted Music ---
+                const music = this.sound.add('heheheha', { 
+                    loop: true,
+                    volume: 1 
+                });
+
+                // "Distort" the music by detuning it (lowering the pitch).
+                music.setDetune(-700);
+
+                // Play the music.
+                // Note: Most browsers will require a user click on the game
+                // canvas before the audio will start.
+                music.play();
             }
 
             update(time, delta) {
