@@ -1,4 +1,4 @@
-// src/main.js
+
 import Phaser from 'phaser';
 import MainScene from './scenes/MainScene.js';
 
