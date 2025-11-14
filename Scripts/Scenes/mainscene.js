@@ -11,25 +11,56 @@ export default class MainScene extends Phaser.Scene {
   }
 
   create() {
-    const logo = this.add.image(400, 300, 'shrek').setScale(0.5);
-    logo.setInteractive();
-    this.input.on('pointerdown', () => {
-      this.tweens.add({
-        targets: logo,
-        y: 200,
-        duration: 600,
-        ease: 'Power2',
-        yoyo: true
-      });
-    });
+                // --- Create Platforms ---
+                this.platforms = this.physics.add.staticGroup();
 
-    this.add.text(8, 8, 'TSA Video Game — Phaser starter', {
-      font: '18px Arial',
-      fill: '#ffffff'
-    });
-  }
+                // Create the ground.
+                // We stretch the 'shrek' image to act as a platform.
+                this.platforms.create(400, 580, 'shrek').setScale(10, 0.5).refreshBody();
 
-  update(time, delta) {
-    // game loop
-  }
+                // Create a couple of smaller ledges
+                this.platforms.create(600, 400, 'shrek').setScale(1, 0.5).refreshBody();
+                this.platforms.create(50, 250, 'shrek').setScale(1, 0.5).refreshBody();
+
+                // --- Create Player ---
+                this.player = this.physics.add.sprite(100, 450, 'shrek');
+
+                // Set player properties
+                this.player.setScale(0.2); // Make the player smaller
+                this.player.setBounce(0.2); // A little bounce
+                this.player.setCollideWorldBounds(true); // Don't fall off-screen
+
+                // --- Physics ---
+                this.physics.add.collider(this.player, this.platforms);
+
+                // --- Controls ---
+                this.cursors = this.input.keyboard.createCursorKeys();
+
+                // --- Text ---
+                this.add.text(8, 8, 'Shrek Platformer!', {
+                    font: '18px Arial',
+                    fill: '#ffffff'
+                });
+            }
+
+            update(time, delta) {
+                // --- Game Loop ---
+
+                // Left/Right Movement
+                if (this.cursors.left.isDown) {
+                    this.player.setVelocityX(-160);
+                } else if (this.cursors.right.isDown) {
+                    this.player.setVelocityX(160);
+                } else {
+                    // Stop moving
+                    this.player.setVelocityX(0);
+                }
+
+                // Jumping
+                // We check 'body.blocked.down' instead of 'body.touching.down'
+                // This is a more reliable way to check for ground collision.
+                if (this.cursors.up.isDown && this.player.body.blocked.down) {
+                    this.player.setVelocityY(-330);
+                }
+            }
 }
