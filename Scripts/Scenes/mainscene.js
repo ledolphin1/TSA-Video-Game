@@ -117,15 +117,15 @@ export default class MainScene extends Phaser.Scene {
     });
 
     this.lives--;
-    this.livesText.setText(`Lives: ${this.lives}`);
+    this.livesText.setText(`Lives: ${this.lives}`); //read lives
 
-    if (this.lives <= 0) {
-      this.time.delayedCall(1500, () => {
+  if (this.lives <= 0) {
+    this.lives = 3; // reset before restart
+    this.time.delayedCall(1500, () => {
         this.scene.restart();
-        this.lives = 3;
-      });
-      return;
-    }
+    });
+    return;
+  }
 
 //------------Respawn player and reset physics--------------------
     
