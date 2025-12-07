@@ -1,0 +1,13 @@
+h1{
+    
+    font-family:monospace;
+    font-size: large;
+    font-weight: normal;
+}
+#game-container{
+    display: flex;
+    align-items: center;
+    margin: 10px;
+    border: 3px;
+    border-color: springgreen;
+}
