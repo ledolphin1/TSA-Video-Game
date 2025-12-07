@@ -12,12 +12,12 @@ export default class MainScene extends Phaser.Scene {
     this.load.image('enemySprite', 'Assets/Enemy.png'); // enemy image
     this.load.image('projectileSprite', 'Assets/Projectile.png'); // projectile image
 
-    this.load.spritesheet('hitAnim', 'Assets/hitAnim.png', { // added: collision animation
+    this.load.spritesheet('hitAnim', 'Assets/hit.png', { // added: collision animation
       frameWidth: 64,
       frameHeight: 64
     });
 
-    this.load.image('shrek', 'Assets/Shrek.png'); //player image?
+    this.load.image('shrek', 'Assets/Shrek.png'); //player image
     this.load.audio('heheheha', 'Assets/audio/scotland.mp3');
   }
 
@@ -30,7 +30,7 @@ export default class MainScene extends Phaser.Scene {
     this.platforms.create(50, 250, 'shrek').setScale(1, 0.5).refreshBody();
 
     // --- Create Player ---
-    this.player = this.physics.add.sprite(100, 450, 'playerSprite'); // changed to playerSprite
+    this.player = this.physics.add.sprite(100, 450, 'shrek'); // YESSS SHREKKK
     this.player.setScale(1);
     this.player.setBounce(0.2);
     this.player.setCollideWorldBounds(true);
