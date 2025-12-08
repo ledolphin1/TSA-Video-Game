@@ -9,14 +9,12 @@ h1{
     font-weight: normal;
 }
 #game-container{
-    width: 800px;
-    height: 600px;
     justify-content: center;
     position: relative;
     display: flex;
     align-items: center;
     margin: 10px;
-    border: 3px;
+    border: 7px;
     border-style: solid;
     border-color: springgreen;
 }

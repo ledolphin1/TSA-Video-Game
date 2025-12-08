@@ -44,7 +44,7 @@ export default class MainScene extends Phaser.Scene {
     this.platforms.create(480, 540, 'shrek').setScale(9, 0.08).refreshBody(); //ground
 
     // --- Create Player ---
-    this.player = this.physics.add.sprite(0, 145, 'player_still');
+    this.player = this.physics.add.sprite(0, 410, 'player_still');
     this.player.setScale(3);
     // this.player.setBounce(0.2); bouncing makes it kinda feel weird so i commented it out (feel free to uncomment)
     this.player.setCollideWorldBounds(true);
