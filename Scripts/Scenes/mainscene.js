@@ -18,12 +18,23 @@ export default class MainScene extends Phaser.Scene {
     });
   */
 
-    this.load.image('player', 'Assets/Main Character Standing SSl.png'); //player image
+    this.load.image('player_still', 'Assets/Main Character Standing SSl.png'); //player image
+    this.load.spritesheet('player_running','Assets/Main Character Running SS.png',{
+        frameWidth: 16,
+        frameHeight: 16
+    })
     this.load.audio('heheheha', 'Assets/audio/scotland.mp3');
     this.load.audio('background', 'Assets/audio/background_music_filler.mp3');
     this.load.image('shrek', 'Assets/shrek.png');
   }
   create() {
+    //upload animations
+    this.anims.create({
+        key: "player_moving",
+        frames: this.anims.generateFrameNumbers("player_running"),
+        frameRate: 20,
+        repeat: -1
+    })
     // --- Create Platforms ---
     this.platforms = this.physics.add.staticGroup();
     //gotta remember shrek (he da goat)
@@ -33,13 +44,13 @@ export default class MainScene extends Phaser.Scene {
     this.platforms.create(480, 540, 'shrek').setScale(9, 0.08).refreshBody(); //ground
 
     // --- Create Player ---
-    this.player = this.physics.add.sprite(0, 145, 'player');
+    this.player = this.physics.add.sprite(0, 145, 'player_still');
     this.player.setScale(3);
-    this.player.setBounce(0.2);
+    // this.player.setBounce(0.2); bouncing makes it kinda feel weird so i commented it out (feel free to uncomment)
     this.player.setCollideWorldBounds(true);
 
     this.physics.add.collider(this.player, this.platforms);
-
+    
     // --- Create Enemy Group ---
     this.enemies = this.physics.add.group(); // added: group for enemies
     const enemy = this.enemies.create(450, 300, 'enemySprite'); // added: initial enemy
@@ -92,17 +103,23 @@ export default class MainScene extends Phaser.Scene {
     if (this.playerIsDead) return; // prevent movement while dead
 
     // Left/Right Movement
+
     if (this.cursors.left.isDown) {
-      this.player.setVelocityX(-160);
+        this.player.flipX = true;   
+        this.player.play("player_moving",true)
+        this.player.setVelocityX(-160);
     } else if (this.cursors.right.isDown) {
+         this.player.flipX = false;   
+        this.player.play("player_moving", true)
       this.player.setVelocityX(160);
     } else {
       this.player.setVelocityX(0);
+      this.player.setTexture("player_still")
     }
 
     // Jumping
     if (this.cursors.up.isDown && this.player.body.blocked.down) {
-      this.player.setVelocityY(-500);
+      this.player.setVelocityY(-450);
     }
   }
 
@@ -136,7 +153,7 @@ export default class MainScene extends Phaser.Scene {
     
     this.player.destroy();
     this.time.delayedCall(1000, () => { //waits to respawn player (dramatic effect)
-      this.player = this.physics.add.sprite(100, 450, 'player'); //set respawn location
+      this.player = this.physics.add.sprite(100, 450, 'player_still'); //set respawn location
       this.player.setScale(3); 
       this.player.setBounce(0.2);
       this.player.setCollideWorldBounds(true);

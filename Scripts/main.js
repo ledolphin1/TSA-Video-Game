@@ -8,6 +8,8 @@ const config = {
   height: 540,
   backgroundColor: '#2d2d2d',
   parent: 'game-container',
+  pixelArt: true,    
+  roundPixels: true,  
   scene: [MainScene],
   physics: {
     default: 'arcade',
