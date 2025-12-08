@@ -23,7 +23,6 @@ export default class MainScene extends Phaser.Scene {
     this.load.audio('background', 'Assets/audio/background_music_filler.mp3');
     this.load.image('shrek', 'Assets/shrek.png');
   }
-
   create() {
     // --- Create Platforms ---
     this.platforms = this.physics.add.staticGroup();
