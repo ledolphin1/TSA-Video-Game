@@ -4,8 +4,8 @@ export default class MainScene extends Phaser.Scene {
   constructor() {
     super({ key: 'MainScene' });
 
-    this.lives = 3; // added: player lives
-    this.playerIsDead = false; // added: track if player is dead
+    this.lives = 3; // : player lives
+    this.playerIsDead = false; // : track if player is dead
   }
 
   preload() {
@@ -23,56 +23,20 @@ export default class MainScene extends Phaser.Scene {
         frameWidth: 16,
         frameHeight: 16
     })
-    this.load.audio('heheheha', 'Assets/audio/scotland.mp3');
     this.load.audio('background', 'Assets/audio/background_music_filler.mp3');
-    this.load.image('shrek', 'Assets/shrek.png');
+    this.load.image("tiles", "./Assets/Tileset.png")
+    this.load.tilemapTiledJSON("tilemap","./Assets/firstLevelTilemapJson.tmj")
+
   }
   create() {
+
     //upload animations
     this.anims.create({
-        key: "player_moving",
-        frames: this.anims.generateFrameNumbers("player_running"),
-        frameRate: 20,
-        repeat: -1
+      key: "player_moving",
+      frames: this.anims.generateFrameNumbers("player_running"),
+      frameRate: 20,
+      repeat: -1
     })
-    // --- Create Platforms ---
-    this.platforms = this.physics.add.staticGroup();
-    //gotta remember shrek (he da goat)
-    this.platforms.create(240, 400, 'shrek').setScale(0.6, 0.05).refreshBody();
-    this.platforms.create(450, 330, 'shrek').setScale(0.6, 0.05).refreshBody();
-    this.platforms.create(600, 190, 'shrek').setScale(0.6, 0.05).refreshBody();
-    this.platforms.create(480, 540, 'shrek').setScale(9, 0.08).refreshBody(); //ground
-
-    // --- Create Player ---
-    this.player = this.physics.add.sprite(0, 410, 'player_still');
-    this.player.setScale(3);
-    // this.player.setBounce(0.2); bouncing makes it kinda feel weird so i commented it out (feel free to uncomment)
-    this.player.setCollideWorldBounds(true);
-
-    this.physics.add.collider(this.player, this.platforms);
-    
-    // --- Create Enemy Group ---
-    this.enemies = this.physics.add.group(); // added: group for enemies
-    const enemy = this.enemies.create(450, 300, 'enemySprite'); // added: initial enemy
-    enemy.setCollideWorldBounds(true); // added
-    enemy.setScale(0.1);
-    this.physics.add.collider(this.enemies, this.platforms); // added
-
-    // --- Create Projectile Group ---
-    this.projectiles = this.physics.add.group(); // added
-
-    this.physics.add.collider(this.projectiles, this.platforms, (proj) => { // added
-      proj.destroy(); // added
-    });
-
-    // --- Collision detection: player ↔ enemies/projectiles ---
-    this.physics.add.overlap(this.player, this.enemies, (player, enemy) => { // added
-      this.handlePlayerDeath(enemy); // added
-    });
-    this.physics.add.overlap(this.player, this.projectiles, (player, projectile) => { // added
-      this.handlePlayerDeath(projectile); // added
-    });
-
     // --- Create Animation --- (not in yet)
     /*this.anims.create({
       key: 'hit',
@@ -80,14 +44,48 @@ export default class MainScene extends Phaser.Scene {
       frameRate: 10,
       repeat: 0
     });*/
+    const map = this.make.tilemap({
+      key: "tilemap"
+    })
+    const tileset = map.addTilesetImage("gametiles","tiles")
+    const ground = map.createLayer("ground", tileset)
+    ground.setCollisionByProperty({
+      collides: true
+    })
+    // --- Create Player ---
+    this.player = this.physics.add.sprite(1,1,"player_still");
+    this.physics.add.collider(this.player, ground)
+    this.player.setCollideWorldBounds(true);
+    // --- Create Enemy Group ---
+    this.enemies = this.physics.add.group(); //  group for enemies
+    const enemy = this.enemies.create(450, 300, 'enemySprite'); //  initial enemy
+    enemy.setCollideWorldBounds(true); // 
+    enemy.setScale(0.1);
+    this.physics.add.collider(this.enemies, ground); 
+    
+    // --- Create Projectile Group ---
+    this.projectiles = this.physics.add.group(); 
+    
+    this.physics.add.collider(this.projectiles, ground, (proj) => { 
+      proj.destroy(); // 
+    });
+    //Collision detection: player  enemies/projectiles
+    this.physics.add.overlap(this.player, this.enemies, (player, enemy) => { 
+      this.handlePlayerDeath(enemy); 
+    });
+    this.physics.add.overlap(this.player, this.projectiles, (player, projectile) => { 
+      this.handlePlayerDeath(projectile); 
+    });
+    
 
     // --- Controls ---
     this.cursors = this.input.keyboard.createCursorKeys();
 
     // --- Text ---
-    this.livesText = this.add.text(8, 8, 'Lives: 3', { // added: lives display
-      font: '18px Arial',
-      fill: '#ffffff'
+    this.livesText = this.add.text(0, 0, 'Lives: 3', { // : lives display
+      fontFamily: "./code_fonts/melodica.regular.otf",
+      fontSize: "16px",
+      fill: "#ffffff"
     });
 
     // --- Add and Play Distorted Music ---
@@ -108,10 +106,21 @@ export default class MainScene extends Phaser.Scene {
         this.player.flipX = true;   
         this.player.play("player_moving",true)
         this.player.setVelocityX(-160);
+        if (oldPlayerPos == this.player.x){
+          this.cameras.main.scrollX -= 1
+
+        }
+        
+        
     } else if (this.cursors.right.isDown) {
-         this.player.flipX = false;   
+        this.player.flipX = false;   
         this.player.play("player_moving", true)
-      this.player.setVelocityX(160);
+        let oldPlayerPos = this.player.x
+        this.player.setVelocityX(160);
+        if (oldPlayerPos == this.player.x){
+          this.cameras.main.scrollX += 1
+
+        }
     } else {
       this.player.setVelocityX(0);
       this.player.setTexture("player_still")
@@ -119,7 +128,7 @@ export default class MainScene extends Phaser.Scene {
 
     // Jumping
     if (this.cursors.up.isDown && this.player.body.blocked.down) {
-      this.player.setVelocityY(-450);
+      this.player.setVelocityY(-300);
     }
   }
 
@@ -152,12 +161,11 @@ export default class MainScene extends Phaser.Scene {
 //------------Respawn player and reset physics--------------------
     
     this.player.destroy();
-    this.time.delayedCall(1000, () => { //waits to respawn player (dramatic effect)
       this.player = this.physics.add.sprite(100, 450, 'player_still'); //set respawn location
       this.player.setScale(3); 
-      this.player.setBounce(0.2);
+      // this.player.setBounce(0.2);
       this.player.setCollideWorldBounds(true);
-      this.physics.add.collider(this.player, this.platforms); 
+      this.physics.add.collider(this.player, this.ground); 
       this.physics.add.overlap(this.player, this.enemies, (player, enemy) => { 
         this.handlePlayerDeath(enemy);
       });
@@ -165,6 +173,5 @@ export default class MainScene extends Phaser.Scene {
         this.handlePlayerDeath(projectile);
       });
       this.playerIsDead = false;
-    });
   }
 }
