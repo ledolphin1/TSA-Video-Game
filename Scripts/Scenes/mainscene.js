@@ -29,7 +29,7 @@ export default class MainScene extends Phaser.Scene {
 
   }
   create() {
-
+    this.physics.world.roundPixels = true;
     //upload animations
     this.anims.create({
       key: "player_moving",
@@ -52,10 +52,16 @@ export default class MainScene extends Phaser.Scene {
     ground.setCollisionByProperty({
       collides: true
     })
+    ground.setPosition(
+      Math.round(ground.x),
+      Math.round(ground.y)
+    );
+
     // --- Create Player ---
     this.player = this.physics.add.sprite(1,1,"player_still");
     this.physics.add.collider(this.player, ground)
-    this.player.setCollideWorldBounds(true);
+    this.cameras.main.startFollow(this.player, false, 1, 1);
+    this.cameras.main.setRoundPixels(true);
     // --- Create Enemy Group ---
     this.enemies = this.physics.add.group(); //  group for enemies
     const enemy = this.enemies.create(450, 300, 'enemySprite'); //  initial enemy
@@ -106,21 +112,14 @@ export default class MainScene extends Phaser.Scene {
         this.player.flipX = true;   
         this.player.play("player_moving",true)
         this.player.setVelocityX(-160);
-        if (oldPlayerPos == this.player.x){
-          this.cameras.main.scrollX -= 1
 
-        }
         
         
     } else if (this.cursors.right.isDown) {
         this.player.flipX = false;   
         this.player.play("player_moving", true)
-        let oldPlayerPos = this.player.x
         this.player.setVelocityX(160);
-        if (oldPlayerPos == this.player.x){
-          this.cameras.main.scrollX += 1
 
-        }
     } else {
       this.player.setVelocityX(0);
       this.player.setTexture("player_still")
