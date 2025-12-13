@@ -94,6 +94,9 @@ export default class MainScene extends Phaser.Scene {
       fill: "#ffffff"
     });
 
+    this.livesText.setScrollFactor(0); // : fix text to camera
+    this.livesText.setDepth(1000); // : ensure text is on top
+
     // --- Add and Play Distorted Music ---
     const music = this.sound.add('background', { 
       loop: true,
