@@ -35,7 +35,7 @@ export default class MainScene extends Phaser.Scene {
     });
   */
     this.load.image('player_still', 'Assets/Main Character Standing SSl.png'); //player image
-    this.load.spritesheet("player_jumping", "Assets/Main Character Jump SS.png",{
+    this.load.spritesheet("player_jumping", "Assets/Main Character Jump SS.png", {
       frameWidth: 16,
       frameHeight: 16
     })
@@ -60,7 +60,7 @@ export default class MainScene extends Phaser.Scene {
     })
     this.anims.create({
       key: "player_jump_start",
-      frames: this.anims.generateFrameNumbers("player_jumping",{
+      frames: this.anims.generateFrameNumbers("player_jumping", {
         start: 0,
         end: 5
       }),
@@ -70,7 +70,7 @@ export default class MainScene extends Phaser.Scene {
     })
     this.anims.create({
       key: "player_falling",
-      frames: this.anims.generateFrameNumbers("player_jumping",{
+      frames: this.anims.generateFrameNumbers("player_jumping", {
         start: 6,
         end: 8
       }),
@@ -134,6 +134,7 @@ export default class MainScene extends Phaser.Scene {
     enemy.body.debugBodyColor = 0xff0000;
 
     enemy.setCollideWorldBounds(true); // 
+    enemy.setVelocityX(50); // Start moving right
     this.physics.add.collider(this.enemies, this.ground);
 
     // --- Create Projectile Group ---
@@ -179,13 +180,19 @@ export default class MainScene extends Phaser.Scene {
 
   update(time, delta) {
     if (this.playerIsDead) return; // prevent movement while dead
+
+    // Update Enemies
+    this.enemies.children.iterate((enemy) => {
+      this.updateEnemy(enemy);
+    });
+
     //switched onGround to a property (just in case)
     this.onGround = this.player.body.blocked.down;
     if (this.onGround) {
       this.isJumping = false
       this.lastGroundedTime = time;
     }
-    if(this.player.body.velocity.y > 0){
+    if (this.player.body.velocity.y > 0) {
       this.player.play("player_falling", true)
     }
     // Attack Input
@@ -199,7 +206,7 @@ export default class MainScene extends Phaser.Scene {
 
     if (this.cursors.left.isDown) {
       this.player.flipX = true;
-      if (this.onGround){
+      if (this.onGround) {
         this.player.play("player_moving", true)
       }
       this.player.setVelocityX(-200);
@@ -208,14 +215,14 @@ export default class MainScene extends Phaser.Scene {
 
     } else if (this.cursors.right.isDown) {
       this.player.flipX = false;
-      if (this.onGround){
+      if (this.onGround) {
         this.player.play("player_moving", true)
       }
       this.player.setVelocityX(200);
 
     } else {
       this.player.setVelocityX(0);
-      if (this.onGround){
+      if (this.onGround) {
         this.player.setTexture("player_still")
       }
     }
@@ -351,5 +358,42 @@ export default class MainScene extends Phaser.Scene {
     // User asked to fix respawning, so let's stick to keeping the scene alive.
     // If the user preferred scene restart, we can uncomment:
     // this.scene.restart(); 
+  }
+
+  updateEnemy(enemy) {
+    if (!enemy.body) return;
+
+    // 1. Wall Detection (Arcade Physics "blocked" check)
+    if (enemy.body.blocked.right) {
+      enemy.setVelocityX(-50);
+      enemy.flipX = false;
+    } else if (enemy.body.blocked.left) {
+      enemy.setVelocityX(50);
+      enemy.flipX = true;
+    }
+
+    // 2. Cliff Detection
+    // Only check if grounded to avoid flipping while falling
+    if (enemy.body.blocked.down) {
+      const isMovingRight = enemy.body.velocity.x > 0;
+      const xOffset = isMovingRight ? enemy.body.width + 5 : -5;
+      const checkX = enemy.body.x + xOffset; // Check just past the edge of the physics body
+      const checkY = enemy.body.bottom + 2;  // Just below feet
+
+      // Check for tile at that position on the collision layer
+      const tile = this.ground.getTileAtWorldXY(checkX, checkY);
+
+      if (!tile || tile.index === -1) {
+        // No tile found OR tile is empty (-1) -> Cliff!
+        // Turn around
+        if (isMovingRight) {
+          enemy.setVelocityX(-50);
+          enemy.flipX = false;
+        } else {
+          enemy.setVelocityX(50);
+          enemy.flipX = true;
+        }
+      }
+    }
   }
 }
