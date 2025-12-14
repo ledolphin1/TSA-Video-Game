@@ -8,10 +8,26 @@ export default class MainScene extends Phaser.Scene {
     this.health = 3; // : player health
     this.isInvincible = false; // : track invulnerability
     this.playerIsDead = false; // : track if player is dead
+    this.isAttacking = false; // track attack state
+    // --- Hitbox Settings ---
+    // Adjustable values for Player (Offsets are auto-calculated to center)
+    this.playerHitbox = {
+      width: 10,
+      height: 14
+    };
+
+    // Adjustable values for Enemy
+    this.enemyHitbox = {
+      width: 10,
+      height: 12
+    };
   }
 
   preload() {
-    this.load.image('enemySprite', 'Assets/snake-mob.png'); // enemy image
+    this.load.spritesheet('enemySprite', 'Assets/snake-mob.png', {
+      frameWidth: 22,
+      frameHeight: 16
+    }); // enemy spritesheet
 
     /*this.load.spritesheet('hitAnim', 'Assets/hit.png', { // not created yet
       frameWidth: 64,
@@ -60,6 +76,16 @@ export default class MainScene extends Phaser.Scene {
     // --- Create Player ---
     this.player = this.physics.add.sprite(100, 250, "player_still");
 
+    // Auto-center hitbox
+    const pWidth = this.playerHitbox.width;
+    const pHeight = this.playerHitbox.height;
+    const pOffsetX = (this.player.width - pWidth) / 2;
+    const pOffsetY = (this.player.height - pHeight); // Align to bottom
+    // If you want pure center: (this.player.height - pHeight) / 2
+
+    this.player.body.setSize(pWidth, pHeight);
+    this.player.body.setOffset(pOffsetX, pOffsetY);
+
     // --- Create Spikes Collision ---
     spikes.setCollisionByExclusion([-1]);
     this.physics.add.collider(this.player, spikes, this.handleSpikeOverlap, null, this);
@@ -73,8 +99,18 @@ export default class MainScene extends Phaser.Scene {
     // --- Create Enemy Group ---
     this.enemies = this.physics.add.group(); //  group for enemies
     const enemy = this.enemies.create(450, 200, 'enemySprite'); //  initial enemy
+
+    // Auto-center hitbox
+    const eWidth = this.enemyHitbox.width;
+    const eHeight = this.enemyHitbox.height;
+    const eOffsetX = (enemy.width - eWidth) / 2;
+    const eOffsetY = (enemy.height - eHeight); // Align to bottom
+
+    enemy.body.setSize(eWidth, eHeight);
+    enemy.body.setOffset(eOffsetX, eOffsetY);
+    enemy.body.debugBodyColor = 0xff0000;
+
     enemy.setCollideWorldBounds(true); // 
-    enemy.setScale(0.1);
     this.physics.add.collider(this.enemies, this.ground);
 
     // --- Create Projectile Group ---
@@ -93,14 +129,11 @@ export default class MainScene extends Phaser.Scene {
       projectile.destroy();
     });
 
-    // Spikes collision (using collider above in create, but double check with overlap if needed)
-    this.physics.add.overlap(this.player, spikes, (player, spike) => {
-      this.handleSpikeOverlap(player, spike);
-    });
-
 
     // --- Controls ---
     this.cursors = this.input.keyboard.createCursorKeys();
+
+    this.attackKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE);
 
     // --- Text ---
     this.healthText = this.add.text(16, 16, 'Health: 3', { // : health display
@@ -128,6 +161,13 @@ export default class MainScene extends Phaser.Scene {
     if (onGround) {
       this.lastGroundedTime = time;
     }
+
+    // Attack Input
+    if (Phaser.Input.Keyboard.JustDown(this.attackKey) && !this.isAttacking) {
+      this.performAttack();
+    }
+
+    if (this.isAttacking) return;
 
     // Left/Right Movement
 
@@ -160,37 +200,80 @@ export default class MainScene extends Phaser.Scene {
     }
   }
 
+  performAttack() {
+    this.isAttacking = true;
+    this.player.setVelocityX(0); // Stop horizontal movement
+
+    // Calculate hitbox position based on facing direction
+    const offsetX = this.player.flipX ? -20 : 20; // Left or Right
+    const startX = this.player.x + offsetX;
+    const startY = this.player.y;
+
+    // Create a temporary hitbox for the attack
+    // Using a clear sprite or zone. For debug visibility we can use a small colored sprite or just a physics body.
+    // We'll use a physics sprite without texture (invisible) but debug body visible.
+    const attackHitbox = this.physics.add.sprite(startX, startY, null);
+    attackHitbox.body.setSize(20, 20);
+    attackHitbox.setVisible(false); // Invisible sprite
+    attackHitbox.body.allowGravity = false;
+    attackHitbox.body.debugBodyColor = 0xffff00; // Yellow for attack
+
+    // Check overlap with enemies
+    this.physics.add.overlap(attackHitbox, this.enemies, (hitbox, enemy) => {
+      if (!enemy.body.enable) return; // Prevent multiple hits
+      enemy.body.enable = false;
+
+      // Hitstop effect
+      this.physics.world.pause();
+      this.anims.pauseAll();
+
+      setTimeout(() => {
+        this.physics.world.resume();
+        this.anims.resumeAll();
+        enemy.destroy();
+      }, 100); // 100ms freeze
+    });
+
+    // Remove hitbox after short duration
+    this.time.delayedCall(100, () => {
+      attackHitbox.destroy();
+      this.isAttacking = false;
+    });
+  }
+
   handleEnemyOverlap(player, enemy) {
     if (this.playerIsDead || this.isInvincible) return;
 
-    this.health--;
-    this.healthText.setText(`Health: ${this.health}`);
+    // Trigger Hitstop (Freezeframe)
+    this.physics.world.pause();
+    this.anims.pauseAll();
+    this.isInvincible = true; // Lock collisions during freeze
 
-    if (this.health <= 0) {
-      this.killPlayer();
-    } else {
-      // Invulnerability logic
-      this.isInvincible = true;
-      this.tweens.add({
-        targets: this.player,
-        alpha: 0.5,
-        duration: 100,
-        yoyo: true,
-        repeat: 5,
-        onComplete: () => {
-          this.player.alpha = 1;
-          this.isInvincible = false;
-        }
-      });
+    // Use setTimeout to ignore engine time scale effectively
+    setTimeout(() => {
+      this.physics.world.resume();
+      this.anims.resumeAll();
 
-      // Optional: pushback?
-      if (player.body.touching.right) {
-        player.setVelocityX(-200);
-      } else if (player.body.touching.left) {
-        player.setVelocityX(200);
+      this.health--;
+      this.healthText.setText(`Health: ${this.health}`);
+
+      if (this.health <= 0) {
+        this.killPlayer();
+      } else {
+        // Invulnerability Flashing
+        this.tweens.add({
+          targets: this.player,
+          alpha: 0.5,
+          duration: 100,
+          yoyo: true,
+          repeat: 5,
+          onComplete: () => {
+            this.player.alpha = 1;
+            this.isInvincible = false;
+          }
+        });
       }
-      player.setVelocityY(-200);
-    }
+    }, 150); // 150ms freeze duration
   }
 
   handleSpikeOverlap(player, spike) {
@@ -210,7 +293,7 @@ export default class MainScene extends Phaser.Scene {
     this.player.body.enable = false;
     this.player.setTint(0xff0000); // Visual feedback for death
 
-    this.time.delayedCall(1500, () => {
+    this.time.delayedCall(100, () => {
       this.respawnPlayer();
     });
   }
