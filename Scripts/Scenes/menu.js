@@ -33,7 +33,6 @@ export default class Menu extends Phaser.Scene {
       playButton.setStyle({ color: '#cc0000ff' });
     });
 
-    // Start the game
     playButton.on('pointerdown', () => {
       this.scene.start('MainScene');
     });
