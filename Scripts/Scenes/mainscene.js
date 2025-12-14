@@ -5,7 +5,8 @@ export default class MainScene extends Phaser.Scene {
   constructor() {
     super({ key: 'MainScene' });
 
-    this.lives = 3; // : player lives
+    this.health = 3; // : player health
+    this.isInvincible = false; // : track invulnerability
     this.playerIsDead = false; // : track if player is dead
   }
 
@@ -55,8 +56,14 @@ export default class MainScene extends Phaser.Scene {
     this.ground.setCollisionByExclusion([-1]);
 
 
+
     // --- Create Player ---
     this.player = this.physics.add.sprite(100, 250, "player_still");
+
+    // --- Create Spikes Collision ---
+    spikes.setCollisionByExclusion([-1]);
+    this.physics.add.collider(this.player, spikes, this.handleSpikeOverlap, null, this);
+
     this.physics.add.collider(this.player, this.ground)
     this.cameras.main.startFollow(this.player, false, 1, 1);
     this.cameras.main.setBounds(0, 0, map.widthInPixels, map.heightInPixels);
@@ -74,14 +81,21 @@ export default class MainScene extends Phaser.Scene {
     this.projectiles = this.physics.add.group();
 
     this.physics.add.collider(this.projectiles, this.ground, (proj) => {
-      proj.destroy(); // 
+      proj.destroy();
     });
+
     //Collision detection: player  enemies/projectiles
     this.physics.add.overlap(this.player, this.enemies, (player, enemy) => {
-      this.handlePlayerDeath(enemy);
+      this.handleEnemyOverlap(player, enemy);
     });
     this.physics.add.overlap(this.player, this.projectiles, (player, projectile) => {
-      this.handlePlayerDeath(projectile);
+      this.handleEnemyOverlap(player, projectile);
+      projectile.destroy();
+    });
+
+    // Spikes collision (using collider above in create, but double check with overlap if needed)
+    this.physics.add.overlap(this.player, spikes, (player, spike) => {
+      this.handleSpikeOverlap(player, spike);
     });
 
 
@@ -89,14 +103,14 @@ export default class MainScene extends Phaser.Scene {
     this.cursors = this.input.keyboard.createCursorKeys();
 
     // --- Text ---
-    this.livesText = this.add.text(0, 0, 'Lives: 3', { // : lives display
+    this.healthText = this.add.text(16, 16, 'Health: 3', { // : health display
       fontFamily: "./code_fonts/melodica.regular.otf",
-      fontSize: "16px",
+      fontSize: "32px",
       fill: "#ffffff"
     });
 
-    this.livesText.setScrollFactor(0); // : fix text to camera
-    this.livesText.setDepth(1000); // : ensure text is on top
+    this.healthText.setScrollFactor(0); // : fix text to camera
+    this.healthText.setDepth(1000); // : ensure text is on top
 
     // --- Add and Play Distorted Music ---
     const music = this.sound.add('background', {
@@ -146,46 +160,78 @@ export default class MainScene extends Phaser.Scene {
     }
   }
 
-  handlePlayerDeath(enemyOrProjectile) {
+  handleEnemyOverlap(player, enemy) {
+    if (this.playerIsDead || this.isInvincible) return;
+
+    this.health--;
+    this.healthText.setText(`Health: ${this.health}`);
+
+    if (this.health <= 0) {
+      this.killPlayer();
+    } else {
+      // Invulnerability logic
+      this.isInvincible = true;
+      this.tweens.add({
+        targets: this.player,
+        alpha: 0.5,
+        duration: 100,
+        yoyo: true,
+        repeat: 5,
+        onComplete: () => {
+          this.player.alpha = 1;
+          this.isInvincible = false;
+        }
+      });
+
+      // Optional: pushback?
+      if (player.body.touching.right) {
+        player.setVelocityX(-200);
+      } else if (player.body.touching.left) {
+        player.setVelocityX(200);
+      }
+      player.setVelocityY(-200);
+    }
+  }
+
+  handleSpikeOverlap(player, spike) {
+    if (this.playerIsDead) return;
+    // Check if we are really touching a spike tile (not empty space)
+    if (spike && spike.index !== -1) {
+      this.killPlayer();
+    }
+  }
+
+  killPlayer() {
     if (this.playerIsDead) return;
     this.playerIsDead = true;
 
     this.player.setVelocity(0, 0);
     this.player.setAcceleration(0);
     this.player.body.enable = false;
+    this.player.setTint(0xff0000); // Visual feedback for death
 
-    enemyOrProjectile.body.enable = false;
-
-    //this.player.play('hit'); 
-    //enemyOrProjectile.play?.('hit'); 
-
-    enemyOrProjectile.destroy();
-
-    this.lives--;
-    this.livesText.setText(`Lives: ${this.lives}`); //read lives
-
-    if (this.lives <= 0) {
-      this.lives = 3; // reset before restart
-      this.time.delayedCall(1500, () => {
-        this.scene.restart();
-      });
-      return;
-    }
-
-    //------------Respawn player and reset physics--------------------
-
-    this.player.destroy();
-    this.player = this.physics.add.sprite(100, 100, 'player_still'); //set respawn location
-    this.player.setScale(3);
-    // this.player.setBounce(0.2);
-    this.player.setCollideWorldBounds(true);
-    this.physics.add.collider(this.player, this.ground);
-    this.physics.add.overlap(this.player, this.enemies, (player, enemy) => {
-      this.handlePlayerDeath(enemy);
+    this.time.delayedCall(1500, () => {
+      this.respawnPlayer();
     });
-    this.physics.add.overlap(this.player, this.projectiles, (player, projectile) => {
-      this.handlePlayerDeath(projectile);
-    });
+  }
+
+  respawnPlayer() {
+    this.health = 3;
+    this.healthText.setText(`Health: ${this.health}`);
     this.playerIsDead = false;
+    this.isInvincible = false;
+
+    // Reset Player Position and Physics
+    this.player.clearTint();
+    this.player.enableBody(true, 100, 250, true, true); // Reset to start pos
+    this.player.setAlpha(1);
+    this.player.setVelocity(0, 0);
+
+    // Ensure camera is still following (should be, since we didn't destroy player)
+    // Restart logic is cleaner this way than scene.restart() usually, 
+    // but if we want full level reset we can do scene.restart(). 
+    // User asked to fix respawning, so let's stick to keeping the scene alive.
+    // If the user preferred scene restart, we can uncomment:
+    // this.scene.restart(); 
   }
 }
