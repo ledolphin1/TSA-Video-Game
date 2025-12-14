@@ -34,8 +34,11 @@ export default class MainScene extends Phaser.Scene {
       frameHeight: 64
     });
   */
-
     this.load.image('player_still', 'Assets/Main Character Standing SSl.png'); //player image
+    this.load.spritesheet("player_jumping", "Assets/Main Character Jump SS.png",{
+      frameWidth: 16,
+      frameHeight: 16
+    })
     this.load.spritesheet('player_running', 'Assets/Main Character Running SS.png', {
       frameWidth: 16,
       frameHeight: 16
@@ -54,6 +57,26 @@ export default class MainScene extends Phaser.Scene {
       frames: this.anims.generateFrameNumbers("player_running"),
       frameRate: 20,
       repeat: -1
+    })
+    this.anims.create({
+      key: "player_jump_start",
+      frames: this.anims.generateFrameNumbers("player_jumping",{
+        start: 0,
+        end: 5
+      }),
+      frameRate: 10,
+      repeat: 0,
+      hideOnComplete: false
+    })
+    this.anims.create({
+      key: "player_falling",
+      frames: this.anims.generateFrameNumbers("player_jumping",{
+        start: 6,
+        end: 8
+      }),
+      frameRate: 10,
+      repeat: 0,
+      hideOnComplete: false
     })
     // --- Create Animation --- (not in yet)
     /*this.anims.create({
@@ -156,12 +179,15 @@ export default class MainScene extends Phaser.Scene {
 
   update(time, delta) {
     if (this.playerIsDead) return; // prevent movement while dead
-
-    const onGround = this.player.body.blocked.down;
-    if (onGround) {
+    //switched onGround to a property (just in case)
+    this.onGround = this.player.body.blocked.down;
+    if (this.onGround) {
+      this.isJumping = false
       this.lastGroundedTime = time;
     }
-
+    if(this.player.body.velocity.y > 0){
+      this.player.play("player_falling", true)
+    }
     // Attack Input
     if (Phaser.Input.Keyboard.JustDown(this.attackKey) && !this.isAttacking) {
       this.performAttack();
@@ -173,25 +199,33 @@ export default class MainScene extends Phaser.Scene {
 
     if (this.cursors.left.isDown) {
       this.player.flipX = true;
-      this.player.play("player_moving", true)
+      if (this.onGround){
+        this.player.play("player_moving", true)
+      }
       this.player.setVelocityX(-200);
 
 
 
     } else if (this.cursors.right.isDown) {
       this.player.flipX = false;
-      this.player.play("player_moving", true)
+      if (this.onGround){
+        this.player.play("player_moving", true)
+      }
       this.player.setVelocityX(200);
 
     } else {
       this.player.setVelocityX(0);
-      this.player.setTexture("player_still")
+      if (this.onGround){
+        this.player.setTexture("player_still")
+      }
     }
 
     // Jumping
-    if (this.cursors.up.isDown && (onGround || (time - this.lastGroundedTime < 100))) {
+    if (this.cursors.up.isDown && (this.onGround || (time - this.lastGroundedTime < 100))) {
       this.player.setVelocityY(-300);
       this.lastGroundedTime = 0;
+      this.isJumping = true;
+      this.player.play("player_jump_start", true);
     }
 
     // Variable jump height: cut velocity when button is released
@@ -201,6 +235,7 @@ export default class MainScene extends Phaser.Scene {
   }
 
   performAttack() {
+    this.isJumping = false
     this.isAttacking = true;
     this.player.setVelocityX(0); // Stop horizontal movement
 
@@ -287,6 +322,7 @@ export default class MainScene extends Phaser.Scene {
   killPlayer() {
     if (this.playerIsDead) return;
     this.playerIsDead = true;
+    this.isJumping = false
 
     this.player.setVelocity(0, 0);
     this.player.setAcceleration(0);
@@ -303,7 +339,6 @@ export default class MainScene extends Phaser.Scene {
     this.healthText.setText(`Health: ${this.health}`);
     this.playerIsDead = false;
     this.isInvincible = false;
-
     // Reset Player Position and Physics
     this.player.clearTint();
     this.player.enableBody(true, 100, 250, true, true); // Reset to start pos
