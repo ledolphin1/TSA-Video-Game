@@ -72,7 +72,7 @@ export default class MainScene extends Phaser.Scene {
     this.cameras.main.setRoundPixels(true);
     // --- Create Enemy Group ---
     this.enemies = this.physics.add.group(); //  group for enemies
-    const enemy = this.enemies.create(450, 300, 'enemySprite'); //  initial enemy
+    const enemy = this.enemies.create(450, 200, 'enemySprite'); //  initial enemy
     enemy.setCollideWorldBounds(true); // 
     enemy.setScale(0.1);
     this.physics.add.collider(this.enemies, this.ground);
