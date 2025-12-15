@@ -6,14 +6,14 @@ import Intro from './Scenes/intro.js';
 
 const config = {
   type: Phaser.AUTO,
-  width: 400,
-  height: 224,
-  zoom: 4.5,
+  width: 320,
+  height: 180,
+  zoom: 5,
   backgroundColor: '#ff0000ff',
   pixelArt: true,
   parent: 'game-container',
 
-  scene: [Intro, Menu, MainScene,Pause],
+  scene: [Menu, MainScene,Pause],
 
   physics: {
     default: 'arcade',
