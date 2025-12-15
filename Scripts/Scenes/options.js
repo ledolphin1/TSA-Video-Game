@@ -15,6 +15,6 @@ export default class Options extends Phaser.Scene {
       backgroundColor: "#000000"
     }).setOrigin(0.5);
 
-    this.rexUI.add.
+  
 }
 }
