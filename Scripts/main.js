@@ -3,6 +3,7 @@ import Menu from './Scenes/menu.js';
 import MainScene from './Scenes/mainscene.js';
 import Pause from "./Scenes/pause.js"
 import Intro from './Scenes/intro.js';
+import Options from './Scenes/options.js';
 
 const config = {
   type: Phaser.AUTO,
