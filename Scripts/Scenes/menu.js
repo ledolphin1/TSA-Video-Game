@@ -17,7 +17,7 @@ export default class Menu extends Phaser.Scene {
     // Play button
     const playButton = this.add.text(width / 2, height / 2, 'PLAY', {
       fontSize: '24px',
-      color: '#cc0000ff',
+      color: '#0099ccff',
       backgroundColor: '#000000',
       padding: { x: 12, y: 6 }
     })
@@ -26,11 +26,11 @@ export default class Menu extends Phaser.Scene {
 
     // Hover effects
     playButton.on('pointerover', () => {
-      playButton.setStyle({ color: '#e78585ff' });
+      playButton.setStyle({ color: '#0e00ccff' });
     });
 
     playButton.on('pointerout', () => {
-      playButton.setStyle({ color: '#cc0000ff' });
+      playButton.setStyle({ color: '#0099ccff' });
     });
 
     playButton.on('pointerdown', () => {
