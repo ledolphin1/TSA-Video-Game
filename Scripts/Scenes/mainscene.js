@@ -18,15 +18,15 @@ export default class MainScene extends Phaser.Scene {
 
     // Adjustable values for Enemy
     this.enemyHitbox = {
-      width: 10,
-      height: 12
+      width: 18.5,
+      height: 9
     };
   }
 
   preload() {
     this.load.spritesheet('enemySprite', '/Assets/snake-mob.png', {
       frameWidth: 22,
-      frameHeight: 16
+      frameHeight: 11
     }); // enemy spritesheet
 
     /*this.load.spritesheet('hitAnim', '/Assets/hit.png', { // not created yet
@@ -55,6 +55,12 @@ export default class MainScene extends Phaser.Scene {
     this.anims.create({
       key: "player_moving",
       frames: this.anims.generateFrameNumbers("player_running"),
+      frameRate: 20,
+      repeat: -1
+    })
+    this.anims.create({
+      key: "enemy_moving",
+      frames: this.anims.generateFrameNumbers("enemySprite"),
       frameRate: 20,
       repeat: -1
     })
@@ -121,20 +127,21 @@ export default class MainScene extends Phaser.Scene {
     this.cameras.main.setRoundPixels(true);
     // --- Create Enemy Group ---
     this.enemies = this.physics.add.group(); //  group for enemies
-    const enemy = this.enemies.create(450, 200, 'enemySprite'); //  initial enemy
-
+    this.enemy = this.enemies.create(450, 200, 'enemySprite'); //  initial enemy
+    this.enemy.play("enemy_moving")
+    this.enemy.flipX = true;
     // Auto-center hitbox
     const eWidth = this.enemyHitbox.width;
     const eHeight = this.enemyHitbox.height;
-    const eOffsetX = (enemy.width - eWidth) / 2;
-    const eOffsetY = (enemy.height - eHeight); // Align to bottom
+    const eOffsetX = (this.enemy.width - eWidth) / 2;
+    const eOffsetY = (this.enemy.height - eHeight); // Align to bottom
 
-    enemy.body.setSize(eWidth, eHeight);
-    enemy.body.setOffset(eOffsetX, eOffsetY);
-    enemy.body.debugBodyColor = 0xff0000;
+    this.enemy.body.setSize(eWidth, eHeight);
+    this.enemy.body.setOffset(eOffsetX, eOffsetY);
+    this.enemy.body.debugBodyColor = 0xff0000;
 
-    enemy.setCollideWorldBounds(true); // 
-    enemy.setVelocityX(50); // Start moving right
+    this.enemy.setCollideWorldBounds(true); // 
+    this.enemy.setVelocityX(50); // Start moving right
     this.physics.add.collider(this.enemies, this.ground);
 
     // --- Create Projectile Group ---
