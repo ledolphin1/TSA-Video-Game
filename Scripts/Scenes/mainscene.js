@@ -166,6 +166,7 @@ export default class MainScene extends Phaser.Scene {
 
     this.attackKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE);
 
+    this.menuKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.ESC)
     // --- Text ---
     this.healthText = this.add.text(16, 16, 'Health: 3', { // : health display
       fontFamily: "./code_fonts/melodica.regular.otf",
@@ -205,6 +206,11 @@ export default class MainScene extends Phaser.Scene {
     // Attack Input
     if (Phaser.Input.Keyboard.JustDown(this.attackKey) && !this.isAttacking) {
       this.performAttack();
+    }
+    
+    if (Phaser.Input.Keyboard.JustDown(this.menuKey)) {
+      this.scene.pause()
+      this.scene.launch("Pause")
     }
 
     if (this.isAttacking) return;
