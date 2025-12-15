@@ -50,6 +50,7 @@ export default class MainScene extends Phaser.Scene {
       frameHeight: 64
     });
   */
+    this.load.image("frame","/Assets/ARCADE_BORDER.png")
     this.load.image('player_still', '/Assets/Main Character Standing SSl.png'); //player image
     this.load.spritesheet("player_jumping", "/Assets/Main Character Jump SS.png", {
       frameWidth: 16,
@@ -125,31 +126,31 @@ export default class MainScene extends Phaser.Scene {
     this.ground = map.createLayer("platforms", tileset)
     const spikes = map.createLayer("spikes", spikeTileset)
     this.ground.setCollisionByExclusion([-1]);
-
-
-
+    
+    
+    
     // --- Create Player ---
     this.player = this.physics.add.sprite(100, 250, "player_still");
     this.player.setVisible(false); // Hide physics body sprite
-
+    
     // Create Visual Sprite (No Physics)
     this.playerVisual = this.add.sprite(100, 250, "player_still");
     this.playerVisual.setDepth(10); // Ensure it renders on top
-
+    
     // Auto-center hitbox
     const pWidth = this.playerHitbox.width;
     const pHeight = this.playerHitbox.height;
     const pOffsetX = (this.player.width - pWidth) / 2;
     const pOffsetY = (this.player.height - pHeight); // Align to bottom
     // If you want pure center: (this.player.height - pHeight) / 2
-
+    
     this.player.body.setSize(pWidth, pHeight);
     this.player.body.setOffset(pOffsetX, pOffsetY);
-
+    
     // --- Create Spikes Collision ---
     spikes.setCollisionByExclusion([-1]);
     this.physics.add.collider(this.player, spikes, this.handleSpikeOverlap, null, this);
-
+    
     this.physics.add.collider(this.player, this.ground)
     this.cameras.main.startFollow(this.player, true, 1, 1);
     this.cameras.main.setBounds(0, 0, map.widthInPixels, map.heightInPixels);
@@ -175,23 +176,23 @@ export default class MainScene extends Phaser.Scene {
 
     // enemy projectiles
     this.projectiles = this.physics.add.group();
-
+    
     this.physics.add.collider(this.projectiles, this.ground, (proj) => {
       proj.destroy();
     });
-
+    
     // player projectiles
     this.playerProjectiles = this.physics.add.group();
-
+    
     this.physics.add.collider(this.playerProjectiles, this.ground, (proj) => {
       proj.destroy();
     });
-
+    
     this.physics.add.overlap(this.playerProjectiles, this.enemies, (proj, enemy) => {
       proj.destroy();
       enemy.destroy();
     });
-
+    
     // player-enemy/projectile collision
     this.physics.add.overlap(this.player, this.enemies, (player, enemy) => {
       this.handleEnemyOverlap(player, enemy);
@@ -200,36 +201,37 @@ export default class MainScene extends Phaser.Scene {
       this.handleEnemyOverlap(player, projectile);
       projectile.destroy();
     });
-
+    
     // chests
     this.chests = this.physics.add.group();
     const chest = this.chests.create(70, 72, 'chests', 0); // Frame 0 = closed
     chest.body.setAllowGravity(false); // assuming chest stays in place
     // chest.setImmovable(true); 
-
+    
     this.physics.add.overlap(this.player, this.chests, (player, chest) => {
       this.handleChestOverlap(player, chest);
     });
-
+    
     this.hasRangedAttack = false;
     this.lastFiredTime = 0; // Initialize cooldown timer
-
-
-
+    
+    
+    
     // --- Controls ---
     this.cursors = this.input.keyboard.createCursorKeys();
-
+    
     this.attackKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE);
     this.fireKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.F);
-
+    
     this.menuKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.ESC)
+    // this.add.image(0,0,"frame").setOrigin(0,0).setScrollFactor(0).setDepth(1001)
     // --- Text ---
     this.healthText = this.add.text(16, 16, 'Health: 3', { // : health display
       fontFamily: "./code_fonts/melodica.regular.otf",
       fontSize: "32px",
       fill: "#ffffff"
     });
-
+    
     this.healthText.setScrollFactor(0); // : fix text to camera
     this.healthText.setScrollFactor(0); // : fix text to camera
     this.healthText.setDepth(1000); // : ensure text is on top

@@ -14,7 +14,7 @@ const config = {
   pixelArt: true,
   parent: 'game-container',
 
-  scene: [Menu, MainScene, Pause],
+  scene: [Menu, MainScene, Pause, Options],
 
   physics: {
     default: 'arcade',
