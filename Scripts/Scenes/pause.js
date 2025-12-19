@@ -6,36 +6,43 @@ export default class Pause extends Phaser.Scene {
   }
 
   create() {
-    const { width, height } = this.scale;
+     const { width, height } = this.scale;
 
     // Title text
-    this.add.text(width / 2, height / 2 - 70, 'Paused', {
-      fontSize: '48px',
-      color: '#ffffff'
-    }).setOrigin(0.5);
+
+    const optionsbutton = this.add.image(width/2, height/2+50,"options").setScale(1.25).setOrigin(0.5).setInteractive({useHandCursor: true})
 
     // Play button
-    const playButton = this.add.text(width / 2, height / 2, 'Resume', {
-      fontSize: '24px',
-      color: '#0099ccff',
-      backgroundColor: '#000000',
-      padding: { x: 12, y: 6 }
-    })
+    const playButton = this.add.image(width/2,height/2+20,"play").setScale(1.25)
     .setOrigin(0.5)
     .setInteractive({ useHandCursor: true });
 
     // Hover effects
     playButton.on('pointerover', () => {
-      playButton.setStyle({ color: '#0e00ccff' });
+      playButton.setTexture("play_yellow");
     });
 
     playButton.on('pointerout', () => {
-      playButton.setStyle({ color: '#0099ccff' });
+      playButton.setTexture("play");
     });
 
     playButton.on('pointerdown', () => {
-      this.scene.resume('MainScene');
       this.scene.stop()
+      this.scene.resume('MainScene');
     });
+     // Hover effects
+    optionsbutton.on('pointerover', () => {
+       optionsbutton.setTexture("options_yellow");
+    });
+
+    optionsbutton.on('pointerout', () => {
+      optionsbutton.setTexture("options");
+    });
+
+    optionsbutton.on('pointerdown', () => {
+      this.scene.pause()
+      this.scene.launch('Options');
+    });
+    this.frame = this.add.image(0,0,"frame").setOrigin(0,0)
   }
 }
