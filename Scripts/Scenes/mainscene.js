@@ -9,6 +9,12 @@ export default class MainScene extends Phaser.Scene {
     this.isInvincible = false; // : track invulnerability
     this.playerIsDead = false; // : track if player is dead
     this.isAttacking = false; // track attack state
+    this.lastAttackEndTime = 0; // track when last attack finished
+    this.isKnockedBack = false; // track knockback state
+    this.slashDamage = 1; // Damage for sword attack
+    this.projectileDamage = 2; // Damage for ranged attack
+    this.knockbackSpeedX = 100; // enemy knockback speed
+    this.knockbackSpeedY = 67; // enemy knockback speed
     // --- Hitbox Settings ---
     // Adjustable values for Player (Offsets are auto-calculated to center)
     this.playerHitbox = {
@@ -50,7 +56,7 @@ export default class MainScene extends Phaser.Scene {
       frameHeight: 64
     });
   */
-    this.load.image("frame","/Assets/ARCADE_BORDER.png")
+    this.load.image("frame", "/Assets/ARCADE_BORDER.png")
     this.load.image('player_still', '/Assets/Main Character Standing SSl.png'); //player image
     this.load.spritesheet("player_jumping", "/Assets/Main Character Jump SS.png", {
       frameWidth: 16,
@@ -67,7 +73,7 @@ export default class MainScene extends Phaser.Scene {
 
   }
   create() {
-    this.physics.world.roundPixels = true;
+    this.physics.world.roundPixels = false;
     //upload animations
     this.anims.create({
       key: "player_moving",
@@ -95,7 +101,7 @@ export default class MainScene extends Phaser.Scene {
       key: "player_attack",
       frames: this.anims.generateFrameNumbers("player_attack_sheet", {
         start: 15,
-        end: 19
+        end: 18
       }),
       frameRate: 20,
       repeat: 0,
@@ -126,73 +132,80 @@ export default class MainScene extends Phaser.Scene {
     this.ground = map.createLayer("platforms", tileset)
     const spikes = map.createLayer("spikes", spikeTileset)
     this.ground.setCollisionByExclusion([-1]);
-    
-    
-    
+
+
+
     // --- Create Player ---
     this.player = this.physics.add.sprite(100, 250, "player_still");
     this.player.setVisible(false); // Hide physics body sprite
-    
+
     // Create Visual Sprite (No Physics)
     this.playerVisual = this.add.sprite(100, 250, "player_still");
     this.playerVisual.setDepth(10); // Ensure it renders on top
-    
+
     // Auto-center hitbox
     const pWidth = this.playerHitbox.width;
     const pHeight = this.playerHitbox.height;
     const pOffsetX = (this.player.width - pWidth) / 2;
     const pOffsetY = (this.player.height - pHeight); // Align to bottom
     // If you want pure center: (this.player.height - pHeight) / 2
-    
+
     this.player.body.setSize(pWidth, pHeight);
     this.player.body.setOffset(pOffsetX, pOffsetY);
-    
+
     // --- Create Spikes Collision ---
     spikes.setCollisionByExclusion([-1]);
     this.physics.add.collider(this.player, spikes, this.handleSpikeOverlap, null, this);
-    
+
     this.physics.add.collider(this.player, this.ground)
     this.cameras.main.startFollow(this.player, true, 1, 1);
     this.cameras.main.setBounds(0, 0, map.widthInPixels, map.heightInPixels);
     this.physics.world.setBounds(0, 0, map.widthInPixels, map.heightInPixels);
     this.player.setCollideWorldBounds(true);
-    this.cameras.main.setRoundPixels(true);
+    this.cameras.main.setRoundPixels(false);
     // Force disable debug (just in case)
-    this.physics.world.drawDebug = false;
-    if (this.physics.world.debugGraphic) {
-      this.physics.world.debugGraphic.setVisible(false);
-    }
+    // this.physics.world.drawDebug = false;
+    // if (this.physics.world.debugGraphic) {
+    //   this.physics.world.debugGraphic.setVisible(false);
+    // }
     // --- Create Enemy Group ---
     this.enemies = this.physics.add.group(); //  group for enemies
 
     // Spawn multiple enemies
-    this.spawnEnemy(200, 280);
-    this.spawnEnemy(500, 250);
-    this.spawnEnemy(650, 250);
-    this.spawnEnemy(500, 80);
-    this.spawnEnemy(1050, 250);
+    this.enemySpawnPoints = [
+      { x: 200, y: 280 },
+      { x: 500, y: 250 },
+      { x: 650, y: 250 },
+      { x: 500, y: 80 },
+      { x: 1050, y: 250 }
+    ];
+
+    this.enemySpawnPoints.forEach(point => {
+      this.spawnEnemy(point.x, point.y);
+    });
 
     this.physics.add.collider(this.enemies, this.ground);
+    this.physics.add.collider(this.enemies, spikes, this.handleEnemySpike, null, this);
 
     // enemy projectiles
     this.projectiles = this.physics.add.group();
-    
+
     this.physics.add.collider(this.projectiles, this.ground, (proj) => {
       proj.destroy();
     });
-    
+
     // player projectiles
     this.playerProjectiles = this.physics.add.group();
-    
+
     this.physics.add.collider(this.playerProjectiles, this.ground, (proj) => {
       proj.destroy();
     });
-    
+
     this.physics.add.overlap(this.playerProjectiles, this.enemies, (proj, enemy) => {
       proj.destroy();
       enemy.destroy();
     });
-    
+
     // player-enemy/projectile collision
     this.physics.add.overlap(this.player, this.enemies, (player, enemy) => {
       this.handleEnemyOverlap(player, enemy);
@@ -201,28 +214,28 @@ export default class MainScene extends Phaser.Scene {
       this.handleEnemyOverlap(player, projectile);
       projectile.destroy();
     });
-    
+
     // chests
     this.chests = this.physics.add.group();
     const chest = this.chests.create(70, 72, 'chests', 0); // Frame 0 = closed
     chest.body.setAllowGravity(false); // assuming chest stays in place
     // chest.setImmovable(true); 
-    
+
     this.physics.add.overlap(this.player, this.chests, (player, chest) => {
       this.handleChestOverlap(player, chest);
     });
-    
+
     this.hasRangedAttack = false;
     this.lastFiredTime = 0; // Initialize cooldown timer
-    
-    
-    
+
+
+
     // --- Controls ---
     this.cursors = this.input.keyboard.createCursorKeys();
-    
+
     this.attackKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE);
     this.fireKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.F);
-    
+
     this.menuKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.ESC)
     // this.add.image(0,0,"frame").setOrigin(0,0).setScrollFactor(0).setDepth(1001)
     // --- Text ---
@@ -231,7 +244,7 @@ export default class MainScene extends Phaser.Scene {
       fontSize: "32px",
       fill: "#ffffff"
     });
-    
+
     this.healthText.setScrollFactor(0); // : fix text to camera
     this.healthText.setScrollFactor(0); // : fix text to camera
     this.healthText.setDepth(1000); // : ensure text is on top
@@ -262,7 +275,7 @@ export default class MainScene extends Phaser.Scene {
         let vY = this.player.y;
 
         // Apply Visual Offsets when attacking
-        if (this.isAttacking) {
+        if (this.playerVisual.texture.key === 'player_attack_sheet') {
           // Invert X offset if facing left
           if (this.player.flipX) {
             vX -= this.attackVisualOffset.x;
@@ -280,6 +293,7 @@ export default class MainScene extends Phaser.Scene {
 
   update(time, delta) {
     if (this.playerIsDead) return; // prevent movement while dead
+    if (this.isKnockedBack) return; // prevent movement while applying knockback force
 
     // Update Enemies
     this.enemies.children.iterate((enemy) => {
@@ -296,7 +310,7 @@ export default class MainScene extends Phaser.Scene {
       this.playerVisual.play("player_falling", true)
     }
     // Attack Input
-    if (Phaser.Input.Keyboard.JustDown(this.attackKey) && !this.isAttacking) {
+    if (Phaser.Input.Keyboard.JustDown(this.attackKey) && !this.isAttacking && time > this.lastAttackEndTime + 10) {
       this.performAttack();
     }
 
@@ -321,7 +335,7 @@ export default class MainScene extends Phaser.Scene {
       if (this.onGround) {
         this.playerVisual.play("player_moving", true)
       }
-      this.player.setVelocityX(-200);
+      this.player.setVelocityX(-150);
 
 
 
@@ -330,7 +344,7 @@ export default class MainScene extends Phaser.Scene {
       if (this.onGround) {
         this.playerVisual.play("player_moving", true)
       }
-      this.player.setVelocityX(200);
+      this.player.setVelocityX(150);
 
     } else {
       this.player.setVelocityX(0);
@@ -354,13 +368,14 @@ export default class MainScene extends Phaser.Scene {
 
     // Update Coordinate Display
     this.coordText.setText(`X: ${Math.round(this.player.x)} Y: ${Math.round(this.player.y)}`);
-    this.updatePlayerHitbox();
   }
 
   performAttack() {
     this.isJumping = false
     this.isAttacking = true;
     this.player.setVelocityX(0); // Stop horizontal movement
+    this.player.setVelocityY(0); // Stop vertical movement
+    this.player.body.allowGravity = false; // Disable gravity
 
     // Force immediate hitbox adjustment for the new animation frame
     this.time.delayedCall(1, () => {
@@ -383,19 +398,56 @@ export default class MainScene extends Phaser.Scene {
 
     // Check overlap with enemies
     this.physics.add.overlap(attackHitbox, this.enemies, (hitbox, enemy) => {
-      if (!enemy.body.enable) return; // Prevent multiple hits
-      enemy.body.enable = false;
+      if (enemy.hitCooldown) return;
+      enemy.hitCooldown = true;
+
       this.playerVisual.play("player_attack", true);
+
+      // -- INSTANT HIT PROCESSING --
+      enemy.hp -= this.slashDamage;
+
+      if (enemy.hp <= 0) {
+        enemy.destroy();
+        this.physics.world.pause();
+        this.anims.pauseAll();
+        setTimeout(() => {
+          this.physics.world.resume();
+          this.anims.resumeAll();
+        }, 100);
+        return;
+      }
+
+      // Flash white
+      enemy.setTintFill(0xffffff);
+
+      // Apply Knockback
+      enemy.isKnockedBack = true;
+      const kbDir = this.player.flipX ? -1 : 1;
+      enemy.setVelocity(kbDir * this.knockbackSpeedX, -this.knockbackSpeedY);
+
       // Hitstop effect
       this.physics.world.pause();
       this.anims.pauseAll();
 
-
+      // Resume Game Loop after freeze
       setTimeout(() => {
         this.physics.world.resume();
         this.anims.resumeAll();
-        enemy.destroy();
-      }, 100); // 100ms freeze
+      }, 100);
+
+      // Reset Enemy State
+      setTimeout(() => {
+        if (enemy.active) {
+          enemy.clearTint();
+          enemy.isKnockedBack = false;
+          enemy.hitCooldown = false;
+
+          // Face Player and Move
+          const recoverDir = (this.player.x < enemy.x) ? -1 : 1;
+          enemy.setVelocityX(recoverDir * 50);
+          enemy.flipX = (recoverDir === 1);
+        }
+      }, 400);
     });
 
     // Remove hitbox after short duration
@@ -404,8 +456,10 @@ export default class MainScene extends Phaser.Scene {
     });
 
     // Reset attack state after fixed duration (independent of animation)
-    this.time.delayedCall(500, () => {
+    this.time.delayedCall(250, () => {
       this.isAttacking = false;
+      this.lastAttackEndTime = this.time.now;
+      this.player.body.allowGravity = true; // Restore gravity
       this.updatePlayerHitbox(); // Reset hitbox for normal sprite
     });
   }
@@ -428,6 +482,7 @@ export default class MainScene extends Phaser.Scene {
 
   handleEnemyOverlap(player, enemy) {
     if (this.playerIsDead || this.isInvincible) return;
+    if (enemy.isKnockedBack) return; // enemy cannot hurt player while stunned
 
     // Trigger Hitstop (Freezeframe)
     this.physics.world.pause();
@@ -445,6 +500,17 @@ export default class MainScene extends Phaser.Scene {
       if (this.health <= 0) {
         this.killPlayer();
       } else {
+        // Apply Knockback
+        this.isKnockedBack = true;
+
+        const knockbackDirection = (this.player.x < enemy.x) ? -1 : 1;
+        this.player.setVelocity(knockbackDirection * 100, -50);
+
+        // Lock controls for short duration
+        this.time.delayedCall(250, () => {
+          this.isKnockedBack = false;
+        });
+
         // Invulnerability Flashing
         this.tweens.add({
           targets: this.playerVisual,
@@ -459,6 +525,12 @@ export default class MainScene extends Phaser.Scene {
         });
       }
     }, 150); // 150ms freeze duration
+  }
+
+  handleEnemySpike(enemy, spike) {
+    if (spike && spike.index !== -1) {
+      enemy.destroy();
+    }
   }
 
   handleSpikeOverlap(player, spike) {
@@ -497,10 +569,21 @@ export default class MainScene extends Phaser.Scene {
     this.player.setVelocity(0, 0);
     this.lastFiredTime = 0;
     this.isAttacking = false;
+    this.resetEnemies();
+  }
+
+  resetEnemies() {
+    this.enemies.clear(true, true); // Remove all children and destroy them
+    this.enemySpawnPoints.forEach(point => {
+      this.spawnEnemy(point.x, point.y);
+    });
   }
 
   spawnEnemy(x, y) {
     const enemy = this.enemies.create(x, y, 'enemySprite');
+    enemy.hp = 2; // Enemy Health
+    enemy.isKnockedBack = false;
+    enemy.hitCooldown = false;
     enemy.play("enemy_moving");
     enemy.flipX = true;
 
@@ -550,8 +633,39 @@ export default class MainScene extends Phaser.Scene {
 
     // Add collision with enemies
     this.physics.add.overlap(proj, this.enemies, (projectile, enemy) => {
+      if (enemy.hitCooldown) {
+        projectile.destroy();
+        return;
+      }
+      enemy.hitCooldown = true;
       projectile.destroy();
-      enemy.destroy();
+
+      enemy.hp -= this.projectileDamage;
+
+      if (enemy.hp <= 0) {
+        enemy.destroy();
+      } else {
+        // Flash white
+        enemy.setTintFill(0xffffff);
+
+        enemy.isKnockedBack = true;
+        // projectile direction
+        const kbDir = (projectile.body.velocity.x > 0) ? 1 : -1;
+        enemy.setVelocity(kbDir * this.knockbackSpeedX, -this.knockbackSpeedY);
+
+        setTimeout(() => {
+          if (enemy.active) {
+            enemy.clearTint();
+            enemy.isKnockedBack = false;
+            enemy.hitCooldown = false;
+
+            // Face Player and Move
+            const recoverDir = (this.player.x < enemy.x) ? -1 : 1;
+            enemy.setVelocityX(recoverDir * 50);
+            enemy.flipX = (recoverDir === 1);
+          }
+        }, 400);
+      }
     });
     // hit wall
     this.physics.add.collider(proj, this.ground, () => {
@@ -561,6 +675,7 @@ export default class MainScene extends Phaser.Scene {
 
   updateEnemy(enemy) {
     if (!enemy.body) return;
+    if (enemy.isKnockedBack) return;
 
     // wall detection
     if (enemy.body.blocked.right) {

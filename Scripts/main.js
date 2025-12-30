@@ -14,13 +14,13 @@ const config = {
   pixelArt: true,
   parent: 'game-container',
 
-  scene: [Intro,Menu, MainScene, Pause, Options],
+  scene: [Intro, Menu, MainScene, Pause, Options],
 
   physics: {
     default: 'arcade',
     arcade: {
       gravity: { y: 600 },
-      debug: false
+      debug: true
     }
   }
 };
