@@ -67,7 +67,7 @@ export default class MainScene extends Phaser.Scene {
       frameHeight: 16
     })
     this.load.audio('background', '/Assets/audio/background_music_filler.mp3');
-    this.load.tilemapTiledJSON('map', '/Assets/Map/BaseMap.tmj');
+    this.load.tilemapTiledJSON('map', '/Assets/Map/firstlevel.tmj');
     this.load.image('tiles', '/Assets/Map/tileset.png');
     this.load.image('spikes', '/Assets/Map/spikes.png');
 
@@ -127,7 +127,7 @@ export default class MainScene extends Phaser.Scene {
     const map = this.make.tilemap({
       key: "map"
     })
-    const tileset = map.addTilesetImage("gametiles", "tiles")
+    const tileset = map.addTilesetImage("Tileset", "tiles")
     const spikeTileset = map.addTilesetImage("spikes", "spikes")
     this.ground = map.createLayer("platforms", tileset)
     const spikes = map.createLayer("spikes", spikeTileset)
@@ -136,11 +136,11 @@ export default class MainScene extends Phaser.Scene {
 
 
     // --- Create Player ---
-    this.player = this.physics.add.sprite(100, 250, "player_still");
+    this.player = this.physics.add.sprite(270, 888, "player_still");
     this.player.setVisible(false); // Hide physics body sprite
 
     // Create Visual Sprite (No Physics)
-    this.playerVisual = this.add.sprite(100, 250, "player_still");
+    this.playerVisual = this.add.sprite(270, 888, "player_still");
     this.playerVisual.setDepth(10); // Ensure it renders on top
 
     // Auto-center hitbox
@@ -173,11 +173,12 @@ export default class MainScene extends Phaser.Scene {
 
     // Spawn multiple enemies
     this.enemySpawnPoints = [
-      { x: 200, y: 280 },
-      { x: 500, y: 250 },
-      { x: 650, y: 250 },
-      { x: 500, y: 80 },
-      { x: 1050, y: 250 }
+      { x: 770, y: 870 },
+      { x: 1150, y: 840 },
+      { x: 1400, y: 820 },
+      { x: 1500, y: 820 },
+      { x: 2000, y: 580 },
+      { x: 2100, y: 580 }
     ];
 
     this.enemySpawnPoints.forEach(point => {
@@ -390,7 +391,7 @@ export default class MainScene extends Phaser.Scene {
     // Using a clear sprite or zone. For debug visibility we can use a small colored sprite or just a physics body.
     // We'll use a physics sprite without texture (invisible) but debug body visible.
     const attackHitbox = this.physics.add.sprite(startX, startY, null);
-    attackHitbox.body.setSize(20, 20);
+    attackHitbox.body.setSize(30, 25);
     attackHitbox.setVisible(false); // Invisible sprite
     attackHitbox.body.allowGravity = false;
     attackHitbox.body.debugBodyColor = 0xffff00; // Yellow for attack
@@ -484,7 +485,22 @@ export default class MainScene extends Phaser.Scene {
     if (this.playerIsDead || this.isInvincible) return;
     if (enemy.isKnockedBack) return; // enemy cannot hurt player while stunned
 
-    // Trigger Hitstop (Freezeframe)
+    // Common Damage Logic
+    this.health--;
+    this.healthText.setText(`Health: ${this.health}`);
+
+    // Super Armor Case: attacking players don't freeze or get knocked back
+    if (this.isAttacking) {
+      this.isInvincible = true;
+      if (this.health <= 0) {
+        this.killPlayer();
+      } else {
+        this.flashPlayer();
+      }
+      return;
+    }
+
+    // Normal Case: Hitstop (Freezeframe) then Knockback
     this.physics.world.pause();
     this.anims.pauseAll();
     this.isInvincible = true; // Lock collisions during freeze
@@ -493,9 +509,6 @@ export default class MainScene extends Phaser.Scene {
     setTimeout(() => {
       this.physics.world.resume();
       this.anims.resumeAll();
-
-      this.health--;
-      this.healthText.setText(`Health: ${this.health}`);
 
       if (this.health <= 0) {
         this.killPlayer();
@@ -511,20 +524,23 @@ export default class MainScene extends Phaser.Scene {
           this.isKnockedBack = false;
         });
 
-        // Invulnerability Flashing
-        this.tweens.add({
-          targets: this.playerVisual,
-          alpha: 0.5,
-          duration: 100,
-          yoyo: true,
-          repeat: 5,
-          onComplete: () => {
-            this.playerVisual.alpha = 1;
-            this.isInvincible = false;
-          }
-        });
+        this.flashPlayer();
       }
     }, 150); // 150ms freeze duration
+  }
+
+  flashPlayer() {
+    this.tweens.add({
+      targets: this.playerVisual,
+      alpha: 0.5,
+      duration: 100,
+      yoyo: true,
+      repeat: 5,
+      onComplete: () => {
+        this.playerVisual.alpha = 1;
+        this.isInvincible = false;
+      }
+    });
   }
 
   handleEnemySpike(enemy, spike) {
@@ -564,7 +580,7 @@ export default class MainScene extends Phaser.Scene {
     // Reset Player Position and Physics
     this.playerVisual.clearTint();
     this.playerVisual.setTexture("player_still"); // Reset animation to idle
-    this.player.enableBody(true, 100, 250, true, false); // Reset to start pos, keep hidden
+    this.player.enableBody(true, 270, 888, true, false); // Reset to start pos, keep hidden
     this.playerVisual.setAlpha(1);
     this.player.setVelocity(0, 0);
     this.lastFiredTime = 0;
