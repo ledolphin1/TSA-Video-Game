@@ -8,6 +8,14 @@ export default class MainScene extends Phaser.Scene {
     this.isInvincible = false; // : track invulnerability
     this.playerIsDead = false; // : track if player is dead
     this.isAttacking = false; // track attack state
+
+    this.isChestMenuOpen = false;
+    this.chestMenu = null;
+    this.menuSourceChest = null;
+
+    this.projectileColor = null;
+
+
     // --- Hitbox Settings ---
     // Adjustable values for Player (Offsets are auto-calculated to center)
     this.playerHitbox = {
@@ -207,8 +215,15 @@ export default class MainScene extends Phaser.Scene {
     chest.body.setAllowGravity(false); // assuming chest stays in place
     // chest.setImmovable(true); 
     
+
+    // Old chest without menu
+    // this.physics.add.overlap(this.player, this.chests, (player, chest) => {
+    //   this.handleChestOverlap(player, chest);
+    // });
+
+    // new chest with menu
     this.physics.add.overlap(this.player, this.chests, (player, chest) => {
-      this.handleChestOverlap(player, chest);
+      this.handleChestOverlapWithMenu(player, chest);
     });
     
     this.hasRangedAttack = false;
@@ -279,6 +294,12 @@ export default class MainScene extends Phaser.Scene {
 
   update(time, delta) {
     if (this.playerIsDead) return; // prevent movement while dead
+
+    if (this.isChestMenuOpen) {
+      this.player.setVelocityX(0); // stops sliding during chest menu
+      return; // prevents inputs during chest menu
+    }
+
 
     // Update Enemies
     this.enemies.children.iterate((enemy) => {
@@ -532,9 +553,139 @@ export default class MainScene extends Phaser.Scene {
     });
   }
 
+  handleChestOverlapWithMenu(player, chest) {
+    if (this.isChestMenuOpen) return;      // already open
+    if (chest.getData("opened")) return;   // already used
+
+    chest.setData("opened", true);
+
+    chest.setFrame(1); // show open chest frame
+
+    // Disable physics overlap but keep the chest visible
+    chest.disableBody(true, false);
+
+    // Remember which chest opened the menu
+    this.menuSourceChest = chest;
+
+    this.showChestMenu();
+  }
+
+  showChestMenu() {
+    if (this.isChestMenuOpen) return;
+
+    this.isChestMenuOpen = true;
+
+    const cam = this.cameras.main;
+    const w = cam.width;
+    const h = cam.height;
+
+    // Overlay container
+    this.chestMenu = this.add.container(0, 0);
+    this.chestMenu.setDepth(5000);
+    this.chestMenu.setAlpha(0);
+
+    // Dim background
+    const bg = this.add
+      .rectangle(w / 2, h / 2, w, h, 0x000000, 0.6)
+      .setScrollFactor(0)
+      .setInteractive();
+
+    const title = this.add
+      .text(w / 2, h / 2 - 90, "Choose One", {
+        fontSize: "28px",
+        fill: "#ffffff",
+      })
+      .setOrigin(0.5)
+      .setScrollFactor(0);
+
+    // 3 squares centered horizontally
+    const size = 80;
+    const gap = 30;
+    const total = size * 3 + gap * 2;
+    const startX = (w - total) / 2 + size / 2;
+    const y = h / 2;
+
+    const optionColors = [0xff0000, 0x00ffff, 0xffff00]; // red, cyan, yellow
+    const squares = [];
+
+    for (let optionIndex = 0; optionIndex < 3; optionIndex++) {
+      const x = startX + optionIndex * (size + gap);
+
+      const square = this.add
+        .rectangle(x, y, size, size, optionColors[optionIndex], 1)
+        .setScrollFactor(0)
+        .setStrokeStyle(3, 0xffffff, 1)
+        .setInteractive({ useHandCursor: true });
+
+      square.on("pointerover", () => square.setAlpha(0.85));
+      square.on("pointerout", () => square.setAlpha(1));
+
+      square.on("pointerdown", () => {
+        this.onChestMenuPick(optionIndex);
+      });
+
+      squares.push(square);
+    }
+
+    this.chestMenu.add([bg, title, ...squares]);
+
+    // Fade in
+    this.tweens.add({
+      targets: this.chestMenu,
+      alpha: 1,
+      duration: 200,
+    });
+  }
+
+  hideChestMenu() {
+    if (!this.chestMenu) return;
+
+    this.tweens.add({
+      targets: this.chestMenu,
+      alpha: 0,
+      duration: 200,
+      onComplete: () => {
+        
+        this.chestMenu.destroy(true);
+
+        // reset 
+        this.chestMenu = null;
+        this.isChestMenuOpen = false;
+        this.menuSourceChest = null;
+      }
+    });
+  }
+
+
+  onChestMenuPick(choiceIndex) {
+    // choiceIndex is 0, 1, or 2
+
+    if (choiceIndex === 0) {
+      // Left square  (red)
+      this.hasRangedAttack = true;
+      this.projectileColor = 0xff0000;
+
+    } 
+    else if (choiceIndex === 1) {
+      // Middle square effect (cyan)
+      this.hasRangedAttack = true;
+      this.projectileColor = 0x00ffff;
+
+    } 
+    else if (choiceIndex === 2) {
+      // Right square effect (yellow)
+      this.hasRangedAttack = true;
+      this.projectileColor = 0xffff00;
+
+    }
+
+    // After picking, close the menu
+    this.hideChestMenu();
+  }
+
   fireProjectile(time) {
     this.lastFiredTime = time;
-    const proj = this.add.rectangle(this.player.x, this.player.y, 10, 10, 0x00ffff);
+    const proj = this.add.rectangle(this.player.x, this.player.y, 10, 10, this.projectileColor);
     this.physics.add.existing(proj);
     this.playerProjectiles.add(proj); // Use separate group!
 
