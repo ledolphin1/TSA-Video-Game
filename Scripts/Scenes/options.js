@@ -24,7 +24,7 @@ export default class Options extends Phaser.Scene {
     })
     // Title text
 
-    this.add.rectangle(width/2, height/2, 200, 140,"#000000")
+
     this.add.image(width/2,height/2-20,"options").setScale(2).setOrigin(0.5);
     this.add.image(width/2,height/2+10,"sound").setScale(1.25).setOrigin(0.5);
     this.backButton = this.add.image(width/2,height/2+50,"back").setScale(1.25).setOrigin(0.5).setInteractive({useHandCursor: true});
