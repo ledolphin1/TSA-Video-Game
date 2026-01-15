@@ -165,13 +165,19 @@ export default class BossScene extends Phaser.Scene {
     this.physics.add.collider(this.enemies, this.ground);
 
     // enemy projectiles
-    this.projectiles = this.physics.add.group();
+    // --- Enemy Projectiles ---
+    this.enemyProjectiles = this.physics.add.group();
 
-    this.physics.add.collider(this.projectiles, this.ground, (proj) => {
+    this.physics.add.collider(this.enemyProjectiles, this.ground, (proj) => {
       proj.destroy();
     });
 
-    // player projectiles
+    this.physics.add.overlap(this.player, this.enemyProjectiles, (player, proj) => {
+      this.handleEnemyOverlap(player, proj);
+      proj.destroy();
+    });
+
+    // --- Player Projectiles ---
     this.playerProjectiles = this.physics.add.group();
 
     this.physics.add.collider(this.playerProjectiles, this.ground, (proj) => {
@@ -180,21 +186,28 @@ export default class BossScene extends Phaser.Scene {
 
     this.physics.add.overlap(this.playerProjectiles, this.enemies, (proj, enemy) => {
       proj.destroy();
-      enemy.destroy();
+      enemy.hp -= this.projectileDamage;
+      console.log(`Enemy HP: ${enemy.hp}`); // Debug: See HP go down
+
+      if (enemy.hp <= 0) {
+        enemy.destroy();
+      } else {
+        // Flash to show hit
+        enemy.setTintFill(0xffffff);
+        this.time.delayedCall(100, () => {
+          if (enemy.active) enemy.clearTint();
+        });
+      }
     });
 
-    // player-enemy/projectile collision
+    // --- Player vs Enemy Collision ---
     this.physics.add.overlap(this.player, this.enemies, (player, enemy) => {
       this.handleEnemyOverlap(player, enemy);
     });
-    this.physics.add.overlap(this.player, this.projectiles, (player, projectile) => {
-      this.handleEnemyOverlap(player, projectile);
-      projectile.destroy();
-    });
 
 
 
-    this.hasRangedAttack = false;
+    this.hasRangedAttack = true;
     this.lastFiredTime = 0; // Initialize cooldown timer
 
 
@@ -235,8 +248,8 @@ export default class BossScene extends Phaser.Scene {
     });
     //music.setDetune(-700); - I left it in just for you (i'm guessing its leo who added this) (yeah sidney told me to do it)
     music.play();
-    this.player.x = 100;
-    this.player.y = 100;
+    this.player.x = 60;
+    this.player.y = 200;
     // --- Post-Update Sync (Fixes Lag/Blur) ---
     // Sync runs AFTER physics, ensuring visual matches actual body position for this frame
     this.events.on('postupdate', () => {
@@ -267,7 +280,7 @@ export default class BossScene extends Phaser.Scene {
 
     // Update Enemies
     this.enemies.children.iterate((enemy) => {
-      this.updateEnemy(enemy);
+      this.updateEnemy(time, enemy);
     });
 
     //switched onGround to a property (just in case)
@@ -291,7 +304,7 @@ export default class BossScene extends Phaser.Scene {
 
     // Ranged Attack Input
     if (Phaser.Input.Keyboard.JustDown(this.fireKey) && this.hasRangedAttack) {
-      if (time > this.lastFiredTime + 3000) { // 3s cooldown
+      if (time > this.lastFiredTime + 1) { // 3s cooldown
         this.fireProjectile(time);
       }
     }
@@ -549,7 +562,7 @@ export default class BossScene extends Phaser.Scene {
     // Reset Player Position and Physics
     this.playerVisual.clearTint();
     this.playerVisual.setTexture("player_still"); // Reset animation to idle
-    this.player.enableBody(true, 270, 888, true, false); // Reset to start pos, keep hidden
+    this.player.enableBody(true, 60, 200, true, false); // Reset to start pos, keep hidden
     this.playerVisual.setAlpha(1);
     this.player.setVelocity(0, 0);
     this.lastFiredTime = 0;
@@ -560,10 +573,12 @@ export default class BossScene extends Phaser.Scene {
 
   spawnEnemy(x, y) {
     const enemy = this.enemies.create(x, y, 'enemySprite');
-    const scale = 4; // Make boss BIG
+    const scale = 4; //temp scale for fake boss
     enemy.setScale(scale);
 
     enemy.hp = 20; // Enemy Health
+    enemy.canShoot = true; // BOSS SHOOTS
+    enemy.lastShotTime = 0;
     enemy.isKnockedBack = false;
     enemy.hitCooldown = false;
     enemy.play("enemy_moving");
@@ -642,9 +657,37 @@ export default class BossScene extends Phaser.Scene {
     });
   }
 
-  updateEnemy(enemy) {
+  enemyProjectile(time, enemy) {
+    this.lastFiredTime = time;
+
+    for (let i = 0; i < 5; i++) {
+      if (!enemy.active) return;
+      this.time.delayedCall(i * 200, () => {
+        if (!enemy.active) return;
+        const proj = this.add.rectangle(enemy.body.center.x, enemy.body.center.y, 10, 10, 0xff0000);
+        this.physics.add.existing(proj);
+        this.enemyProjectiles.add(proj);
+
+        proj.body.allowGravity = false;
+
+        this.physics.moveTo(proj, this.player.x, this.player.y, 100);
+
+        this.time.delayedCall(3000, () => {
+          if (proj.active) proj.destroy();
+        });
+      });
+    }
+  }
+
+  updateEnemy(time, enemy) {
     if (!enemy.body) return;
     if (enemy.isKnockedBack) return;
+
+    // Shooting Logic
+    if (enemy.canShoot && time > enemy.lastShotTime + 2000) {
+      this.enemyProjectile(time, enemy);
+      enemy.lastShotTime = time;
+    }
 
     // wall detection
     if (enemy.body.blocked.right) {
