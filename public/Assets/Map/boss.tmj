@@ -25,7 +25,7 @@
             12, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 13],
          "height":20,
          "id":1,
-         "name":"Tile Layer 1",
+         "name":"platforms",
          "opacity":1,
          "type":"tilelayer",
          "visible":true,
@@ -39,10 +39,19 @@
  "renderorder":"right-down",
  "tiledversion":"1.11.2",
  "tileheight":16,
- "tilesets":[
+"tilesets":[
         {
+         "columns":7,
          "firstgid":1,
-         "source":"tsa.tsx"
+         "image":"Tileset.png",
+         "imageheight":112,
+         "imagewidth":112,
+         "margin":0,
+         "name":"Tileset",
+         "spacing":0,
+         "tilecount":49,
+         "tileheight":16,
+         "tilewidth":16
         }],
  "tilewidth":16,
  "type":"map",

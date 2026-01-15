@@ -4,6 +4,7 @@ import MainScene from './Scenes/mainscene.js';
 import Pause from "./Scenes/pause.js"
 import Intro from './Scenes/intro.js';
 import Options from './Scenes/options.js';
+import boss from './Scenes/boss.js';
 
 const config = {
   type: Phaser.AUTO,
@@ -14,7 +15,7 @@ const config = {
   pixelArt: true,
   parent: 'game-container',
 
-  scene: [Intro, Menu, MainScene, Pause, Options],
+  scene: [Intro, Menu, MainScene, Pause, Options, boss],
 
   physics: {
     default: 'arcade',

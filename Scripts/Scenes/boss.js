@@ -1,9 +1,8 @@
-
 import Phaser from 'phaser';
 
-export default class MainScene extends Phaser.Scene {
+export default class BossScene extends Phaser.Scene {
   constructor() {
-    super({ key: 'MainScene' });
+    super({ key: 'boss' });
 
     this.health = 3; // : player health
     this.isInvincible = false; // : track invulnerability
@@ -46,10 +45,7 @@ export default class MainScene extends Phaser.Scene {
       frameHeight: 64
     })
 
-    this.load.spritesheet('chests', '/Assets/chests.png', {
-      frameWidth: 16,
-      frameHeight: 16
-    });
+
 
     /*this.load.spritesheet('hitAnim', '/Assets/hit.png', { // not created yet
       frameWidth: 64,
@@ -67,12 +63,13 @@ export default class MainScene extends Phaser.Scene {
       frameHeight: 16
     })
     this.load.audio('background', '/Assets/audio/background_music_filler.mp3');
-    this.load.tilemapTiledJSON('map', '/Assets/Map/firstlevel.tmj');
+    this.load.tilemapTiledJSON('boss_level', '/Assets/Map/boss.tmj');
     this.load.image('tiles', '/Assets/Map/tileset.png');
-    this.load.image('spikes', '/Assets/Map/spikes.png');
 
   }
+
   create() {
+    console.log("boss scene created");
     this.physics.world.roundPixels = false;
     //upload animations
     this.anims.create({
@@ -117,30 +114,23 @@ export default class MainScene extends Phaser.Scene {
       repeat: 0,
       hideOnComplete: false
     })
-    // --- Create Animation --- (not in yet)
-    /*this.anims.create({
-      key: 'hit',
-      frames: this.anims.generateFrameNumbers('hitAnim', { start: 0, end: 5 }),
-      frameRate: 10,
-      repeat: 0
-    });*/
+
     const map = this.make.tilemap({
-      key: "map"
+      key: "boss_level"
     })
     const tileset = map.addTilesetImage("Tileset", "tiles")
-    const spikeTileset = map.addTilesetImage("spikes", "spikes")
     this.ground = map.createLayer("platforms", tileset)
-    const spikes = map.createLayer("spikes", spikeTileset)
     this.ground.setCollisionByExclusion([-1]);
 
 
 
+
     // --- Create Player ---
-    this.player = this.physics.add.sprite(270, 888, "player_still");
+    this.player = this.physics.add.sprite(60, 296, "player_still");
     this.player.setVisible(false); // Hide physics body sprite
 
     // Create Visual Sprite (No Physics)
-    this.playerVisual = this.add.sprite(270, 888, "player_still");
+    this.playerVisual = this.add.sprite(60, 296, "player_still");
     this.playerVisual.setDepth(10); // Ensure it renders on top
 
     // Auto-center hitbox
@@ -152,10 +142,6 @@ export default class MainScene extends Phaser.Scene {
 
     this.player.body.setSize(pWidth, pHeight);
     this.player.body.setOffset(pOffsetX, pOffsetY);
-
-    // --- Create Spikes Collision ---
-    spikes.setCollisionByExclusion([-1]);
-    this.physics.add.collider(this.player, spikes, this.handleSpikeOverlap, null, this);
 
     this.physics.add.collider(this.player, this.ground)
     this.cameras.main.startFollow(this.player, true, 1, 1);
@@ -172,21 +158,11 @@ export default class MainScene extends Phaser.Scene {
     this.enemies = this.physics.add.group(); //  group for enemies
 
     // Spawn multiple enemies
-    this.enemySpawnPoints = [
-      { x: 770, y: 870 },
-      { x: 1150, y: 840 },
-      { x: 1400, y: 820 },
-      { x: 1500, y: 820 },
-      { x: 2000, y: 580 },
-      { x: 2100, y: 580 }
-    ];
 
-    this.enemySpawnPoints.forEach(point => {
-      this.spawnEnemy(point.x, point.y);
-    });
+    this.spawnEnemy(241, 296);
+
 
     this.physics.add.collider(this.enemies, this.ground);
-    this.physics.add.collider(this.enemies, spikes, this.handleEnemySpike, null, this);
 
     // enemy projectiles
     this.projectiles = this.physics.add.group();
@@ -216,15 +192,7 @@ export default class MainScene extends Phaser.Scene {
       projectile.destroy();
     });
 
-    // chests
-    this.chests = this.physics.add.group();
-    const chest = this.chests.create(70, 72, 'chests', 0); // Frame 0 = closed
-    chest.body.setAllowGravity(false); // assuming chest stays in place
-    // chest.setImmovable(true); 
 
-    this.physics.add.overlap(this.player, this.chests, (player, chest) => {
-      this.handleChestOverlap(player, chest);
-    });
 
     this.hasRangedAttack = false;
     this.lastFiredTime = 0; // Initialize cooldown timer
@@ -236,7 +204,6 @@ export default class MainScene extends Phaser.Scene {
 
     this.attackKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE);
     this.fireKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.F);
-    this.skipKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.G);
 
     this.menuKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.ESC)
     // this.add.image(0,0,"frame").setOrigin(0,0).setScrollFactor(0).setDepth(1001)
@@ -268,7 +235,8 @@ export default class MainScene extends Phaser.Scene {
     });
     //music.setDetune(-700); - I left it in just for you (i'm guessing its leo who added this) (yeah sidney told me to do it)
     music.play();
-
+    this.player.x = 100;
+    this.player.y = 100;
     // --- Post-Update Sync (Fixes Lag/Blur) ---
     // Sync runs AFTER physics, ensuring visual matches actual body position for this frame
     this.events.on('postupdate', () => {
@@ -289,8 +257,6 @@ export default class MainScene extends Phaser.Scene {
 
         this.playerVisual.setPosition(vX, vY);
         this.playerVisual.setFlipX(this.player.flipX);
-
-
       }
     });
   }
@@ -372,15 +338,6 @@ export default class MainScene extends Phaser.Scene {
 
     // Update Coordinate Display
     this.coordText.setText(`X: ${Math.round(this.player.x)} Y: ${Math.round(this.player.y)}`);
-
-    if (this.player.x <= 100 && this.player.y <= 200) {
-      this.scene.start("boss");
-    }
-
-    if (this.skipKey.isDown) {
-      this.scene.start("boss");
-    }
-
   }
 
   performAttack() {
@@ -597,19 +554,16 @@ export default class MainScene extends Phaser.Scene {
     this.player.setVelocity(0, 0);
     this.lastFiredTime = 0;
     this.isAttacking = false;
-    this.resetEnemies();
   }
 
-  resetEnemies() {
-    this.enemies.clear(true, true); // Remove all children and destroy them
-    this.enemySpawnPoints.forEach(point => {
-      this.spawnEnemy(point.x, point.y);
-    });
-  }
+
 
   spawnEnemy(x, y) {
     const enemy = this.enemies.create(x, y, 'enemySprite');
-    enemy.hp = 2; // Enemy Health
+    const scale = 4; // Make boss BIG
+    enemy.setScale(scale);
+
+    enemy.hp = 20; // Enemy Health
     enemy.isKnockedBack = false;
     enemy.hitCooldown = false;
     enemy.play("enemy_moving");
@@ -629,20 +583,7 @@ export default class MainScene extends Phaser.Scene {
     enemy.setVelocityX(50); // Start moving right
   }
 
-  handleChestOverlap(player, chest) {
-    if (this.hasRangedAttack) return;
 
-    this.hasRangedAttack = true;
-    chest.setFrame(1);
-    chest.disableBody();
-    const text = this.add.text(chest.x, chest.y - 20, "Special Unlocked!", { fontSize: "12px", fill: "#fff" });
-
-    // Fade out text and destroy chest after delay
-    this.time.delayedCall(1000, () => {
-      text.destroy();
-      chest.destroy();
-    });
-  }
 
   fireProjectile(time) {
     this.lastFiredTime = time;
