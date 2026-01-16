@@ -164,7 +164,8 @@ export default class BossScene extends Phaser.Scene {
 
     this.physics.add.collider(this.enemies, this.ground);
 
-    // enemy projectiles
+
+
     // --- Enemy Projectiles ---
     this.enemyProjectiles = this.physics.add.group();
 
@@ -204,6 +205,7 @@ export default class BossScene extends Phaser.Scene {
     this.physics.add.overlap(this.player, this.enemies, (player, enemy) => {
       this.handleEnemyOverlap(player, enemy);
     });
+
 
 
 
@@ -378,6 +380,13 @@ export default class BossScene extends Phaser.Scene {
     attackHitbox.body.allowGravity = false;
     attackHitbox.body.debugBodyColor = 0xffff00; // Yellow for attack
     this.playerVisual.play("player_attack", true);
+
+    //Check overlap with projectiles
+    this.physics.add.overlap(attackHitbox, this.enemyProjectiles, (hitbox, proj) => {
+      if (proj && proj.active) {
+        proj.destroy();
+      }
+    });
 
     // Check overlap with enemies
     this.physics.add.overlap(attackHitbox, this.enemies, (hitbox, enemy) => {
