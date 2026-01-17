@@ -5,7 +5,10 @@ export default class MainScene extends Phaser.Scene {
   constructor() {
     super({ key: 'MainScene' });
 
-    this.health = 3; // : player health
+    this.maxHealth = 5; // : maximum player health
+    this.health = this.maxHealth; // : player health
+
+
     this.isInvincible = false; // : track invulnerability
     this.playerIsDead = false; // : track if player is dead
     this.isAttacking = false; // track attack state
@@ -73,6 +76,20 @@ export default class MainScene extends Phaser.Scene {
 
   }
   create() {
+        this.healthBarBg = this.add.graphics();
+        this.healthBarFill = this.add.graphics();
+
+        this.healthBarX = 20;
+        this.healthBarY = 20;
+        this.healthBarWidth = 100;
+        this.healthBarHeight = 10;
+
+       this.healthBarBg.setScrollFactor(0);
+       this.healthBarFill.setScrollFactor(0);
+       this.healthBarBg.setDepth(1000);
+       this.healthBarFill.setDepth(1000);
+
+      this.drawHealthBar();
     this.physics.world.roundPixels = false;
     //upload animations
     this.anims.create({
@@ -239,17 +256,6 @@ export default class MainScene extends Phaser.Scene {
     this.skipKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.G);
 
     this.menuKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.ESC)
-    // this.add.image(0,0,"frame").setOrigin(0,0).setScrollFactor(0).setDepth(1001)
-    // --- Text ---
-    this.healthText = this.add.text(16, 16, 'Health: 3', { // : health display
-      fontFamily: "./code_fonts/melodica.regular.otf",
-      fontSize: "32px",
-      fill: "#ffffff"
-    });
-
-    this.healthText.setScrollFactor(0); // : fix text to camera
-    this.healthText.setScrollFactor(0); // : fix text to camera
-    this.healthText.setDepth(1000); // : ensure text is on top
 
     //cords for debug
     this.coordText = this.add.text(this.cameras.main.width - 10, this.cameras.main.height - 10, 'X: 0 Y: 0', {
@@ -294,6 +300,30 @@ export default class MainScene extends Phaser.Scene {
       }
     });
   }
+
+  drawHealthBar() {
+  const healthPercent = Phaser.Math.Clamp(this.health / this.maxHealth, 0, 1);
+
+  this.healthBarBg.clear();
+  this.healthBarFill.clear();
+
+  this.healthBarBg.lineStyle(2, 0xffffff);
+  this.healthBarBg.strokeRect(
+    this.healthBarX,
+    this.healthBarY,
+    this.healthBarWidth,
+    this.healthBarHeight
+  );
+
+  this.healthBarFill.fillStyle(0x00ff00);
+  this.healthBarFill.fillRect(
+    this.healthBarX + 2,
+    this.healthBarY + 2,
+    (this.healthBarWidth - 4) * healthPercent,
+    this.healthBarHeight - 4
+  );
+}
+
 
   update(time, delta) {
     if (this.playerIsDead) return; // prevent movement while dead
@@ -499,7 +529,7 @@ export default class MainScene extends Phaser.Scene {
 
     // Common Damage Logic
     this.health--;
-    this.healthText.setText(`Health: ${this.health}`);
+    this.drawHealthBar();
 
     // Super Armor Case: attacking players don't freeze or get knocked back
     if (this.isAttacking) {
@@ -585,8 +615,8 @@ export default class MainScene extends Phaser.Scene {
   }
 
   respawnPlayer() {
-    this.health = 3;
-    this.healthText.setText(`Health: ${this.health}`);
+    this.health = this.maxHealth;
+    this.drawHealthBar();
     this.playerIsDead = false;
     this.isInvincible = false;
     // Reset Player Position and Physics

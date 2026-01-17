@@ -4,7 +4,8 @@ export default class BossScene extends Phaser.Scene {
   constructor() {
     super({ key: 'boss' });
 
-    this.health = 3; // : player health
+    this.health = 5; // : player health
+    this.maxHealth = 5;
     this.isInvincible = false; // : track invulnerability
     this.playerIsDead = false; // : track if player is dead
     this.isAttacking = false; // track attack state
@@ -14,6 +15,10 @@ export default class BossScene extends Phaser.Scene {
     this.projectileDamage = 2; // Damage for ranged attack
     this.knockbackSpeedX = 100; // enemy knockback speed
     this.knockbackSpeedY = 67; // enemy knockback speed
+    this.projectileCooldown = 3000;
+    this.projectileOnCooldown = false;
+    this.projectileCooldownStart = 0;
+
     // --- Hitbox Settings ---
     // Adjustable values for Player (Offsets are auto-calculated to center)
     this.playerHitbox = {
@@ -69,6 +74,7 @@ export default class BossScene extends Phaser.Scene {
   }
 
   create() {
+
     console.log("boss scene created");
     this.physics.world.roundPixels = false;
     //upload animations
@@ -222,16 +228,6 @@ export default class BossScene extends Phaser.Scene {
 
     this.menuKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.ESC)
     // this.add.image(0,0,"frame").setOrigin(0,0).setScrollFactor(0).setDepth(1001)
-    // --- Text ---
-    this.healthText = this.add.text(16, 16, 'Health: 3', { // : health display
-      fontFamily: "./code_fonts/melodica.regular.otf",
-      fontSize: "32px",
-      fill: "#ffffff"
-    });
-
-    this.healthText.setScrollFactor(0); // : fix text to camera
-    this.healthText.setScrollFactor(0); // : fix text to camera
-    this.healthText.setDepth(1000); // : ensure text is on top
 
     //cords for debug
     this.coordText = this.add.text(this.cameras.main.width - 10, this.cameras.main.height - 10, 'X: 0 Y: 0', {
@@ -274,9 +270,97 @@ export default class BossScene extends Phaser.Scene {
         this.playerVisual.setFlipX(this.player.flipX);
       }
     });
+
+    this.cooldownRadius = 8;
+    this.cooldownX = this.cameras.main.width - 15;
+    this.cooldownY = 15;
+
+    this.cooldownGraphic = this.add.graphics();
+    this.cooldownGraphic.setScrollFactor(0);
+    this.cooldownGraphic.setDepth(1000);
+    this.cooldownGraphic.setVisible(false);
+
+    this.healthBarWidth = 100;
+    this.healthBarHeight = 10;
+    this.healthBarX = 20; // distance from left
+    this.healthBarY = 20; // distance from top
+
+    this.healthBarBg = this.add.graphics();
+    this.healthBarFill = this.add.graphics();
+
+    this.healthBarBg.setScrollFactor(0);
+    this.healthBarFill.setScrollFactor(0);
+    this.healthBarBg.setDepth(1000);
+    this.healthBarFill.setDepth(1000);
+
+    this.drawHealthBar();
+
   }
 
+drawHealthBar() {
+  const healthPercent = Phaser.Math.Clamp(this.health / this.maxHealth, 0, 1);
+
+  this.healthBarBg.clear();
+  this.healthBarFill.clear();
+
+  this.healthBarBg.lineStyle(2, 0xffffff);
+  this.healthBarBg.strokeRect(
+    this.healthBarX,
+    this.healthBarY,
+    this.healthBarWidth,
+    this.healthBarHeight
+  );
+
+  this.healthBarFill.fillStyle(0x00ff00);
+  this.healthBarFill.fillRect(
+    this.healthBarX + 2,
+    this.healthBarY + 2,
+    (this.healthBarWidth - 4) * healthPercent,
+    this.healthBarHeight - 4
+  );
+}
+
+
+drawCooldown(progress) {
+  this.cooldownGraphic.clear();
+
+  if (progress >= 1) {
+    this.cooldownGraphic.setVisible(false);
+    return;
+  }
+
+  this.cooldownGraphic.setVisible(true);
+
+  this.cooldownGraphic.fillStyle(0x00ffff, 1);
+
+  this.cooldownGraphic.beginPath();
+  this.cooldownGraphic.moveTo(this.cooldownX, this.cooldownY);
+
+  this.cooldownGraphic.arc(
+    this.cooldownX,
+    this.cooldownY,
+    this.cooldownRadius,
+    Phaser.Math.DegToRad(-90),
+    Phaser.Math.DegToRad(-90 + 360 * (1 - progress)),
+    false
+  );
+
+  this.cooldownGraphic.closePath();
+  this.cooldownGraphic.fillPath();
+}
+
   update(time, delta) {
+    if (this.projectileOnCooldown) {
+      const elapsed = time - this.projectileCooldownStart;
+      const progress = Phaser.Math.Clamp(elapsed / this.projectileCooldown, 0, 1);
+
+      this.drawCooldown(progress);
+
+      if (progress >= 1) {
+      this.projectileOnCooldown = false;
+      }
+    }
+
     if (this.playerIsDead) return; // prevent movement while dead
     if (this.isKnockedBack) return; // prevent movement while applying knockback force
 
@@ -305,11 +389,14 @@ export default class BossScene extends Phaser.Scene {
     }
 
     // Ranged Attack Input
-    if (Phaser.Input.Keyboard.JustDown(this.fireKey) && this.hasRangedAttack) {
-      if (time > this.lastFiredTime + 1) { // 3s cooldown
-        this.fireProjectile(time);
-      }
+    if (
+     Phaser.Input.Keyboard.JustDown(this.fireKey) &&
+     this.hasRangedAttack &&
+     !this.projectileOnCooldown
+    ) {
+     this.fireProjectile(time);
     }
+
 
     if (this.isAttacking) return;
 
@@ -478,7 +565,7 @@ export default class BossScene extends Phaser.Scene {
 
     // Common Damage Logic
     this.health--;
-    this.healthText.setText(`Health: ${this.health}`);
+    this.drawHealthBar();
 
     // Super Armor Case: attacking players don't freeze or get knocked back
     if (this.isAttacking) {
@@ -550,8 +637,8 @@ export default class BossScene extends Phaser.Scene {
   }
 
   respawnPlayer() {
-    this.health = 3;
-    this.healthText.setText(`Health: ${this.health}`);
+    this.health = this.maxHealth;
+    this.drawHealthBar();
     this.playerIsDead = false;
     this.isInvincible = false;
     // Reset Player Position and Physics
@@ -596,6 +683,9 @@ export default class BossScene extends Phaser.Scene {
 
 
   fireProjectile(time) {
+    this.projectileOnCooldown = true;
+    this.projectileCooldownStart = time;
+
     this.lastFiredTime = time;
     const proj = this.add.rectangle(this.player.x, this.player.y, 10, 10, 0x00ffff);
     this.physics.add.existing(proj);
