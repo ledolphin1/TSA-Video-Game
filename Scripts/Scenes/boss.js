@@ -395,7 +395,7 @@ export default class BossScene extends Phaser.Scene {
 
       this.playerVisual.play("player_attack", true);
 
-      // -- INSTANT HIT PROCESSING --
+
       enemy.hp -= this.slashDamage;
 
       if (enemy.hp <= 0) {
@@ -532,20 +532,6 @@ export default class BossScene extends Phaser.Scene {
         this.isInvincible = false;
       }
     });
-  }
-
-  handleEnemySpike(enemy, spike) {
-    if (spike && spike.index !== -1) {
-      enemy.destroy();
-    }
-  }
-
-  handleSpikeOverlap(player, spike) {
-    if (this.playerIsDead) return;
-    // Check if we are really touching a spike tile (not empty space)
-    if (spike && spike.index !== -1) {
-      this.killPlayer();
-    }
   }
 
   killPlayer() {
