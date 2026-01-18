@@ -76,20 +76,20 @@ export default class MainScene extends Phaser.Scene {
 
   }
   create() {
-        this.healthBarBg = this.add.graphics();
-        this.healthBarFill = this.add.graphics();
+    this.healthBarBg = this.add.graphics();
+    this.healthBarFill = this.add.graphics();
 
-        this.healthBarX = 20;
-        this.healthBarY = 20;
-        this.healthBarWidth = 100;
-        this.healthBarHeight = 10;
+    this.healthBarX = 20;
+    this.healthBarY = 20;
+    this.healthBarWidth = 100;
+    this.healthBarHeight = 10;
 
-       this.healthBarBg.setScrollFactor(0);
-       this.healthBarFill.setScrollFactor(0);
-       this.healthBarBg.setDepth(1000);
-       this.healthBarFill.setDepth(1000);
+    this.healthBarBg.setScrollFactor(0);
+    this.healthBarFill.setScrollFactor(0);
+    this.healthBarBg.setDepth(1000);
+    this.healthBarFill.setDepth(1000);
 
-      this.drawHealthBar();
+    this.drawHealthBar();
     this.physics.world.roundPixels = false;
     //upload animations
     this.anims.create({
@@ -302,27 +302,27 @@ export default class MainScene extends Phaser.Scene {
   }
 
   drawHealthBar() {
-  const healthPercent = Phaser.Math.Clamp(this.health / this.maxHealth, 0, 1);
+    const healthPercent = Phaser.Math.Clamp(this.health / this.maxHealth, 0, 1);
 
-  this.healthBarBg.clear();
-  this.healthBarFill.clear();
+    this.healthBarBg.clear();
+    this.healthBarFill.clear();
 
-  this.healthBarBg.lineStyle(2, 0xffffff);
-  this.healthBarBg.strokeRect(
-    this.healthBarX,
-    this.healthBarY,
-    this.healthBarWidth,
-    this.healthBarHeight
-  );
+    this.healthBarBg.lineStyle(2, 0xffffff);
+    this.healthBarBg.strokeRect(
+      this.healthBarX,
+      this.healthBarY,
+      this.healthBarWidth,
+      this.healthBarHeight
+    );
 
-  this.healthBarFill.fillStyle(0x00ff00);
-  this.healthBarFill.fillRect(
-    this.healthBarX + 2,
-    this.healthBarY + 2,
-    (this.healthBarWidth - 4) * healthPercent,
-    this.healthBarHeight - 4
-  );
-}
+    this.healthBarFill.fillStyle(0x00ff00);
+    this.healthBarFill.fillRect(
+      this.healthBarX + 2,
+      this.healthBarY + 2,
+      (this.healthBarWidth - 4) * healthPercent,
+      this.healthBarHeight - 4
+    );
+  }
 
 
   update(time, delta) {
@@ -350,7 +350,7 @@ export default class MainScene extends Phaser.Scene {
 
     if (Phaser.Input.Keyboard.JustDown(this.menuKey)) {
       this.scene.pause()
-      this.scene.launch("Pause")
+      this.scene.launch("Pause", { returnScene: this.scene.key });
     }
 
     // Ranged Attack Input

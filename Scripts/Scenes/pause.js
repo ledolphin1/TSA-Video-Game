@@ -5,6 +5,10 @@ export default class Pause extends Phaser.Scene {
     super({ key: 'Pause' });
   }
 
+  init(data) {
+    this.returnScene = data.returnScene;
+  }
+
   create() {
     const { width, height } = this.scale;
 
@@ -21,8 +25,8 @@ export default class Pause extends Phaser.Scene {
       backgroundColor: '#000000',
       padding: { x: 12, y: 6 }
     })
-    .setOrigin(0.5)
-    .setInteractive({ useHandCursor: true });
+      .setOrigin(0.5)
+      .setInteractive({ useHandCursor: true });
 
     // Hover effects
     playButton.on('pointerover', () => {
@@ -34,8 +38,10 @@ export default class Pause extends Phaser.Scene {
     });
 
     playButton.on('pointerdown', () => {
-      this.scene.resume('MainScene');
-      this.scene.stop()
+      if (this.returnScene) {
+        this.scene.resume(this.returnScene);
+      }
+      this.scene.stop();
     });
   }
 }

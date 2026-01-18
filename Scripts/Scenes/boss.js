@@ -181,6 +181,7 @@ export default class BossScene extends Phaser.Scene {
 
     this.physics.add.overlap(this.player, this.enemyProjectiles, (player, proj) => {
       this.handleEnemyOverlap(player, proj);
+      if (this.isInvincible) return;
       proj.destroy();
     });
 
@@ -297,57 +298,57 @@ export default class BossScene extends Phaser.Scene {
 
   }
 
-drawHealthBar() {
-  const healthPercent = Phaser.Math.Clamp(this.health / this.maxHealth, 0, 1);
+  drawHealthBar() {
+    const healthPercent = Phaser.Math.Clamp(this.health / this.maxHealth, 0, 1);
 
-  this.healthBarBg.clear();
-  this.healthBarFill.clear();
+    this.healthBarBg.clear();
+    this.healthBarFill.clear();
 
-  this.healthBarBg.lineStyle(2, 0xffffff);
-  this.healthBarBg.strokeRect(
-    this.healthBarX,
-    this.healthBarY,
-    this.healthBarWidth,
-    this.healthBarHeight
-  );
+    this.healthBarBg.lineStyle(2, 0xffffff);
+    this.healthBarBg.strokeRect(
+      this.healthBarX,
+      this.healthBarY,
+      this.healthBarWidth,
+      this.healthBarHeight
+    );
 
-  this.healthBarFill.fillStyle(0x00ff00);
-  this.healthBarFill.fillRect(
-    this.healthBarX + 2,
-    this.healthBarY + 2,
-    (this.healthBarWidth - 4) * healthPercent,
-    this.healthBarHeight - 4
-  );
-}
-
-
-drawCooldown(progress) {
-  this.cooldownGraphic.clear();
-
-  if (progress >= 1) {
-    this.cooldownGraphic.setVisible(false);
-    return;
+    this.healthBarFill.fillStyle(0x00ff00);
+    this.healthBarFill.fillRect(
+      this.healthBarX + 2,
+      this.healthBarY + 2,
+      (this.healthBarWidth - 4) * healthPercent,
+      this.healthBarHeight - 4
+    );
   }
 
-  this.cooldownGraphic.setVisible(true);
 
-  this.cooldownGraphic.fillStyle(0x00ffff, 1);
+  drawCooldown(progress) {
+    this.cooldownGraphic.clear();
 
-  this.cooldownGraphic.beginPath();
-  this.cooldownGraphic.moveTo(this.cooldownX, this.cooldownY);
+    if (progress >= 1) {
+      this.cooldownGraphic.setVisible(false);
+      return;
+    }
 
-  this.cooldownGraphic.arc(
-    this.cooldownX,
-    this.cooldownY,
-    this.cooldownRadius,
-    Phaser.Math.DegToRad(-90),
-    Phaser.Math.DegToRad(-90 + 360 * (1 - progress)),
-    false
-  );
+    this.cooldownGraphic.setVisible(true);
 
-  this.cooldownGraphic.closePath();
-  this.cooldownGraphic.fillPath();
-}
+    this.cooldownGraphic.fillStyle(0x00ffff, 1);
+
+    this.cooldownGraphic.beginPath();
+    this.cooldownGraphic.moveTo(this.cooldownX, this.cooldownY);
+
+    this.cooldownGraphic.arc(
+      this.cooldownX,
+      this.cooldownY,
+      this.cooldownRadius,
+      Phaser.Math.DegToRad(-90),
+      Phaser.Math.DegToRad(-90 + 360 * (1 - progress)),
+      false
+    );
+
+    this.cooldownGraphic.closePath();
+    this.cooldownGraphic.fillPath();
+  }
 
   update(time, delta) {
     if (this.projectileOnCooldown) {
@@ -357,7 +358,7 @@ drawCooldown(progress) {
       this.drawCooldown(progress);
 
       if (progress >= 1) {
-      this.projectileOnCooldown = false;
+        this.projectileOnCooldown = false;
       }
     }
 
@@ -385,16 +386,16 @@ drawCooldown(progress) {
 
     if (Phaser.Input.Keyboard.JustDown(this.menuKey)) {
       this.scene.pause()
-      this.scene.launch("Pause")
+      this.scene.launch("Pause", { returnScene: this.scene.key });
     }
 
     // Ranged Attack Input
     if (
-     Phaser.Input.Keyboard.JustDown(this.fireKey) &&
-     this.hasRangedAttack &&
-     !this.projectileOnCooldown
+      Phaser.Input.Keyboard.JustDown(this.fireKey) &&
+      this.hasRangedAttack &&
+      !this.projectileOnCooldown
     ) {
-     this.fireProjectile(time);
+      this.fireProjectile(time);
     }
 
 
