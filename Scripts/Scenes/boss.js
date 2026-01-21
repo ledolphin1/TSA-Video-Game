@@ -4,39 +4,51 @@ export default class BossScene extends Phaser.Scene {
   constructor() {
     super({ key: 'boss' });
 
-    this.health = 5; // : player health
-    this.maxHealth = 5;
-    this.isInvincible = false; // : track invulnerability
-    this.playerIsDead = false; // : track if player is dead
-    this.isAttacking = false; // track attack state
-    this.lastAttackEndTime = 0; // track when last attack finished
-    this.isKnockedBack = false; // track knockback state
-    this.slashDamage = 1; // Damage for sword attack
-    this.projectileDamage = 2; // Damage for ranged attack
-    this.knockbackSpeedX = 100; // enemy knockback speed
-    this.knockbackSpeedY = 67; // enemy knockback speed
+  {
+  //Health & State
+  this.maxHealth = 5;
+  this.health = this.maxHealth;
+
+  this.isInvincible   = false;
+  this.playerIsDead   = false;
+  this.isAttacking    = false;
+  this.isKnockedBack  = false;
+
+  //Combat
+  this.slashDamage      = 1;
+  this.projectileDamage = 2;
+
+  this.knockbackSpeedX = 100;
+  this.knockbackSpeedY = 67;
+
+  this.lastAttackEndTime = 0;
+
+  //Hitboxes
+  // Offsets are auto-calculated to center
+  this.playerHitbox = {
+    width: 10,
+    height: 14
+  };
+
+  this.enemyHitbox = {
+    width: 18.5,
+    height: 9
+  };
+
+  //Visual Offsets
+  // Positive X → shift sprite right
+  // Positive Y → shift sprite down
+  this.attackVisualOffset = {
+    x: 9,
+    y: -8
+  };
+}
+    
     this.projectileCooldown = 3000;
     this.projectileOnCooldown = false;
     this.projectileCooldownStart = 0;
 
-    // --- Hitbox Settings ---
-    // Adjustable values for Player (Offsets are auto-calculated to center)
-    this.playerHitbox = {
-      width: 10,
-      height: 14
-    };
 
-    this.enemyHitbox = {
-      width: 18.5,
-      height: 9
-    };
-
-    // VISUAL OFFSETS (Shift sprite relative to hitbox)
-    // Positive X = Shift Sprite Right, Positive Y = Shift Sprite Down
-    this.attackVisualOffset = {
-      x: 9,
-      y: -8
-    };
   }
 
   preload() {
@@ -220,7 +232,6 @@ export default class BossScene extends Phaser.Scene {
 
 
 
-    this.hasRangedAttack = true;
     this.lastFiredTime = 0; // Initialize cooldown timer
 
 
@@ -249,6 +260,7 @@ export default class BossScene extends Phaser.Scene {
       loop: true,
       volume: 0.65
     });
+
     //music.setDetune(-700); - I left it in just for you (i'm guessing its leo who added this) (yeah sidney told me to do it)
     music.play();
     this.player.x = 60;
@@ -394,13 +406,12 @@ export default class BossScene extends Phaser.Scene {
     }
 
     // Ranged Attack Input
-    if (
-      Phaser.Input.Keyboard.JustDown(this.fireKey) &&
-      this.hasRangedAttack &&
-      !this.projectileOnCooldown
-    ) {
-      this.fireProjectile(time);
-    }
+    if (Phaser.Input.Keyboard.JustDown(this.fireKey)){ 
+      if (!this.projectileOnCooldown){
+        this.fireProjectile(time);
+      }
+      
+    } 
 
 
     if (this.isAttacking) return;
