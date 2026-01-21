@@ -45,7 +45,6 @@ export default class MainScene extends Phaser.Scene {
   };
 };
 
-
     this.projectileCooldown = 3000;
     this.projectileOnCooldown = false;
     this.projectileCooldownStart = 0;
@@ -75,6 +74,7 @@ export default class MainScene extends Phaser.Scene {
     });
   */
     this.load.image("frame", "/Assets/ARCADE_BORDER.png")
+    this.load.image("basic_projectile", "/Assets/projectile.png")
     this.load.image('player_still', '/Assets/Main Character Standing SSl.png'); //player image
     this.load.spritesheet("player_jumping", "/Assets/Main Character Jump SS.png", {
       frameWidth: 16,
@@ -341,7 +341,7 @@ export default class MainScene extends Phaser.Scene {
       this.healthBarHeight - 4
     );
   }
-    drawCooldown(progress) {
+  drawCooldown(progress) {
       this.cooldownGraphic.clear();
   
       if (progress >= 1) {
@@ -367,7 +367,7 @@ export default class MainScene extends Phaser.Scene {
   
       this.cooldownGraphic.closePath();
       this.cooldownGraphic.fillPath();
-    }
+  }
 
   update(time, delta) {
     if (this.playerIsDead) return; // prevent movement while dead
@@ -729,15 +729,15 @@ export default class MainScene extends Phaser.Scene {
     });
   }
 
-   fireProjectile(time) {
+  fireProjectile(time) {
     this.projectileOnCooldown = true;
     this.projectileCooldownStart = time;
 
     this.lastFiredTime = time;
-    const proj = this.add.rectangle(this.player.x, this.player.y, 10, 10, 0x00ffff);
+    const proj = this.add.sprite(this.player.x, this.player.y,"basic_projectile");
     this.physics.add.existing(proj);
     this.playerProjectiles.add(proj); // Use separate group!
-
+    proj.flipX = this.player.flipX? true : false;
     proj.body.allowGravity = false;
     const velocity = this.player.flipX ? -400 : 400;
     proj.body.setVelocityX(velocity);

@@ -52,6 +52,7 @@ export default class BossScene extends Phaser.Scene {
   }
 
   preload() {
+    this.load.image("basic_projectile", "/Assets/projectile.png")
     this.load.spritesheet('enemySprite', '/Assets/snake-mob.png', {
       frameWidth: 22,
       frameHeight: 11
@@ -703,10 +704,10 @@ export default class BossScene extends Phaser.Scene {
     this.projectileCooldownStart = time;
 
     this.lastFiredTime = time;
-    const proj = this.add.rectangle(this.player.x, this.player.y, 10, 10, 0x00ffff);
+    const proj = this.add.sprite(this.player.x, this.player.y,"basic_projectile");
     this.physics.add.existing(proj);
     this.playerProjectiles.add(proj); // Use separate group!
-
+    proj.flipX = this.player.flipX? true : false;
     proj.body.allowGravity = false;
     const velocity = this.player.flipX ? -400 : 400;
     proj.body.setVelocityX(velocity);
