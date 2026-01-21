@@ -5,37 +5,52 @@ export default class MainScene extends Phaser.Scene {
   constructor() {
     super({ key: 'MainScene' });
 
-    this.maxHealth = 5; // : maximum player health
-    this.health = this.maxHealth; // : player health
+{
+  //Health & State
+  this.maxHealth = 5;
+  this.health = this.maxHealth;
+
+  this.isInvincible   = false;
+  this.playerIsDead   = false;
+  this.isAttacking    = false;
+  this.isKnockedBack  = false;
+
+  //Combat
+  this.slashDamage      = 1;
+  this.projectileDamage = 2;
+
+  this.knockbackSpeedX = 100;
+  this.knockbackSpeedY = 67;
+
+  this.lastAttackEndTime = 0;
+
+  //Hitboxes
+  // Offsets are auto-calculated to center
+  this.playerHitbox = {
+    width: 10,
+    height: 14
+  };
+
+  this.enemyHitbox = {
+    width: 18.5,
+    height: 9
+  };
+
+  //Visual Offsets
+  // Positive X → shift sprite right
+  // Positive Y → shift sprite down
+  this.attackVisualOffset = {
+    x: 9,
+    y: -8
+  };
+};
 
 
-    this.isInvincible = false; // : track invulnerability
-    this.playerIsDead = false; // : track if player is dead
-    this.isAttacking = false; // track attack state
-    this.lastAttackEndTime = 0; // track when last attack finished
-    this.isKnockedBack = false; // track knockback state
-    this.slashDamage = 1; // Damage for sword attack
-    this.projectileDamage = 2; // Damage for ranged attack
-    this.knockbackSpeedX = 100; // enemy knockback speed
-    this.knockbackSpeedY = 67; // enemy knockback speed
-    // --- Hitbox Settings ---
-    // Adjustable values for Player (Offsets are auto-calculated to center)
-    this.playerHitbox = {
-      width: 10,
-      height: 14
-    };
+    this.projectileCooldown = 3000;
+    this.projectileOnCooldown = false;
+    this.projectileCooldownStart = 0;
 
-    this.enemyHitbox = {
-      width: 18.5,
-      height: 9
-    };
-
-    // VISUAL OFFSETS (Shift sprite relative to hitbox)
-    // Positive X = Shift Sprite Right, Positive Y = Shift Sprite Down
-    this.attackVisualOffset = {
-      x: 9,
-      y: -8
-    };
+    
   }
 
   preload() {
@@ -89,6 +104,16 @@ export default class MainScene extends Phaser.Scene {
     this.healthBarBg.setDepth(1000);
     this.healthBarFill.setDepth(1000);
 
+    
+    this.cooldownRadius = 8;
+    this.cooldownX = this.cameras.main.width - 15;
+    this.cooldownY = 15;
+
+    this.cooldownGraphic = this.add.graphics();
+    this.cooldownGraphic.setScrollFactor(0);
+    this.cooldownGraphic.setDepth(1000);
+    this.cooldownGraphic.setVisible(false);
+
     this.drawHealthBar();
     this.physics.world.roundPixels = false;
     //upload animations
@@ -134,13 +159,7 @@ export default class MainScene extends Phaser.Scene {
       repeat: 0,
       hideOnComplete: false
     })
-    // --- Create Animation --- (not in yet)
-    /*this.anims.create({
-      key: 'hit',
-      frames: this.anims.generateFrameNumbers('hitAnim', { start: 0, end: 5 }),
-      frameRate: 10,
-      repeat: 0
-    });*/
+ 
     const map = this.make.tilemap({
       key: "map"
     })
@@ -152,7 +171,7 @@ export default class MainScene extends Phaser.Scene {
 
 
 
-    // --- Create Player ---
+    // Create Player
     this.player = this.physics.add.sprite(270, 888, "player_still");
     this.player.setVisible(false); // Hide physics body sprite
 
@@ -243,7 +262,6 @@ export default class MainScene extends Phaser.Scene {
       this.handleChestOverlap(player, chest);
     });
 
-    this.hasRangedAttack = false;
     this.lastFiredTime = 0; // Initialize cooldown timer
 
 
@@ -268,12 +286,12 @@ export default class MainScene extends Phaser.Scene {
     this.coordText.setDepth(1000);
 
     //sidney asked for music
-    const music = this.sound.add('background', {
+    this.music = this.sound.add('background', {
       loop: true,
       volume: 0.65
     });
     //music.setDetune(-700); - I left it in just for you (i'm guessing its leo who added this) (yeah sidney told me to do it)
-    music.play();
+    this.music.play();
 
     // --- Post-Update Sync (Fixes Lag/Blur) ---
     // Sync runs AFTER physics, ensuring visual matches actual body position for this frame
@@ -323,12 +341,49 @@ export default class MainScene extends Phaser.Scene {
       this.healthBarHeight - 4
     );
   }
-
+    drawCooldown(progress) {
+      this.cooldownGraphic.clear();
+  
+      if (progress >= 1) {
+        this.cooldownGraphic.setVisible(false);
+        return;
+      }
+  
+      this.cooldownGraphic.setVisible(true);
+  
+      this.cooldownGraphic.fillStyle(0x00ffff, 1);
+  
+      this.cooldownGraphic.beginPath();
+      this.cooldownGraphic.moveTo(this.cooldownX, this.cooldownY);
+  
+      this.cooldownGraphic.arc(
+        this.cooldownX,
+        this.cooldownY,
+        this.cooldownRadius,
+        Phaser.Math.DegToRad(-90),
+        Phaser.Math.DegToRad(-90 + 360 * (1 - progress)),
+        false
+      );
+  
+      this.cooldownGraphic.closePath();
+      this.cooldownGraphic.fillPath();
+    }
 
   update(time, delta) {
     if (this.playerIsDead) return; // prevent movement while dead
     if (this.isKnockedBack) return; // prevent movement while applying knockback force
 
+    if (this.projectileOnCooldown) {
+          const elapsed = time - this.projectileCooldownStart;
+          const progress = Phaser.Math.Clamp(elapsed / this.projectileCooldown, 0, 1);
+    
+          this.drawCooldown(progress);
+    
+          if (progress >= 1) {
+            this.projectileOnCooldown = false;
+          }
+        }
+    
     // Update Enemies
     this.enemies.children.iterate((enemy) => {
       this.updateEnemy(enemy);
@@ -354,7 +409,7 @@ export default class MainScene extends Phaser.Scene {
     }
 
     // Ranged Attack Input
-    if (Phaser.Input.Keyboard.JustDown(this.fireKey) && this.hasRangedAttack) {
+    if (Phaser.Input.Keyboard.JustDown(this.fireKey) && !this.projectileOnCooldown) {
       if (time > this.lastFiredTime + 3000) { // 3s cooldown
         this.fireProjectile(time);
       }
@@ -405,10 +460,12 @@ export default class MainScene extends Phaser.Scene {
 
     if (this.player.x <= 100 && this.player.y <= 200) {
       this.scene.start("boss");
+      this.music.stop()
     }
 
     if (this.skipKey.isDown) {
       this.scene.start("boss");
+      this.music.stop()
     }
 
   }
@@ -660,21 +717,22 @@ export default class MainScene extends Phaser.Scene {
   }
 
   handleChestOverlap(player, chest) {
-    if (this.hasRangedAttack) return;
 
-    this.hasRangedAttack = true;
     chest.setFrame(1);
     chest.disableBody();
-    const text = this.add.text(chest.x, chest.y - 20, "Special Unlocked!", { fontSize: "12px", fill: "#fff" });
+    const text = this.add.text(chest.x, chest.y - 20, "Nice!", { fontSize: "12px", fill: "#fff" });
 
     // Fade out text and destroy chest after delay
-    this.time.delayedCall(1000, () => {
+    this.time.delayedCall(2000, () => {
       text.destroy();
       chest.destroy();
     });
   }
 
-  fireProjectile(time) {
+   fireProjectile(time) {
+    this.projectileOnCooldown = true;
+    this.projectileCooldownStart = time;
+
     this.lastFiredTime = time;
     const proj = this.add.rectangle(this.player.x, this.player.y, 10, 10, 0x00ffff);
     this.physics.add.existing(proj);
@@ -744,7 +802,7 @@ export default class MainScene extends Phaser.Scene {
       enemy.flipX = true;
     }
 
-    // Cliff Detection
+    // cliff detection
     if (enemy.body.blocked.down) {
       const isMovingRight = enemy.body.velocity.x > 0;
       const xOffset = isMovingRight ? enemy.body.width + 5 : -5;
