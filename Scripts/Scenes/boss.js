@@ -58,6 +58,7 @@ export default class BossScene extends Phaser.Scene {
     });
   */
     this.load.image("frame", "/Assets/ARCADE_BORDER.png")
+    this.load.image("bossbg", "/Assets/bossbg.png")
     this.load.image('player_still', '/Assets/Main Character Standing SSl.png'); //player image
     this.load.spritesheet("player_jumping", "/Assets/Main Character Jump SS.png", {
       frameWidth: 16,
@@ -75,6 +76,8 @@ export default class BossScene extends Phaser.Scene {
 
   create() {
 
+
+    this.add.image(160, 220, "bossbg");
     console.log("boss scene created");
     this.physics.world.roundPixels = false;
     //upload animations
@@ -150,8 +153,9 @@ export default class BossScene extends Phaser.Scene {
     this.player.body.setOffset(pOffsetX, pOffsetY);
 
     this.physics.add.collider(this.player, this.ground)
-    this.cameras.main.startFollow(this.player, true, 1, 1);
+    // this.cameras.main.startFollow(this.player, true, 1, 1);
     this.cameras.main.setBounds(0, 0, map.widthInPixels, map.heightInPixels);
+    this.cameras.main.setScroll(0, 200);
     this.physics.world.setBounds(0, 0, map.widthInPixels, map.heightInPixels);
     this.player.setCollideWorldBounds(true);
     this.cameras.main.setRoundPixels(false);
