@@ -725,7 +725,7 @@ export default class MainScene extends Phaser.Scene {
 
     chest.setFrame(1);
     chest.disableBody();
-    const text = this.add.text(chest.x, chest.y - 20, "Nice!", { fontSize: "12px", fill: "#fff" });
+    const text = this.add.text(chest.x, chest.y - 20, "Special Unlocked! Press E to Use", { fontSize: "12px", fill: "#fff" });
 
     // Fade out text and destroy chest after delay
     this.time.delayedCall(2000, () => {
