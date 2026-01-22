@@ -1,4 +1,4 @@
-import Phaser from 'phaser';
+import { Phaser } from 'phaser';
 import Menu from './Scenes/menu.js';
 import MainScene from './Scenes/mainscene.js';
 import Pause from "./Scenes/pause.js"
