@@ -89,10 +89,6 @@ export default class BossScene extends Phaser.Scene {
     this.load.audio('background', 'Assets/audio/background_music_filler.mp3');
     this.load.tilemapTiledJSON('boss_level', 'Assets/Map/boss.tmj');
     this.load.image('tiles', 'Assets/Map/tileset.png');
-    this.load.image("bossbg", "/Assets/bossbg.png")
-   
-    this.load.tilemapTiledJSON('boss_level', '/Assets/Map/boss.tmj');
-    this.load.image('tiles', '/Assets/Map/tileset.png');
 
   }
 

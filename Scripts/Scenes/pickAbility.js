@@ -10,18 +10,22 @@ export default class pickAbility extends Phaser.Scene {
   preload() {
     this.load.bitmapFont("arcade_font", "Assets/PressStart.png", "Assets/PressStart.xml");
 
+=======
   preload(){
     this.load.bitmapFont("arcade_font","/Assets/PressStart.png","/Assets/PressStart.xml");
     this.load.image("card_01","/Assets/wave_card.png")
     this.load.image("card_01_H","/Assets/wave_card_highlighted.png")
+>>>>>>> Stashed changes
   }
   create() {
     const { width, height } = this.scale;
     // Title text
     
+<<<<<<< Updated upstream
 
 
 
+=======
     this.add.bitmapText(width / 2, 15,"arcade_font", "Upgrade",16).setOrigin(0.5);
     const wave = this.add.image(width/2, 100,"card_01").setOrigin(0.5).setInteractive({useHandCursor:true});
     wave.on('pointerover', () => {
@@ -35,5 +39,6 @@ export default class pickAbility extends Phaser.Scene {
       playerData.specialWeapon = 1;
       console.log(this.specialWeapon)
     });
+>>>>>>> Stashed changes
   }
 }
