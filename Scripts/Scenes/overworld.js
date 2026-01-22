@@ -209,7 +209,7 @@ export default class Overworld extends Phaser.Scene {
             if (Phaser.Input.Keyboard.JustDown(this.interactKey)) {
                 // Stop music before switching if needed
                 this.sound.stopAll();
-                this.scene.start("Intro");
+                this.scene.start("Mainscene");
             }
         });
 
