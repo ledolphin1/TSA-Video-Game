@@ -4,46 +4,46 @@ export default class BossScene extends Phaser.Scene {
   constructor() {
     super({ key: 'boss' });
 
-  {
-  //Health & State
-  this.maxHealth = 5;
-  this.health = this.maxHealth;
+    {
+      //Health & State
+      this.maxHealth = 5;
+      this.health = this.maxHealth;
 
-  this.isInvincible   = false;
-  this.playerIsDead   = false;
-  this.isAttacking    = false;
-  this.isKnockedBack  = false;
+      this.isInvincible = false;
+      this.playerIsDead = false;
+      this.isAttacking = false;
+      this.isKnockedBack = false;
 
-  //Combat
-  this.slashDamage      = 1;
-  this.projectileDamage = 2;
+      //Combat
+      this.slashDamage = 1;
+      this.projectileDamage = 2;
 
-  this.knockbackSpeedX = 100;
-  this.knockbackSpeedY = 67;
+      this.knockbackSpeedX = 100;
+      this.knockbackSpeedY = 67;
 
-  this.lastAttackEndTime = 0;
+      this.lastAttackEndTime = 0;
 
-  //Hitboxes
-  // Offsets are auto-calculated to center
-  this.playerHitbox = {
-    width: 10,
-    height: 14
-  };
+      //Hitboxes
+      // Offsets are auto-calculated to center
+      this.playerHitbox = {
+        width: 10,
+        height: 14
+      };
 
-  this.enemyHitbox = {
-    width: 18.5,
-    height: 9
-  };
+      this.enemyHitbox = {
+        width: 18.5,
+        height: 9
+      };
 
-  //Visual Offsets
-  // Positive X → shift sprite right
-  // Positive Y → shift sprite down
-  this.attackVisualOffset = {
-    x: 9,
-    y: -8
-  };
-}
-    
+      //Visual Offsets
+      // Positive X → shift sprite right
+      // Positive Y → shift sprite down
+      this.attackVisualOffset = {
+        x: 9,
+        y: -8
+      };
+    }
+
     this.projectileCooldown = 3000;
     this.projectileOnCooldown = false;
     this.projectileCooldownStart = 0;
@@ -229,12 +229,7 @@ export default class BossScene extends Phaser.Scene {
       this.handleEnemyOverlap(player, enemy);
     });
 
-
-
-
     this.lastFiredTime = 0; // Initialize cooldown timer
-
-
 
     // --- Controls ---
     this.cursors = this.input.keyboard.createCursorKeys();
@@ -406,12 +401,12 @@ export default class BossScene extends Phaser.Scene {
     }
 
     // Ranged Attack Input
-    if (Phaser.Input.Keyboard.JustDown(this.fireKey)){ 
-      if (!this.projectileOnCooldown){
+    if (Phaser.Input.Keyboard.JustDown(this.fireKey)) {
+      if (!this.projectileOnCooldown) {
         this.fireProjectile(time);
       }
-      
-    } 
+
+    }
 
 
     if (this.isAttacking) return;

@@ -10,6 +10,7 @@ export default class Pause extends Phaser.Scene {
   }
 
   create() {
+    this.scene.bringToTop();
     const { width, height } = this.scale;
 
     // Title text
