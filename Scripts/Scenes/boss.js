@@ -1,4 +1,5 @@
 import Phaser from 'phaser';
+import { playerData } from './playerData';
 
 export default class BossScene extends Phaser.Scene {
   constructor() {
@@ -62,6 +63,10 @@ export default class BossScene extends Phaser.Scene {
       frameWidth: 64,
       frameHeight: 64
     })
+    this.load.spritesheet('player_wave_sheet', '/Assets/wave-sheet.png', {
+      frameWidth: 64,
+      frameHeight: 64
+    })
 
 
 
@@ -88,7 +93,7 @@ export default class BossScene extends Phaser.Scene {
   }
 
   create() {
-
+    console.log(playerData)
 
     this.add.image(160, 220, "bossbg");
     console.log("boss scene created");
@@ -121,6 +126,16 @@ export default class BossScene extends Phaser.Scene {
       frames: this.anims.generateFrameNumbers("player_attack_sheet", {
         start: 15,
         end: 18
+      }),
+      frameRate: 20,
+      repeat: 0,
+      hideOnComplete: false
+    });
+    this.anims.create({
+      key: "player_wave",
+      frames: this.anims.generateFrameNumbers("player_wave_sheet", {
+        start: 0,
+        end: 5
       }),
       frameRate: 20,
       repeat: 0,
@@ -237,6 +252,7 @@ export default class BossScene extends Phaser.Scene {
 
     this.attackKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE);
     this.fireKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.F);
+    this.specialKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.E);
 
     this.menuKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.ESC)
     // this.add.image(0,0,"frame").setOrigin(0,0).setScrollFactor(0).setDepth(1001)
@@ -394,6 +410,9 @@ export default class BossScene extends Phaser.Scene {
     // Attack Input
     if (Phaser.Input.Keyboard.JustDown(this.attackKey) && !this.isAttacking && time > this.lastAttackEndTime + 10) {
       this.performAttack();
+    }
+    if (Phaser.Input.Keyboard.JustDown(this.specialKey) && !this.isAttacking && time > this.lastAttackEndTime + 20) {
+      this.waveAttack();
     }
 
     if (Phaser.Input.Keyboard.JustDown(this.menuKey)) {
@@ -554,6 +573,110 @@ export default class BossScene extends Phaser.Scene {
       this.updatePlayerHitbox(); // Reset hitbox for normal sprite
     });
   }
+  waveAttack() {
+    console.log("Special Attack had been performed:",this.specialWeapon)
+    if (playerData.specialWeapon!= 1){
+      return;
+    }
+    this.isJumping = false
+    this.isAttacking = true;
+    this.player.setVelocityX(0); // Stop horizontal movement
+    this.player.setVelocityY(0); // Stop vertical movement
+    this.player.body.allowGravity = false; // Disable gravity
+
+    // Force immediate hitbox adjustment for the new animation frame
+    this.time.delayedCall(1, () => {
+      this.updatePlayerHitbox();
+    });
+
+    // Calculate hitbox position based on facing direction
+    const offsetX = this.player.flipX ? -40 : 40; // Left or Right
+    const startX = this.player.x + offsetX;
+    const startY = this.player.y;
+    // Create a temporary hitbox for the attack
+    // Using a clear sprite or zone. For debug visibility we can use a small colored sprite or just a physics body.
+    // We'll use a physics sprite without texture (invisible) but debug body visible.
+    const attackHitbox = this.physics.add.sprite(startX, startY, null);
+    attackHitbox.body.setSize(48, 34);
+    attackHitbox.setVisible(false); // Invisible sprite
+    attackHitbox.body.allowGravity = false;
+    attackHitbox.body.debugBodyColor = 0xffff00; // Yellow for attack
+    this.playerVisual.play("player_wave", true);
+    
+    //Check overlap with projectiles
+    this.physics.add.overlap(attackHitbox, this.enemyProjectiles, (hitbox, proj) => {
+      if (proj && proj.active) {
+        proj.destroy();
+      }
+    });
+
+    // Check overlap with enemies
+    this.physics.add.overlap(attackHitbox, this.enemies, (hitbox, enemy) => {
+      if (enemy.hitCooldown) return;
+      enemy.hitCooldown = true;
+
+      this.playerVisual.play("player_wave", true);
+      
+
+      enemy.hp -= this.slashDamage;
+
+      if (enemy.hp <= 0) {
+        enemy.destroy();
+        this.physics.world.pause();
+        this.anims.pauseAll();
+        setTimeout(() => {
+          this.physics.world.resume();
+          this.anims.resumeAll();
+        }, 100);
+        return;
+      }
+
+      // Flash white
+      enemy.setTintFill(0xffffff);
+
+      // Apply Knockback
+      enemy.isKnockedBack = true;
+      const kbDir = this.player.flipX ? -1 : 1;
+      enemy.setVelocity(kbDir * this.knockbackSpeedX + 6, -this.knockbackSpeedY + 3);
+
+      // Hitstop effect
+      this.physics.world.pause();
+      this.anims.pauseAll();
+
+      // Resume Game Loop after freeze
+      setTimeout(() => {
+        this.physics.world.resume();
+        this.anims.resumeAll();
+      }, 100);
+
+      // Reset Enemy State
+      setTimeout(() => {
+        if (enemy.active) {
+          enemy.clearTint();
+          enemy.isKnockedBack = false;
+          enemy.hitCooldown = false;
+
+          // Face Player and Move
+          const recoverDir = (this.player.x < enemy.x) ? -1 : 1;
+          enemy.setVelocityX(recoverDir * 50);
+          enemy.flipX = (recoverDir === 1);
+        }
+      }, 400);
+    });
+
+    // Remove hitbox after short duration
+    this.time.delayedCall(100, () => {
+      attackHitbox.destroy();
+    });
+
+    // Reset attack state after fixed duration (independent of animation)
+    this.time.delayedCall(250, () => {
+      this.isAttacking = false;
+      this.lastAttackEndTime = this.time.now;
+      this.player.body.allowGravity = true; // Restore gravity
+      this.updatePlayerHitbox(); // Reset hitbox for normal sprite
+    });
+  }
 
   updatePlayerHitbox() {
     if (!this.player || !this.player.body) return;
@@ -570,6 +693,7 @@ export default class BossScene extends Phaser.Scene {
     this.player.body.setSize(pWidth, pHeight);
     this.player.body.setOffset(pOffsetX, pOffsetY);
   }
+ 
 
   handleEnemyOverlap(player, enemy) {
     if (this.playerIsDead || this.isInvincible) return;
@@ -663,8 +787,6 @@ export default class BossScene extends Phaser.Scene {
     this.isAttacking = false;
   }
 
-
-
   spawnEnemy(x, y) {
     const enemy = this.enemies.create(x, y, 'enemySprite');
     const scale = 4; //temp scale for fake boss
@@ -691,8 +813,6 @@ export default class BossScene extends Phaser.Scene {
     enemy.setCollideWorldBounds(true);
     enemy.setVelocityX(50); // Start moving right
   }
-
-
 
   fireProjectile(time) {
     this.projectileOnCooldown = true;
