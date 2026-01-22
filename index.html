@@ -6,11 +6,20 @@
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <link rel="stylesheet" href="./styles.css">
   <title>TSA Video Game</title>
+  <script type="importmap">
+            {
+                "imports": {
+                    "phaser": "/node_modules/phaser/dist/phaser.min.js" // Adjust this path relative to your HTML
+                }
+            }
+        </script>
+
 </head>
 
 <body>
   <h1>WASD to Move, Space to Attack, Z to Interact</h1>
   <div id="game-container"></div>
+
   <script type="module" src="Scripts/main.js"></script>
 
 
