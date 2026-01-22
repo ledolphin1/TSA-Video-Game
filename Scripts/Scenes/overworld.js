@@ -165,9 +165,9 @@ export default class Overworld extends Phaser.Scene {
         this.cameras.main.setRoundPixels(false);
         // Force disable debug (just in case)
         this.physics.world.drawDebug = false;
-        // if (this.physics.world.debugGraphic) {
-        //   this.physics.world.debugGraphic.setVisible(false);
-        // }
+        if (this.physics.world.debugGraphic) {
+        this.physics.world.debugGraphic.setVisible(false);
+        }
         // --- Create Enemy Group ---
 
         // Spawn multiple enemies
