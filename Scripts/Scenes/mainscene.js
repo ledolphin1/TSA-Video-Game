@@ -50,12 +50,8 @@ export default class MainScene extends Phaser.Scene {
     this.projectileOnCooldown = false;
     this.projectileCooldownStart = 0;
 
-<<<<<<< Updated upstream
-
-=======
     this.saber_count = 0;
     this.fire_count = 0;
->>>>>>> Stashed changes
   }
 
   preload() {
