@@ -48,7 +48,7 @@ export default class MainScene extends Phaser.Scene {
 
     this.projectileCooldown = 3000;
     this.projectileOnCooldown = false;
-    this.projectileCooldownStart = 0;
+    this.projectileCooldownStart = 999999;
 
 
   }
@@ -725,8 +725,8 @@ export default class MainScene extends Phaser.Scene {
 
     chest.setFrame(1);
     chest.disableBody();
-    const text = this.add.text(chest.x, chest.y - 20, "Special Unlocked! Press E to Use", { fontSize: "12px", fill: "#fff" });
-
+    const text = this.add.text(chest.x, chest.y - 20, "Special Unlocked! Press F to Use", { fontSize: "12px", fill: "#fff" });
+    this.projectileCooldownStart = 0; 
     // Fade out text and destroy chest after delay
     this.time.delayedCall(2000, () => {
       text.destroy();
