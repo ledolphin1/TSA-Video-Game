@@ -200,10 +200,10 @@ export default class MainScene extends Phaser.Scene {
     this.player.setCollideWorldBounds(true);
     this.cameras.main.setRoundPixels(false);
     // Force disable debug (just in case)
-    // this.physics.world.drawDebug = false;
-    // if (this.physics.world.debugGraphic) {
-    //   this.physics.world.debugGraphic.setVisible(false);
-    // }
+    this.physics.world.drawDebug = false;
+    if (this.physics.world.debugGraphic) {
+       this.physics.world.debugGraphic.setVisible(false);
+    }
     // --- Create Enemy Group ---
     this.enemies = this.physics.add.group(); //  group for enemies
 
