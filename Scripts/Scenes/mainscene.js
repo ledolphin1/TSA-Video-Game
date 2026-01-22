@@ -54,12 +54,12 @@ export default class MainScene extends Phaser.Scene {
   }
 
   preload() {
-    this.load.spritesheet('enemySprite', 'Assets/snake-mob.png', {
+    this.load.spritesheet('enemySprite', 'Assets/snakeMob.png', {
       frameWidth: 22,
       frameHeight: 11
     }); // enemy spritesheet
 
-    this.load.spritesheet('player_attack_sheet', 'Assets/Main Character Attack.png', {
+    this.load.spritesheet('player_attack_sheet', 'Assets/mainCharacterAttack.png', {
       frameWidth: 64,
       frameHeight: 64
     })
