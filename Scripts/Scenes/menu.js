@@ -5,8 +5,8 @@ export default class Menu extends Phaser.Scene {
     super({ key: 'Menu' });
   }
   preload() {
-    this.load.image("frame", "/Assets/ARCADE_BORDER.png")
-    this.load.image("title", "/Assets/title.png")
+    this.load.image("frame", "Assets/ARCADE_BORDER.png")
+    this.load.image("title", "Assets/title.png")
     this.load.image("play", "Assets/play.png")
     this.load.image("options", "Assets/options.png")
     this.load.image("options_yellow", "Assets/options_yellow.png")

@@ -52,37 +52,37 @@ export default class BossScene extends Phaser.Scene {
   }
 
   preload() {
-    this.load.spritesheet('enemySprite', '/Assets/snake-mob.png', {
+    this.load.spritesheet('enemySprite', 'Assets/snake-mob.png', {
       frameWidth: 22,
       frameHeight: 11
     }); // enemy spritesheet
 
-    this.load.spritesheet('player_attack_sheet', '/Assets/Main Character Attack.png', {
+    this.load.spritesheet('player_attack_sheet', 'Assets/Main Character Attack.png', {
       frameWidth: 64,
       frameHeight: 64
     })
 
 
 
-    /*this.load.spritesheet('hitAnim', '/Assets/hit.png', { // not created yet
+    /*this.load.spritesheet('hitAnim', 'Assets/hit.png', { // not created yet
       frameWidth: 64,
       frameHeight: 64
     });
   */
-    this.load.image("frame", "/Assets/ARCADE_BORDER.png")
-    this.load.image("bossbg", "/Assets/bossbg.png")
-    this.load.image('player_still', '/Assets/Main Character Standing SSl.png'); //player image
-    this.load.spritesheet("player_jumping", "/Assets/Main Character Jump SS.png", {
+    this.load.image("frame", "Assets/ARCADE_BORDER.png")
+    this.load.image("bossbg", "Assets/bossbg.png")
+    this.load.image('player_still', 'Assets/Main Character Standing SSl.png'); //player image
+    this.load.spritesheet("player_jumping", "Assets/Main Character Jump SS.png", {
       frameWidth: 16,
       frameHeight: 16
     })
-    this.load.spritesheet('player_running', '/Assets/Main Character Running SS.png', {
+    this.load.spritesheet('player_running', 'Assets/Main Character Running SS.png', {
       frameWidth: 16,
       frameHeight: 16
     })
-    this.load.audio('background', '/Assets/audio/background_music_filler.mp3');
-    this.load.tilemapTiledJSON('boss_level', '/Assets/Map/boss.tmj');
-    this.load.image('tiles', '/Assets/Map/tileset.png');
+    this.load.audio('background', 'Assets/audio/background_music_filler.mp3');
+    this.load.tilemapTiledJSON('boss_level', 'Assets/Map/boss.tmj');
+    this.load.image('tiles', 'Assets/Map/tileset.png');
 
   }
 

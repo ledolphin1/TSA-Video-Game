@@ -5,8 +5,8 @@ export default class Pause extends Phaser.Scene {
     super({ key: 'pickAbility' });
   }
 
-  preload(){
-    this.load.bitmapFont("arcade_font","/Assets/PressStart.png","/Assets/PressStart.xml");
+  preload() {
+    this.load.bitmapFont("arcade_font", "Assets/PressStart.png", "Assets/PressStart.xml");
 
   }
   create() {
@@ -17,8 +17,8 @@ export default class Pause extends Phaser.Scene {
       fontSize: '48px',
       color: '#ffffff'
     }).setOrigin(0.5);
-    
 
-   
+
+
   }
 }

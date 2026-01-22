@@ -69,21 +69,21 @@ export default class Overworld extends Phaser.Scene {
           frameHeight: 64
         });
       */
-        this.load.image("frame", "/Assets/ARCADE_BORDER.png")
-        this.load.image("overworldbg", "/Assets/arcade_interior.png")
-        this.load.image('ow_player_still', '/Assets/playerIdle.png'); //player image
-        this.load.image('ow_player_falling_static', '/Assets/playerFall.png'); //player image
-        this.load.spritesheet("ow_player_jumping", "/Assets/playerJump.png", {
+        this.load.image("frame", "Assets/ARCADE_BORDER.png")
+        this.load.image("overworldbg", "Assets/arcade_interior.png")
+        this.load.image('ow_player_still', 'Assets/playerIdle.png'); //player image
+        this.load.image('ow_player_falling_static', 'Assets/playerFall.png'); //player image
+        this.load.spritesheet("ow_player_jumping", "Assets/playerJump.png", {
             frameWidth: 16,
             frameHeight: 16
         })
-        this.load.spritesheet('ow_player_running', '/Assets/playerRun.png', {
+        this.load.spritesheet('ow_player_running', 'Assets/playerRun.png', {
             frameWidth: 16,
             frameHeight: 16
         })
-        this.load.audio('background', '/Assets/audio/background_music_filler.mp3');
-        this.load.tilemapTiledJSON('overworld_level', '/Assets/Map/overworld.tmj');
-        this.load.image('tiles', '/Assets/Map/tileset.png');
+        this.load.audio('background', 'Assets/audio/background_music_filler.mp3');
+        this.load.tilemapTiledJSON('overworld_level', 'Assets/Map/overworld.tmj');
+        this.load.image('tiles', 'Assets/Map/tileset.png');
 
     }
 
