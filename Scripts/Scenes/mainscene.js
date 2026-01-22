@@ -45,7 +45,6 @@ export default class MainScene extends Phaser.Scene {
       };
     };
 
-
     this.projectileCooldown = 3000;
     this.projectileOnCooldown = false;
     this.projectileCooldownStart = 0;
@@ -74,9 +73,10 @@ export default class MainScene extends Phaser.Scene {
       frameHeight: 64
     });
   */
-    this.load.image("frame", "Assets/ARCADE_BORDER.png")
-    this.load.image('player_still', 'Assets/Main Character Standing SSl.png'); //player image
-    this.load.spritesheet("player_jumping", 'Assets/Main Character Jump SS.png', {
+    this.load.image("frame", "/Assets/ARCADE_BORDER.png")
+    this.load.image("basic_projectile", "/Assets/projectile.png")
+    this.load.image('player_still', '/Assets/Main Character Standing SSl.png'); //player image
+    this.load.spritesheet("player_jumping", "/Assets/Main Character Jump SS.png", {
       frameWidth: 16,
       frameHeight: 16
     })
@@ -346,12 +346,32 @@ export default class MainScene extends Phaser.Scene {
     );
   }
   drawCooldown(progress) {
-    this.cooldownGraphic.clear();
-
-    if (progress >= 1) {
-      this.cooldownGraphic.setVisible(false);
-      return;
-    }
+      this.cooldownGraphic.clear();
+  
+      if (progress >= 1) {
+        this.cooldownGraphic.setVisible(false);
+        return;
+      }
+  
+      this.cooldownGraphic.setVisible(true);
+  
+      this.cooldownGraphic.fillStyle(0x00ffff, 1);
+  
+      this.cooldownGraphic.beginPath();
+      this.cooldownGraphic.moveTo(this.cooldownX, this.cooldownY);
+  
+      this.cooldownGraphic.arc(
+        this.cooldownX,
+        this.cooldownY,
+        this.cooldownRadius,
+        Phaser.Math.DegToRad(-90),
+        Phaser.Math.DegToRad(-90 + 360 * (1 - progress)),
+        false
+      );
+  
+      this.cooldownGraphic.closePath();
+      this.cooldownGraphic.fillPath();
+  
 
     this.cooldownGraphic.setVisible(true);
 
@@ -738,10 +758,10 @@ export default class MainScene extends Phaser.Scene {
     this.projectileCooldownStart = time;
 
     this.lastFiredTime = time;
-    const proj = this.add.rectangle(this.player.x, this.player.y, 10, 10, 0x00ffff);
+    const proj = this.add.sprite(this.player.x, this.player.y,"basic_projectile");
     this.physics.add.existing(proj);
     this.playerProjectiles.add(proj); // Use separate group!
-
+    proj.flipX = this.player.flipX? true : false;
     proj.body.allowGravity = false;
     const velocity = this.player.flipX ? -400 : 400;
     proj.body.setVelocityX(velocity);
@@ -827,3 +847,4 @@ export default class MainScene extends Phaser.Scene {
     }
   }
 }
+

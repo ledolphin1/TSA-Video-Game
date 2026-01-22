@@ -5,6 +5,7 @@ import Pause from "./Scenes/pause.js"
 import Intro from './Scenes/intro.js';
 import Options from './Scenes/options.js';
 import boss from './Scenes/boss.js';
+import pickAbility from './Scenes/pickAbility.js'
 import Overworld from './Scenes/overworld.js';
 
 const config = {
@@ -16,7 +17,8 @@ const config = {
   pixelArt: true,
   parent: 'game-container',
 
-  scene: [Intro, Menu, MainScene, Pause, Options, boss, Overworld],
+
+  scene: [Intro, Menu, MainScene, pickAbility, boss, Overworld, Pause, Options],
 
   physics: {
     default: 'arcade',

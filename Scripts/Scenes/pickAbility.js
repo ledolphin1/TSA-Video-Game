@@ -1,6 +1,6 @@
 import Phaser from 'phaser';
 
-export default class Pause extends Phaser.Scene {
+export default class pickAbility extends Phaser.Scene {
   constructor() {
     super({ key: 'pickAbility' });
   }
@@ -13,10 +13,8 @@ export default class Pause extends Phaser.Scene {
     const { width, height } = this.scale;
     // Title text
     this.specialWeapon = 0
-    this.add.text(width / 2, height / 2 - 70, "Time to Get Stronger", {
-      fontSize: '48px',
-      color: '#ffffff'
-    }).setOrigin(0.5);
+    this.add.bitmapText(width / 2, height / 2 - 70,"arcade_font", "Upgrade",16).setOrigin(0.5);
+    
 
 
 
