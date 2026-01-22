@@ -97,12 +97,7 @@ export default class Overworld extends Phaser.Scene {
             frameRate: 20,
             repeat: -1
         })
-        this.anims.create({
-            key: "enemy_moving",
-            frames: this.anims.generateFrameNumbers("enemySprite"),
-            frameRate: 20,
-            repeat: -1
-        })
+       
         this.anims.create({
             key: "ow_player_jump_start",
             frames: this.anims.generateFrameNumbers("ow_player_jumping", {
@@ -113,16 +108,7 @@ export default class Overworld extends Phaser.Scene {
             repeat: 0,
             hideOnComplete: false
         })
-        this.anims.create({
-            key: "player_attack",
-            frames: this.anims.generateFrameNumbers("player_attack_sheet", {
-                start: 15,
-                end: 18
-            }),
-            frameRate: 20,
-            repeat: 0,
-            hideOnComplete: false
-        });
+        
         this.anims.create({
             key: "ow_player_falling",
             frames: this.anims.generateFrameNumbers("ow_player_jumping", {
