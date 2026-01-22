@@ -60,6 +60,9 @@ export default class BossScene extends Phaser.Scene {
     }); // enemy spritesheet
 
     this.load.spritesheet('player_attack_sheet', 'Assets/Main Character Attack.png', {
+      frameWidth: 64,
+      frameHeight: 64
+    })
     this.load.spritesheet('player_wave_sheet', '/Assets/wave-sheet.png', {
       frameWidth: 64,
       frameHeight: 64
