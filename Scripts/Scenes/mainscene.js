@@ -298,7 +298,6 @@ export default class MainScene extends Phaser.Scene {
     //music.setDetune(-700); - I left it in just for you (i'm guessing its leo who added this) (yeah sidney told me to do it)
     this.music.play();
 
-    // --- Post-Update Sync (Fixes Lag/Blur) ---
     // Sync runs AFTER physics, ensuring visual matches actual body position for this frame
     this.events.on('postupdate', () => {
       if (this.playerVisual && this.player) {
