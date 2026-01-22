@@ -7,7 +7,7 @@ import Options from './Scenes/options.js';
 import boss from './Scenes/boss.js';
 import pickAbility from './Scenes/pickAbility.js'
 import Overworld from './Scenes/overworld.js';
-
+import arcadeExterior from './Scenes/arcade_exterior.js';
 const config = {
   type: Phaser.AUTO,
   width: 320,
@@ -18,7 +18,7 @@ const config = {
   parent: 'game-container',
 
 
-  scene: [Intro, Menu, MainScene, pickAbility, boss, Overworld, Pause, Options],
+  scene: [arcadeExterior,Overworld, Intro, Menu, MainScene, pickAbility, boss, Pause, Options],
 
   physics: {
     default: 'arcade',
