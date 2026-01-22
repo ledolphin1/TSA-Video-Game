@@ -5,70 +5,70 @@ export default class MainScene extends Phaser.Scene {
   constructor() {
     super({ key: 'MainScene' });
 
-{
-  //Health & State
-  this.maxHealth = 5;
-  this.health = this.maxHealth;
+    {
+      //Health & State
+      this.maxHealth = 5;
+      this.health = this.maxHealth;
 
-  this.isInvincible   = false;
-  this.playerIsDead   = false;
-  this.isAttacking    = false;
-  this.isKnockedBack  = false;
+      this.isInvincible = false;
+      this.playerIsDead = false;
+      this.isAttacking = false;
+      this.isKnockedBack = false;
 
-  //Combat
-  this.slashDamage      = 1;
-  this.projectileDamage = 2;
+      //Combat
+      this.slashDamage = 1;
+      this.projectileDamage = 2;
 
-  this.knockbackSpeedX = 100;
-  this.knockbackSpeedY = 67;
+      this.knockbackSpeedX = 100;
+      this.knockbackSpeedY = 67;
 
-  this.lastAttackEndTime = 0;
+      this.lastAttackEndTime = 0;
 
-  //Hitboxes
-  // Offsets are auto-calculated to center
-  this.playerHitbox = {
-    width: 10,
-    height: 14
-  };
+      //Hitboxes
+      // Offsets are auto-calculated to center
+      this.playerHitbox = {
+        width: 10,
+        height: 14
+      };
 
-  this.enemyHitbox = {
-    width: 18.5,
-    height: 9
-  };
+      this.enemyHitbox = {
+        width: 18.5,
+        height: 9
+      };
 
-  //Visual Offsets
-  // Positive X → shift sprite right
-  // Positive Y → shift sprite down
-  this.attackVisualOffset = {
-    x: 9,
-    y: -8
-  };
-};
+      //Visual Offsets
+      // Positive X → shift sprite right
+      // Positive Y → shift sprite down
+      this.attackVisualOffset = {
+        x: 9,
+        y: -8
+      };
+    };
 
     this.projectileCooldown = 3000;
     this.projectileOnCooldown = false;
     this.projectileCooldownStart = 0;
 
-    
+
   }
 
   preload() {
-    this.load.spritesheet('enemySprite', '/Assets/snake-mob.png', {
+    this.load.spritesheet('enemySprite', 'Assets/snake-mob.png', {
       frameWidth: 22,
       frameHeight: 11
     }); // enemy spritesheet
 
-    this.load.spritesheet('player_attack_sheet', '/Assets/Main Character Attack.png', {
+    this.load.spritesheet('player_attack_sheet', 'Assets/Main Character Attack.png', {
       frameWidth: 64,
       frameHeight: 64
     })
 
-    this.load.spritesheet('chests', '/Assets/chests.png', {
+    this.load.spritesheet('chests', 'Assets/chests.png', {
       frameWidth: 16,
       frameHeight: 16
     });
 
-    /*this.load.spritesheet('hitAnim', '/Assets/hit.png', { // not created yet
+    /*this.load.spritesheet('hitAnim', 'Assets/hit.png', { // not created yet
       frameWidth: 64,
       frameHeight: 64
     });
@@ -80,14 +80,14 @@ export default class MainScene extends Phaser.Scene {
       frameWidth: 16,
       frameHeight: 16
     })
-    this.load.spritesheet('player_running', '/Assets/Main Character Running SS.png', {
+    this.load.spritesheet('player_running', 'Assets/Main Character Running SS.png', {
       frameWidth: 16,
       frameHeight: 16
     })
-    this.load.audio('background', '/Assets/audio/background_music_filler.mp3');
-    this.load.tilemapTiledJSON('map', '/Assets/Map/firstlevel.tmj');
-    this.load.image('tiles', '/Assets/Map/tileset.png');
-    this.load.image('spikes', '/Assets/Map/spikes.png');
+    this.load.audio('background', 'Assets/audio/background_music_filler.mp3');
+    this.load.tilemapTiledJSON('map', 'Assets/Map/firstlevel.tmj');
+    this.load.image('tiles', 'Assets/Map/tileset.png');
+    this.load.image('spikes', 'Assets/Map/spikes.png');
 
   }
   create() {
@@ -104,7 +104,7 @@ export default class MainScene extends Phaser.Scene {
     this.healthBarBg.setDepth(1000);
     this.healthBarFill.setDepth(1000);
 
-    
+
     this.cooldownRadius = 8;
     this.cooldownX = this.cameras.main.width - 15;
     this.cooldownY = 15;
@@ -159,7 +159,7 @@ export default class MainScene extends Phaser.Scene {
       repeat: 0,
       hideOnComplete: false
     })
- 
+
     const map = this.make.tilemap({
       key: "map"
     })
@@ -214,7 +214,12 @@ export default class MainScene extends Phaser.Scene {
       { x: 1400, y: 820 },
       { x: 1500, y: 820 },
       { x: 2000, y: 580 },
-      { x: 2100, y: 580 }
+      { x: 2100, y: 580 },
+      { x: 1250, y: 568 },
+      { x: 1610, y: 568 },
+      { x: 1610, y: 568 },
+      { x: 1200, y: 312 },
+      { x: 805, y: 520 }
     ];
 
     this.enemySpawnPoints.forEach(point => {
@@ -369,21 +374,41 @@ export default class MainScene extends Phaser.Scene {
       this.cooldownGraphic.fillPath();
   }
 
+    this.cooldownGraphic.setVisible(true);
+
+    this.cooldownGraphic.fillStyle(0x00ffff, 1);
+
+    this.cooldownGraphic.beginPath();
+    this.cooldownGraphic.moveTo(this.cooldownX, this.cooldownY);
+
+    this.cooldownGraphic.arc(
+      this.cooldownX,
+      this.cooldownY,
+      this.cooldownRadius,
+      Phaser.Math.DegToRad(-90),
+      Phaser.Math.DegToRad(-90 + 360 * (1 - progress)),
+      false
+    );
+
+    this.cooldownGraphic.closePath();
+    this.cooldownGraphic.fillPath();
+  }
+
   update(time, delta) {
     if (this.playerIsDead) return; // prevent movement while dead
     if (this.isKnockedBack) return; // prevent movement while applying knockback force
 
     if (this.projectileOnCooldown) {
-          const elapsed = time - this.projectileCooldownStart;
-          const progress = Phaser.Math.Clamp(elapsed / this.projectileCooldown, 0, 1);
-    
-          this.drawCooldown(progress);
-    
-          if (progress >= 1) {
-            this.projectileOnCooldown = false;
-          }
-        }
-    
+      const elapsed = time - this.projectileCooldownStart;
+      const progress = Phaser.Math.Clamp(elapsed / this.projectileCooldown, 0, 1);
+
+      this.drawCooldown(progress);
+
+      if (progress >= 1) {
+        this.projectileOnCooldown = false;
+      }
+    }
+
     // Update Enemies
     this.enemies.children.iterate((enemy) => {
       this.updateEnemy(enemy);

@@ -4,46 +4,46 @@ export default class BossScene extends Phaser.Scene {
   constructor() {
     super({ key: 'boss' });
 
-  {
-  //Health & State
-  this.maxHealth = 5;
-  this.health = this.maxHealth;
+    {
+      //Health & State
+      this.maxHealth = 5;
+      this.health = this.maxHealth;
 
-  this.isInvincible   = false;
-  this.playerIsDead   = false;
-  this.isAttacking    = false;
-  this.isKnockedBack  = false;
+      this.isInvincible = false;
+      this.playerIsDead = false;
+      this.isAttacking = false;
+      this.isKnockedBack = false;
 
-  //Combat
-  this.slashDamage      = 1;
-  this.projectileDamage = 2;
+      //Combat
+      this.slashDamage = 1;
+      this.projectileDamage = 2;
 
-  this.knockbackSpeedX = 100;
-  this.knockbackSpeedY = 67;
+      this.knockbackSpeedX = 100;
+      this.knockbackSpeedY = 67;
 
-  this.lastAttackEndTime = 0;
+      this.lastAttackEndTime = 0;
 
-  //Hitboxes
-  // Offsets are auto-calculated to center
-  this.playerHitbox = {
-    width: 10,
-    height: 14
-  };
+      //Hitboxes
+      // Offsets are auto-calculated to center
+      this.playerHitbox = {
+        width: 10,
+        height: 14
+      };
 
-  this.enemyHitbox = {
-    width: 18.5,
-    height: 9
-  };
+      this.enemyHitbox = {
+        width: 18.5,
+        height: 9
+      };
 
-  //Visual Offsets
-  // Positive X → shift sprite right
-  // Positive Y → shift sprite down
-  this.attackVisualOffset = {
-    x: 9,
-    y: -8
-  };
-}
-    
+      //Visual Offsets
+      // Positive X → shift sprite right
+      // Positive Y → shift sprite down
+      this.attackVisualOffset = {
+        x: 9,
+        y: -8
+      };
+    }
+
     this.projectileCooldown = 3000;
     this.projectileOnCooldown = false;
     this.projectileCooldownStart = 0;
@@ -58,32 +58,32 @@ export default class BossScene extends Phaser.Scene {
       frameHeight: 11
     }); // enemy spritesheet
 
-    this.load.spritesheet('player_attack_sheet', '/Assets/Main Character Attack.png', {
+    this.load.spritesheet('player_attack_sheet', 'Assets/Main Character Attack.png', {
       frameWidth: 64,
       frameHeight: 64
     })
 
 
 
-    /*this.load.spritesheet('hitAnim', '/Assets/hit.png', { // not created yet
+    /*this.load.spritesheet('hitAnim', 'Assets/hit.png', { // not created yet
       frameWidth: 64,
       frameHeight: 64
     });
   */
-    this.load.image("frame", "/Assets/ARCADE_BORDER.png")
-    this.load.image("bossbg", "/Assets/bossbg.png")
-    this.load.image('player_still', '/Assets/Main Character Standing SSl.png'); //player image
-    this.load.spritesheet("player_jumping", "/Assets/Main Character Jump SS.png", {
+    this.load.image("frame", "Assets/ARCADE_BORDER.png")
+    this.load.image("bossbg", "Assets/bossbg.png")
+    this.load.image('player_still', 'Assets/Main Character Standing SSl.png'); //player image
+    this.load.spritesheet("player_jumping", "Assets/Main Character Jump SS.png", {
       frameWidth: 16,
       frameHeight: 16
     })
-    this.load.spritesheet('player_running', '/Assets/Main Character Running SS.png', {
+    this.load.spritesheet('player_running', 'Assets/Main Character Running SS.png', {
       frameWidth: 16,
       frameHeight: 16
     })
-    this.load.audio('background', '/Assets/audio/background_music_filler.mp3');
-    this.load.tilemapTiledJSON('boss_level', '/Assets/Map/boss.tmj');
-    this.load.image('tiles', '/Assets/Map/tileset.png');
+    this.load.audio('background', 'Assets/audio/background_music_filler.mp3');
+    this.load.tilemapTiledJSON('boss_level', 'Assets/Map/boss.tmj');
+    this.load.image('tiles', 'Assets/Map/tileset.png');
 
   }
 
@@ -230,12 +230,7 @@ export default class BossScene extends Phaser.Scene {
       this.handleEnemyOverlap(player, enemy);
     });
 
-
-
-
     this.lastFiredTime = 0; // Initialize cooldown timer
-
-
 
     // --- Controls ---
     this.cursors = this.input.keyboard.createCursorKeys();
@@ -407,12 +402,12 @@ export default class BossScene extends Phaser.Scene {
     }
 
     // Ranged Attack Input
-    if (Phaser.Input.Keyboard.JustDown(this.fireKey)){ 
-      if (!this.projectileOnCooldown){
+    if (Phaser.Input.Keyboard.JustDown(this.fireKey)) {
+      if (!this.projectileOnCooldown) {
         this.fireProjectile(time);
       }
-      
-    } 
+
+    }
 
 
     if (this.isAttacking) return;
