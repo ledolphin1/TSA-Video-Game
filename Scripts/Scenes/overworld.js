@@ -87,7 +87,7 @@ export default class Overworld extends Phaser.Scene {
     create() {
 
 
-        this.add.image(160, 220, "overworldbg");
+        this.add.image(160, 240, "overworldbg");
         console.log("overworld scene created");
         this.physics.world.roundPixels = false;
         //upload animations
