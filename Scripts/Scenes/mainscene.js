@@ -1,5 +1,6 @@
 
 import Phaser from 'phaser';
+import { playerData } from './playerData';
 
 export default class MainScene extends Phaser.Scene {
   constructor() {
@@ -50,6 +51,9 @@ export default class MainScene extends Phaser.Scene {
     this.projectileCooldownStart = 0;
 
 
+=======
+    this.saber_count = 0;
+    this.fire_count = 0;
   }
 
   preload() {
@@ -484,12 +488,16 @@ export default class MainScene extends Phaser.Scene {
     this.coordText.setText(`X: ${Math.round(this.player.x)} Y: ${Math.round(this.player.y)}`);
 
     if (this.player.x <= 100 && this.player.y <= 200) {
-      this.scene.start("boss");
+      playerData.electro_saber_stat += this.saber_count;
+      playerData.fire_stat += this.fire_count;
+      this.scene.start("pickAbility");
       this.music.stop()
     }
-
+    
     if (this.skipKey.isDown) {
-      this.scene.start("boss");
+      playerData.electro_saber_stat += this.saber_count;
+      playerData.fire_stat += this.fire_count;
+      this.scene.start("pickAbility");
       this.music.stop()
     }
 
@@ -501,7 +509,7 @@ export default class MainScene extends Phaser.Scene {
     this.player.setVelocityX(0); // Stop horizontal movement
     this.player.setVelocityY(0); // Stop vertical movement
     this.player.body.allowGravity = false; // Disable gravity
-
+    this.saber_count++;
     // Force immediate hitbox adjustment for the new animation frame
     this.time.delayedCall(1, () => {
       this.updatePlayerHitbox();
@@ -755,6 +763,7 @@ export default class MainScene extends Phaser.Scene {
   }
 
   fireProjectile(time) {
+    this.fire_count++;
     this.projectileOnCooldown = true;
     this.projectileCooldownStart = time;
 
