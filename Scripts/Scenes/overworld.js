@@ -1,4 +1,4 @@
-import { Phaser } from 'phaser';
+import Phaser from 'phaser';
 
 export default class Overworld extends Phaser.Scene {
     constructor() {
@@ -85,6 +85,11 @@ export default class Overworld extends Phaser.Scene {
         this.load.tilemapTiledJSON('overworld_level', 'Assets/Map/overworld.tmj');
         this.load.image('tiles', 'Assets/Map/tileset.png');
 
+        this.load.spritesheet('arcadeMachine', 'Assets/arcadeMachine.png', {
+            frameWidth: 32,
+            frameHeight: 48
+        });
+
     }
 
     create() {
@@ -137,6 +142,14 @@ export default class Overworld extends Phaser.Scene {
             hideOnComplete: false
         })
 
+        // --- Arcade Machine Animation ---
+        this.anims.create({
+            key: "arcade_idle",
+            frames: this.anims.generateFrameNumbers("arcadeMachine"),
+            frameRate: 10,
+            repeat: -1
+        });
+
         const map = this.make.tilemap({
             key: "overworld_level"
         })
@@ -182,6 +195,23 @@ export default class Overworld extends Phaser.Scene {
         // Spawn multiple enemies
 
 
+        // --- Arcade Machine ---
+        // Place it somewhere on the ground. Player is at y=296.
+        // x=200 is an arbitrary position to the right of start
+        this.arcadeMachine = this.physics.add.sprite(200, 296, "arcadeMachine");
+        this.arcadeMachine.play("arcade_idle");
+        this.arcadeMachine.setImmovable(true);
+        this.arcadeMachine.body.allowGravity = false; // Or let it fall to ground if needed
+        this.physics.add.collider(this.arcadeMachine, this.ground);
+
+        // Interaction Logic
+        this.physics.add.overlap(this.player, this.arcadeMachine, () => {
+            if (Phaser.Input.Keyboard.JustDown(this.interactKey)) {
+                // Stop music before switching if needed
+                this.sound.stopAll();
+                this.scene.start("MainScene");
+            }
+        });
 
 
 
@@ -195,7 +225,6 @@ export default class Overworld extends Phaser.Scene {
 
         this.menuKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.ESC)
         this.interactKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.Z)
-        // this.add.image(0,0,"frame").setOrigin(0,0).setScrollFactor(0).setDepth(1001)
 
         //cords for debug
         this.coordText = this.add.text(this.cameras.main.width - 10, this.cameras.main.height - 10, 'X: 0 Y: 0', {
@@ -345,12 +374,8 @@ export default class Overworld extends Phaser.Scene {
             this.player.setVelocityY(this.player.body.velocity.y * 0.5);
         }
 
-        if (Phaser.Input.Keyboard.JustUp(this.interactKey)) {
-            this.scene.start("MainScene");
-        }
 
         // Update Coordinate Display
         this.coordText.setText(`X: ${Math.round(this.player.x)} Y: ${Math.round(this.player.y)}`);
     }
 }
-
