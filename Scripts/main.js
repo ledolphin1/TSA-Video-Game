@@ -18,7 +18,7 @@ const config = {
   parent: 'game-container',
 
 
-  scene: [Intro, Menu, MainScene, Pause, Options,pickAbility, boss, Overworld],
+  scene: [Intro, Menu, MainScene, pickAbility, boss, Overworld, Pause, Options],
 
   physics: {
     default: 'arcade',
