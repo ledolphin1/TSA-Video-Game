@@ -372,7 +372,7 @@ export default class MainScene extends Phaser.Scene {
   
       this.cooldownGraphic.closePath();
       this.cooldownGraphic.fillPath();
-  }
+  
 
     this.cooldownGraphic.setVisible(true);
 
@@ -848,3 +848,4 @@ export default class MainScene extends Phaser.Scene {
     }
   }
 }
+
