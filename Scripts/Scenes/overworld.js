@@ -164,7 +164,7 @@ export default class Overworld extends Phaser.Scene {
         this.player.setCollideWorldBounds(true);
         this.cameras.main.setRoundPixels(false);
         // Force disable debug (just in case)
-        // this.physics.world.drawDebug = false;
+        this.physics.world.drawDebug = false;
         // if (this.physics.world.debugGraphic) {
         //   this.physics.world.debugGraphic.setVisible(false);
         // }
