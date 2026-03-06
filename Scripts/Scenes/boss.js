@@ -1,163 +1,32 @@
 import * as Phaser from 'phaser';
+import constructor_init from './Functions/constructor_init';
+import preload_init from './Functions/preload_init';
+import create_init from './Functions/create_init';
 export default class BossScene extends Phaser.Scene {
   constructor() {
     super({ key: 'boss' });
 
-    {
-      //Health & State
-      this.maxHealth = 5;
-      this.health = this.maxHealth;
-
-      this.isInvincible = false;
-      this.playerIsDead = false;
-      this.isAttacking = false;
-      this.isKnockedBack = false;
-
-      //Combat
-      this.slashDamage = 1;
-      this.projectileDamage = 2;
-
-      this.knockbackSpeedX = 100;
-      this.knockbackSpeedY = 67;
-
-      this.lastAttackEndTime = 0;
-
-      //Hitboxes
-      // Offsets are auto-calculated to center
-      this.playerHitbox = {
-        width: 10,
-        height: 14
-      };
-
-      this.enemyHitbox = {
-        width: 18.5,
-        height: 9
-      };
-
-      //Visual Offsets
-      // Positive X → shift sprite right
-      // Positive Y → shift sprite down
-      this.attackVisualOffset = {
-        x: 9,
-        y: -8
-      };
-    }
-
-    this.projectileCooldown = 3000;
-    this.projectileOnCooldown = false;
-    this.projectileCooldownStart = 0;
+    constructor_init.call(this);
     this._bossTransitioned = false;
   }
 
   preload() {
-    this.load.spritesheet('enemySprite', 'Assets/snake-mob.png', {
-      frameWidth: 22,
-      frameHeight: 11
-    });
-
-    this.load.spritesheet('player_attack_sheet', 'Assets/Main Character Attack.png', {
-      frameWidth: 64,
-      frameHeight: 64
-    });
-
-    this.load.image("frame", "Assets/ARCADE_BORDER.png");
+   
+    preload_init.call(this);
     this.load.image("bossbg", "Assets/bossbg.png");
-    this.load.image('player_still', 'Assets/Main Character Standing SSl.png');
-    this.load.spritesheet("player_jumping", "Assets/Main Character Jump SS.png", {
-      frameWidth: 16,
-      frameHeight: 16
-    });
-    this.load.spritesheet('player_running', 'Assets/Main Character Running SS.png', {
-      frameWidth: 16,
-      frameHeight: 16
-    });
-    this.load.audio('background', 'Assets/audio/background_music_filler.mp3');
     this.load.tilemapTiledJSON('boss_level', 'Assets/Map/boss.tmj');
-    this.load.image('tiles', 'Assets/Map/tileset.png');
   }
 
   create() {
     this._bossTransitioned = false;
-
     this.add.image(160, 220, "bossbg");
     console.log("boss scene created");
-    this.physics.world.roundPixels = false;
-
-    this.anims.create({
-      key: "player_moving",
-      frames: this.anims.generateFrameNumbers("player_running"),
-      frameRate: 20,
-      repeat: -1
-    });
-    this.anims.create({
-      key: "enemy_moving",
-      frames: this.anims.generateFrameNumbers("enemySprite"),
-      frameRate: 20,
-      repeat: -1
-    });
-    this.anims.create({
-      key: "player_jump_start",
-      frames: this.anims.generateFrameNumbers("player_jumping", {
-        start: 0,
-        end: 5
-      }),
-      frameRate: 10,
-      repeat: 0,
-      hideOnComplete: false
-    });
-    this.anims.create({
-      key: "player_attack",
-      frames: this.anims.generateFrameNumbers("player_attack_sheet", {
-        start: 15,
-        end: 18
-      }),
-      frameRate: 20,
-      repeat: 0,
-      hideOnComplete: false
-    });
-    this.anims.create({
-      key: "player_falling",
-      frames: this.anims.generateFrameNumbers("player_jumping", {
-        start: 6,
-        end: 8
-      }),
-      frameRate: 10,
-      repeat: 0,
-      hideOnComplete: false
-    });
-
     const map = this.make.tilemap({ key: "boss_level" });
-    const tileset = map.addTilesetImage("Tileset", "tiles");
-    this.ground = map.createLayer("platforms", tileset);
-    this.ground.setCollisionByExclusion([-1]);
-
-    // --- Create Player ---
-    this.player = this.physics.add.sprite(60, 296, "player_still");
-    this.player.setVisible(false);
-
-    this.playerVisual = this.add.sprite(60, 296, "player_still");
-    this.playerVisual.setDepth(10);
-
-    const pWidth = this.playerHitbox.width;
-    const pHeight = this.playerHitbox.height;
-    const pOffsetX = (this.player.width - pWidth) / 2;
-    const pOffsetY = (this.player.height - pHeight);
-
-    this.player.body.setSize(pWidth, pHeight);
-    this.player.body.setOffset(pOffsetX, pOffsetY);
-
-    this.physics.add.collider(this.player, this.ground);
-    this.cameras.main.setBounds(0, 0, map.widthInPixels, map.heightInPixels);
+    create_init.call(this, map,1)  
+ 
+    
     this.cameras.main.setScroll(0, 200);
-    this.physics.world.setBounds(0, 0, map.widthInPixels, map.heightInPixels);
-    this.player.setCollideWorldBounds(true);
-    this.cameras.main.setRoundPixels(false);
-    this.physics.world.drawDebug = false;
-    if (this.physics.world.debugGraphic) {
-      this.physics.world.debugGraphic.setVisible(false);
-    }
-
-    // --- Create Enemy Group ---
+    //Create Enemy Group
     this.enemies = this.physics.add.group();
 
     this.spawnEnemy(241, 296);
@@ -165,7 +34,7 @@ export default class BossScene extends Phaser.Scene {
 
     this.physics.add.collider(this.enemies, this.ground);
 
-    // --- Enemy Projectiles ---
+    //Enemy Projectiles
     this.enemyProjectiles = this.physics.add.group();
 
     this.physics.add.collider(this.enemyProjectiles, this.ground, (proj) => {
@@ -179,13 +48,7 @@ export default class BossScene extends Phaser.Scene {
       proj.destroy();
     });
 
-    // --- Player Projectiles ---
-    this.playerProjectiles = this.physics.add.group();
-
-    this.physics.add.collider(this.playerProjectiles, this.ground, (proj) => {
-      proj.destroy();
-    });
-
+    
     this.physics.add.overlap(this.playerProjectiles, this.enemies, (proj, enemy) => {
       if (!this.scene.isActive()) return;
       proj.destroy();
@@ -205,129 +68,16 @@ export default class BossScene extends Phaser.Scene {
       }
     });
 
-    // --- Player vs Enemy Collision ---
+    //Player vs Enemy Collision
     this.physics.add.overlap(this.player, this.enemies, (player, enemy) => {
       if (!this.scene.isActive()) return;
       this.handleEnemyOverlap(player, enemy);
     });
 
-    this.lastFiredTime = 0;
-
-    // --- Controls ---
-    this.cursors = this.input.keyboard.createCursorKeys();
-    this.attackKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE);
-    this.fireKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.F);
-    this.menuKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.ESC);
-
-    this.coordText = this.add.text(this.cameras.main.width - 10, this.cameras.main.height - 10, 'X: 0 Y: 0', {
-      fontFamily: "./code_fonts/melodica.regular.otf",
-      fontSize: "16px",
-      fill: "#ffffff"
-    });
-    this.coordText.setOrigin(1, 1);
-    this.coordText.setScrollFactor(0);
-    this.coordText.setDepth(1000);
-
-    const music = this.sound.add('background', {
-      loop: true,
-      volume: 0.65
-    });
-    music.play();
-    this.music = music;
-
     this.player.x = 60;
     this.player.y = 200;
-
-    this.events.on('postupdate', () => {
-      if (this.playerVisual && this.player) {
-        let vX = this.player.x;
-        let vY = this.player.y;
-
-        if (this.playerVisual.texture.key === 'player_attack_sheet') {
-          if (this.player.flipX) {
-            vX -= this.attackVisualOffset.x;
-          } else {
-            vX += this.attackVisualOffset.x;
-          }
-          vY += this.attackVisualOffset.y;
-        }
-
-        this.playerVisual.setPosition(vX, vY);
-        this.playerVisual.setFlipX(this.player.flipX);
-      }
-    });
-
-    this.cooldownRadius = 8;
-    this.cooldownX = this.cameras.main.width - 15;
-    this.cooldownY = 15;
-
-    this.cooldownGraphic = this.add.graphics();
-    this.cooldownGraphic.setScrollFactor(0);
-    this.cooldownGraphic.setDepth(1000);
-    this.cooldownGraphic.setVisible(false);
-
-    this.healthBarWidth = 100;
-    this.healthBarHeight = 10;
-    this.healthBarX = 20;
-    this.healthBarY = 20;
-
-    this.healthBarBg = this.add.graphics();
-    this.healthBarFill = this.add.graphics();
-
-    this.healthBarBg.setScrollFactor(0);
-    this.healthBarFill.setScrollFactor(0);
-    this.healthBarBg.setDepth(1000);
-    this.healthBarFill.setDepth(1000);
-
-    this.drawHealthBar();
   }
 
-  drawHealthBar() {
-    const healthPercent = Phaser.Math.Clamp(this.health / this.maxHealth, 0, 1);
-
-    this.healthBarBg.clear();
-    this.healthBarFill.clear();
-
-    this.healthBarBg.lineStyle(2, 0xffffff);
-    this.healthBarBg.strokeRect(
-      this.healthBarX,
-      this.healthBarY,
-      this.healthBarWidth,
-      this.healthBarHeight
-    );
-
-    this.healthBarFill.fillStyle(0x00ff00);
-    this.healthBarFill.fillRect(
-      this.healthBarX + 2,
-      this.healthBarY + 2,
-      (this.healthBarWidth - 4) * healthPercent,
-      this.healthBarHeight - 4
-    );
-  }
-
-  drawCooldown(progress) {
-    this.cooldownGraphic.clear();
-
-    if (progress >= 1) {
-      this.cooldownGraphic.setVisible(false);
-      return;
-    }
-
-    this.cooldownGraphic.setVisible(true);
-    this.cooldownGraphic.fillStyle(0x00ffff, 1);
-    this.cooldownGraphic.beginPath();
-    this.cooldownGraphic.moveTo(this.cooldownX, this.cooldownY);
-    this.cooldownGraphic.arc(
-      this.cooldownX,
-      this.cooldownY,
-      this.cooldownRadius,
-      Phaser.Math.DegToRad(-90),
-      Phaser.Math.DegToRad(-90 + 360 * (1 - progress)),
-      false
-    );
-    this.cooldownGraphic.closePath();
-    this.cooldownGraphic.fillPath();
-  }
 
   update(time, delta) {
     if (this.projectileOnCooldown) {
@@ -496,104 +246,6 @@ export default class BossScene extends Phaser.Scene {
     });
   }
 
-  updatePlayerHitbox() {
-    if (!this.player || !this.player.body) return;
-
-    const pWidth = this.playerHitbox.width;
-    const pHeight = this.playerHitbox.height;
-
-    const pOffsetX = (this.player.width - pWidth) / 2;
-    const pOffsetY = ((this.player.height - pHeight) / 2) + 1;
-
-    this.player.body.setSize(pWidth, pHeight);
-    this.player.body.setOffset(pOffsetX, pOffsetY);
-  }
-
-  handleEnemyOverlap(player, enemy) {
-    if (this.playerIsDead || this.isInvincible) return;
-    if (enemy.isKnockedBack) return;
-
-    this.health--;
-    this.drawHealthBar();
-
-    if (this.isAttacking) {
-      this.isInvincible = true;
-      if (this.health <= 0) {
-        this.killPlayer();
-      } else {
-        this.flashPlayer();
-      }
-      return;
-    }
-
-    this.physics.world.pause();
-    this.anims.pauseAll();
-    this.isInvincible = true;
-
-    setTimeout(() => {
-      this.physics.world.resume();
-      this.anims.resumeAll();
-
-      if (this.health <= 0) {
-        this.killPlayer();
-      } else {
-        this.isKnockedBack = true;
-
-        const knockbackDirection = (this.player.x < enemy.x) ? -1 : 1;
-        this.player.setVelocity(knockbackDirection * 100, -50);
-
-        this.time.delayedCall(250, () => {
-          this.isKnockedBack = false;
-        });
-
-        this.flashPlayer();
-      }
-    }, 150);
-  }
-
-  flashPlayer() {
-    this.tweens.add({
-      targets: this.playerVisual,
-      alpha: 0.5,
-      duration: 100,
-      yoyo: true,
-      repeat: 5,
-      onComplete: () => {
-        this.playerVisual.alpha = 1;
-        this.isInvincible = false;
-      }
-    });
-  }
-
-  killPlayer() {
-    if (this.playerIsDead) return;
-    this.playerIsDead = true;
-    this.isJumping = false;
-
-    this.player.setVelocity(0, 0);
-    this.player.setAcceleration(0);
-    this.player.body.enable = false;
-    this.playerVisual.setTint(0xff0000);
-
-    this.time.delayedCall(100, () => {
-      this.respawnPlayer();
-    });
-  }
-
-  respawnPlayer() {
-    this.health = this.maxHealth;
-    this.drawHealthBar();
-    this.playerIsDead = false;
-    this.isInvincible = false;
-    this.playerVisual.clearTint();
-    this.playerVisual.setTexture("player_still");
-    this.player.enableBody(true, 60, 200, true, false);
-    this.playerVisual.setAlpha(1);
-    this.player.setVelocity(0, 0);
-    this.lastFiredTime = 0;
-    this.isAttacking = false;
-  }
-
   spawnEnemy(x, y) {
     const enemy = this.enemies.create(x, y, 'enemySprite');
     const scale = 4;
@@ -620,65 +272,7 @@ export default class BossScene extends Phaser.Scene {
     enemy.setVelocityX(50);
   }
 
-  fireProjectile(time) {
-    this.projectileOnCooldown = true;
-    this.projectileCooldownStart = time;
 
-    this.lastFiredTime = time;
-    const proj = this.add.rectangle(this.player.x, this.player.y, 10, 10, 0x00ffff);
-    this.physics.add.existing(proj);
-    this.playerProjectiles.add(proj);
-
-    proj.body.allowGravity = false;
-    const velocity = this.player.flipX ? -400 : 400;
-    proj.body.setVelocityX(velocity);
-
-    this.time.delayedCall(2000, () => {
-      if (proj.active) proj.destroy();
-    });
-
-    this.physics.add.overlap(proj, this.enemies, (projectile, enemy) => {
-      if (!this.scene.isActive()) return;
-      if (enemy.hitCooldown) {
-        projectile.destroy();
-        return;
-      }
-      enemy.hitCooldown = true;
-      projectile.destroy();
-
-      enemy.hp -= this.projectileDamage;
-      this._updateEnemyHpBar(enemy.hp);
-
-      if (enemy.hp <= 0) {
-        enemy.destroy();
-        if (this.enemies.countActive(true) === 0) {
-          this._onBossDefeated();
-        }
-      } else {
-        enemy.setTintFill(0xffffff);
-
-        enemy.isKnockedBack = true;
-        const kbDir = (projectile.body.velocity.x > 0) ? 1 : -1;
-        enemy.setVelocity(kbDir * this.knockbackSpeedX, -this.knockbackSpeedY);
-
-        setTimeout(() => {
-          if (enemy.active) {
-            enemy.clearTint();
-            enemy.isKnockedBack = false;
-            enemy.hitCooldown = false;
-
-            const recoverDir = (this.player.x < enemy.x) ? -1 : 1;
-            enemy.setVelocityX(recoverDir * 50);
-            enemy.flipX = (recoverDir === 1);
-          }
-        }, 400);
-      }
-    });
-
-    this.physics.add.collider(proj, this.ground, () => {
-      proj.destroy();
-    });
-  }
 
   enemyProjectile(time, enemy) {
     this.lastFiredTime = time;
@@ -738,7 +332,9 @@ export default class BossScene extends Phaser.Scene {
       }
     }
   }
-
+  resetEnemies(){
+    //do nothing just a blank function to call don't keep anything in here.
+  }
   _buildEnemyHpBar() {
     const bw = 120, bh = 8, bx = 100, by = 6;
     this.enemyHpBarBg   = this.add.graphics().setScrollFactor(0).setDepth(1000);

@@ -1,16 +1,16 @@
   import Phaser from "phaser";
   
   const performAttack = function() {
-    this.isJumping = false;
-    this.isAttacking = true;
-    this.player.setVelocityX(0); // Stop horizontal movement
-    this.player.setVelocityY(0); // Stop vertical movement
-    this.player.body.allowGravity = false; // Disable gravity
+    this.isJumping = false;//!
+    this.isAttacking = true;//!
+    this.player.setVelocityX(0); // Stop horizontal movement//!
+    this.player.setVelocityY(0); // Stop vertical movement//!
+    this.player.body.allowGravity = false; // Disable gravity//!
 
     // Force immediate hitbox adjustment for the new animation frame
-    this.time.delayedCall(1, () => {
-      this.updatePlayerHitbox();
-    });
+    this.time.delayedCall(1, () => {//!
+      this.updatePlayerHitbox();//!
+    });//!
 
     // Calculate hitbox position based on facing direction
     const offsetX = this.player.flipX ? -20 : 20; // Left or Right

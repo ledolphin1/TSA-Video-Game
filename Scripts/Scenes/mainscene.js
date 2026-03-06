@@ -5,7 +5,7 @@ import create_init from './Functions/create_init.js';
 import activate_anims from './Functions/activate_anims.js';
 import constructor_init from './Functions/constructor_init.js';
 import preload_init from './Functions/preload_init.js';
-
+import performAttack from './Functions/performAttack.js';
 export default class MainScene extends Phaser.Scene {
   constructor() {
     super({ key: 'MainScene' });
@@ -30,6 +30,7 @@ export default class MainScene extends Phaser.Scene {
     })
     create_init.call(this, map);
     activate_anims.call(this);
+    this.performAttack = performAttack.bind(this);
     const spikeTileset = map.addTilesetImage("spikes", "spikes")
     const spikes = map.createLayer("spikes", spikeTileset)
     
