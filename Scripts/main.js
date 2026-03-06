@@ -6,6 +6,7 @@ import Intro from './Scenes/intro.js';
 import Options from './Scenes/options.js';
 import boss from './Scenes/boss.js';
 import Overworld from './Scenes/overworld.js';
+import DragonBossScene from './Scenes/dragonboss.js';  // NEW
 
 
 const config = {
@@ -17,13 +18,14 @@ const config = {
   pixelArt: true,
   parent: 'game-container',
 
-  scene: [Intro, Menu, MainScene, Pause, Options, boss, Overworld],
+  // DragonBossScene added at the end of the scene list
+  scene: [Intro, Menu, MainScene, Pause, Options, boss, Overworld, DragonBossScene],
 
   physics: {
     default: 'arcade',
     arcade: {
       gravity: { y: 600 },
-      debug: true
+      debug: false          // set to true for hitbox debugging
     }
   }
 };
