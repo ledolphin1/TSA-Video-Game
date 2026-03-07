@@ -35,7 +35,7 @@ export default class Menu extends Phaser.Scene {
     });
 
     playButton.on('pointerdown', () => {
-      this.scene.start('overworld');
+      this.scene.start('arcade_exterior');
     });
     // Hover effects
     optionsbutton.on('pointerover', () => {
