@@ -215,12 +215,12 @@ export default class arcade_exterior extends Phaser.Scene {
     
     
     update(time, delta) {
-        if (this.player.x >= 223, this.player.x <= 245) {
+        if (this.player.x >= 226 && this.player.x <= 245) {
             if (Phaser.Input.Keyboard.JustDown(this.interactKey)) {
         
-                this.sound.stopAll();
+                this.sound.stopAll();   
                 this.scene.start("overworld");
-            }
+            }    
     }
         
         
