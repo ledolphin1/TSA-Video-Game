@@ -20,5 +20,6 @@ const preload_init = function (){
     })
     this.load.audio('background', 'Assets/audio/background_music_filler.mp3');
     this.load.image('tiles', 'Assets/Map/tileset.png');
+    this.load.image('lpProjectile','Assets/projectile.png')
 }
 export default preload_init;

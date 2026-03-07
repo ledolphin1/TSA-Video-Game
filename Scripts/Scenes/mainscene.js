@@ -99,7 +99,10 @@ export default class MainScene extends Phaser.Scene {
   }
 
   update(time, delta) {
-    if (this.playerIsDead) return; // prevent movement while dead
+    if (this.playerIsDead) {
+      this.resetEnemies();
+      return;
+    }; // prevent movement while dead
     if (this.isKnockedBack) return; // prevent movement while applying knockback force
 
     if (this.projectileOnCooldown) {
@@ -211,6 +214,7 @@ export default class MainScene extends Phaser.Scene {
     // Check if we are really touching a spike tile (not empty space)
     if (spike && spike.index !== -1) {
       this.killPlayer();
+      this.resetEnemies();
     }
   }
 

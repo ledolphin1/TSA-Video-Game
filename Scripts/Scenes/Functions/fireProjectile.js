@@ -3,12 +3,13 @@
     this.projectileCooldownStart = time;
 
     this.lastFiredTime = time;
-    const proj = this.add.rectangle(this.player.x, this.player.y, 10, 10, 0x00ffff);
+    const proj = this.physics.add.sprite(this.player.x,this.player.y,"lpProjectile");
+    proj.flipX = this.player.flipX ? true : false;
     this.physics.add.existing(proj);
     this.playerProjectiles.add(proj); // Use separate group!
 
-    proj.body.allowGravity = false;
     const velocity = this.player.flipX ? -400 : 400;
+    proj.body.allowGravity = false;
     proj.body.setVelocityX(velocity);
 
     // auto destroy

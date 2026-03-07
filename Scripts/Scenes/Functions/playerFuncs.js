@@ -59,5 +59,4 @@
     this.player.setVelocity(0, 0);
     this.lastFiredTime = 0;
     this.isAttacking = false;
-    this.resetEnemies();
   }
