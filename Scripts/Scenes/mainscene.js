@@ -142,7 +142,7 @@ export default class MainScene extends Phaser.Scene {
 
     // Ranged Attack Input
     if (Phaser.Input.Keyboard.JustDown(this.fireKey) && !this.projectileOnCooldown) {
-      if (time > this.lastFiredTime + 3000) { // 3s cooldown
+      if (time > this.lastFiredTime + this.projectileCooldown) { // 3s cooldown
         this.fireProjectile(time);
       }
     }

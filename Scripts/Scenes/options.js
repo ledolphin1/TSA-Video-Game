@@ -5,7 +5,7 @@ export default class Options extends Phaser.Scene {
     super({ key: 'Options' });
   }
   preload() {
-    this.load.spritesheet("knob", "Assets/knob.png", {
+    this.load.spritesheet("knob", "Assets/knob-sheet.png", {
       frameWidth: 16,
       frameHeight: 16
     })
@@ -28,9 +28,25 @@ export default class Options extends Phaser.Scene {
     this.add.image(width / 2, height / 2 - 20, "options").setScale(2).setOrigin(0.5);
     this.add.image(width / 2, height / 2 + 10, "sound").setScale(1.25).setOrigin(0.5);
     this.backButton = this.add.image(width / 2, height / 2 + 50, "back").setScale(1.25).setOrigin(0.5).setInteractive({ useHandCursor: true });
-    this.add.image(width / 2, height / 2 + 30, "slider").setOrigin(0.5);
+    this.track = this.add.image(width / 2, height / 2 + 30, "slider").setOrigin(0.5);
 
-    this.knob = this.add.sprite(width / 2, height / 2 + 30, "knob").setScale(2)
+    const handle = this.add.sprite(width / 2, height / 2 + 30, "knob").setScale(2)
+    handle.play('knob_anim'); 
+    handle.setInteractive({ draggable: true });
+    handle.x = this.sound.volume*225+47.5;
+    this.input.setDraggable(handle);
+    this.input.on('drag', (pointer, gameObject, dragX) => {
+
+        // clamp inside the track
+        const minX = this.track.x - this.track.width / 2 + 10;
+        const maxX = this.track.x + this.track.width / 2 - 10;
+
+        gameObject.x = Phaser.Math.Clamp(dragX, minX, maxX);
+
+        this.sound.volume = Math.round((gameObject.x-47.5)/225 * 100)/100;
+    })
+
+
     this.backButton.on('pointerover', () => {
       this.backButton.setTexture("back_yellow");
     });
@@ -44,7 +60,6 @@ export default class Options extends Phaser.Scene {
       this.scene.stop()
     });
 
-    this.knob.play("knob_anim")
 
   }
 }

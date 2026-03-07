@@ -9,40 +9,63 @@ export default class Pause extends Phaser.Scene {
     this.returnScene = data.returnScene;
   }
 
+  preload() {
+    this.load.spritesheet("knob", "Assets/knob-sheet.png", {
+      frameWidth: 16,
+      frameHeight: 16
+    })
+    this.load.image("back", "Assets/back.png")
+    this.load.image("back_yellow", "Assets/back_yellow.png")
+    this.load.image("slider", "Assets/slider.png")
+    this.load.image("sound", "Assets/sound.png")
+  }
   create() {
     this.scene.bringToTop();
     const { width, height } = this.scale;
-
-    // Title text
-    this.add.text(width / 2, height / 2 - 70, 'Paused', {
-      fontSize: '48px',
-      color: '#ffffff'
-    }).setOrigin(0.5);
-
-    // Play button
-    const playButton = this.add.text(width / 2, height / 2, 'Resume', {
-      fontSize: '24px',
-      color: '#0099ccff',
-      backgroundColor: '#000000',
-      padding: { x: 12, y: 6 }
+    this.anims.create({
+      key: "knob_anim",
+      frames: this.anims.generateFrameNumbers("knob"),
+      frameRate: 10,
+      repeat: -1
     })
-      .setOrigin(0.5)
-      .setInteractive({ useHandCursor: true });
+    // Title text
 
-    // Hover effects
-    playButton.on('pointerover', () => {
-      playButton.setStyle({ color: '#0e00ccff' });
+    this.add.image(width / 2, height / 2 - 20, "options").setScale(2).setOrigin(0.5);
+    this.add.image(width / 2, height / 2 + 10, "sound").setScale(1.25).setOrigin(0.5);
+    this.backButton = this.add.image(width / 2, height / 2 + 50, "back").setScale(1.25).setOrigin(0.5).setInteractive({ useHandCursor: true });
+    this.track = this.add.image(width / 2, height / 2 + 30, "slider").setOrigin(0.5);
+
+    const handle = this.add.sprite(width / 2, height / 2 + 30, "knob").setScale(2)
+    handle.play('knob_anim'); 
+    handle.setInteractive({ draggable: true });
+    handle.x = this.sound.volume*225+47.5;
+    this.input.setDraggable(handle);
+    this.input.on('drag', (pointer, gameObject, dragX) => {
+
+        // clamp inside the track
+        const minX = this.track.x - this.track.width / 2 + 10;
+        const maxX = this.track.x + this.track.width / 2 - 10;
+
+        gameObject.x = Phaser.Math.Clamp(dragX, minX, maxX);
+
+        this.sound.volume = Math.round((gameObject.x-47.5)/225 * 100)/100;
+    })
+
+
+    this.backButton.on('pointerover', () => {
+      this.backButton.setTexture("back_yellow");
     });
 
-    playButton.on('pointerout', () => {
-      playButton.setStyle({ color: '#0099ccff' });
+    this.backButton.on('pointerout', () => {
+      this.backButton.setTexture("back");
     });
 
-    playButton.on('pointerdown', () => {
-      if (this.returnScene) {
-        this.scene.resume(this.returnScene);
-      }
-      this.scene.stop();
+    this.backButton.on('pointerdown', () => {
+      this.scene.resume(this.returnScene);
+      this.scene.stop()
     });
+
+
   }
+
 }
