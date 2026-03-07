@@ -1,5 +1,5 @@
 import * as Phaser from 'phaser';
-
+import preload_init from './Functions/preload_init';
 export default class DragonBossScene extends Phaser.Scene {
   constructor() {
     super({ key: 'dragonBoss' });
@@ -47,17 +47,7 @@ export default class DragonBossScene extends Phaser.Scene {
 
   preload() {
     // Player assets (reuse same keys as other scenes — guard against double-load)
-    this.load.image('player_still', 'Assets/Main Character Standing SSl.png');
-    this.load.spritesheet('player_jumping', 'Assets/Main Character Jump SS.png', {
-      frameWidth: 16, frameHeight: 16
-    });
-    this.load.spritesheet('player_running', 'Assets/Main Character Running SS.png', {
-      frameWidth: 16, frameHeight: 16
-    });
-    this.load.spritesheet('player_attack_sheet', 'Assets/mainCharacterAttack.png', {
-      frameWidth: 64, frameHeight: 64
-    });
-
+    preload_init.call(this); // Use default preload loader
     // Dragon sprite — 32×24 per frame, 4 frames wide
     this.load.spritesheet('dragon', 'Assets/dragon.png', {
       frameWidth: 32, frameHeight: 24
@@ -70,11 +60,9 @@ export default class DragonBossScene extends Phaser.Scene {
 
     // Tilemap (reuse boss room layout)
     this.load.tilemapTiledJSON('boss_level', 'Assets/Map/boss.tmj');
-    this.load.image('tiles', 'Assets/Map/Tileset.png');
 
     // Background & UI
     this.load.image('bossbg', 'Assets/bossbg.png');
-    this.load.audio('background', 'Assets/audio/background_music_filler.mp3');
   }
 
   create() {
@@ -98,35 +86,6 @@ export default class DragonBossScene extends Phaser.Scene {
     this.physics.world.setBounds(0, 0, map.widthInPixels, map.heightInPixels);
     this.cameras.main.setRoundPixels(false);
 
-    // ── Animations ──────────────────────────────────────────
-    if (!this.anims.exists('player_moving')) {
-      this.anims.create({
-        key: 'player_moving',
-        frames: this.anims.generateFrameNumbers('player_running'),
-        frameRate: 20, repeat: -1
-      });
-    }
-    if (!this.anims.exists('player_jump_start')) {
-      this.anims.create({
-        key: 'player_jump_start',
-        frames: this.anims.generateFrameNumbers('player_jumping', { start: 0, end: 5 }),
-        frameRate: 10, repeat: 0, hideOnComplete: false
-      });
-    }
-    if (!this.anims.exists('player_falling')) {
-      this.anims.create({
-        key: 'player_falling',
-        frames: this.anims.generateFrameNumbers('player_jumping', { start: 6, end: 8 }),
-        frameRate: 10, repeat: 0, hideOnComplete: false
-      });
-    }
-    if (!this.anims.exists('player_attack')) {
-      this.anims.create({
-        key: 'player_attack',
-        frames: this.anims.generateFrameNumbers('player_attack_sheet', { start: 15, end: 18 }),
-        frameRate: 20, repeat: 0, hideOnComplete: false
-      });
-    }
 
     // Dragon flying animation (4 frames = wing flap cycle)
     this.anims.create({
@@ -138,7 +97,7 @@ export default class DragonBossScene extends Phaser.Scene {
 
     // Fire breath particle animation
     this.anims.create({
-      key: 'fire_anim',
+      key: 'dragonFire_anim',
       frames: this.anims.generateFrameNumbers('dragonFire', { start: 0, end: 2 }),
       frameRate: 12,
       repeat: -1
@@ -393,7 +352,7 @@ export default class DragonBossScene extends Phaser.Scene {
         const mouthY    = this.dragon.y + 4;
 
         const fb = this.add.sprite(mouthX, mouthY, 'dragonFire');
-        fb.play('fire_anim');
+        fb.play('dragonFire_anim');
         fb.setDepth(9);
         this.physics.add.existing(fb);
         this.fireBalls.add(fb);
@@ -567,7 +526,8 @@ export default class DragonBossScene extends Phaser.Scene {
     this.projectileCooldownStart = time;
     this.lastFiredTime           = time;
 
-    const proj = this.add.rectangle(this.player.x, this.player.y, 10, 10, 0x00ffff);
+    const proj = this.physics.add.sprite(this.player.x, this.player.y, "lpProjectile");
+    proj.flipX = this.player.flipX ? true : false;
     this.physics.add.existing(proj);
     this.playerProjectiles.add(proj);
 
