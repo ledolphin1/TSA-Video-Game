@@ -1,5 +1,8 @@
 import * as Phaser from 'phaser';
 import constructor_init from './Functions/constructor_init.js';
+import { playerData } from './playerdata.js';
+import { customEmitter } from './events.js';
+
 export default class arcade_exterior extends Phaser.Scene {
     constructor() {
         super({ key: 'arcade_exterior' });
@@ -10,6 +13,7 @@ export default class arcade_exterior extends Phaser.Scene {
     }
 
     preload() {
+        customEmitter.emit("ARCADE_EXTERIOR_BEGIN");
             this.physics.world.roundPixels = true;
     this.cameras.main.setRoundPixels(true);
         this.load.image("frame", "Assets/ARCADE_BORDER.png")
@@ -35,7 +39,8 @@ export default class arcade_exterior extends Phaser.Scene {
     }
 
     create() {
-        
+        playerData.currentScene = "arcade_exterior";
+        console.log(playerData);
         this.physics.world.setBounds(0, 0, this.scale.width,this.scale.height - 36);
         // this.game.canvas.style.filter = "contrast(1) saturate(1.5) brightness(1.5)";
         const video = this.add.video(0, 0, 'begin');
@@ -197,15 +202,17 @@ export default class arcade_exterior extends Phaser.Scene {
                 this.playerVisual.play("ow_player_moving", true)
             }
             this.player.setVelocityX(-150);
-
-
-
+            customEmitter.emit("MOVED")
+            
+            
+            
         } else if (this.cursors.right.isDown) {
             this.player.flipX = false;
             if (this.onGround) {
                 this.playerVisual.play("ow_player_moving", true)
             }
             this.player.setVelocityX(150);
+            customEmitter.emit("MOVED")
 
         } else {
             this.player.setVelocityX(0);

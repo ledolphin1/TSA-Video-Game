@@ -2,6 +2,7 @@ import * as Phaser from 'phaser';
 import constructor_init from './Functions/constructor_init.js';
 import preload_init from './Functions/preload_init.js';
 import create_init from './Functions/create_init.js';
+import { customEmitter } from './events.js';
 export default class BossScene extends Phaser.Scene {
   constructor() {
     super({ key: 'boss' });
@@ -11,7 +12,7 @@ export default class BossScene extends Phaser.Scene {
   }
 
   preload() {
-   
+    customEmitter.emit("SNAKEBOSS_BEGIN")
     preload_init.call(this);
     this.load.image("bossbg", "Assets/bossbg.png");
     this.load.tilemapTiledJSON('boss_level', 'Assets/Map/boss.tmj');

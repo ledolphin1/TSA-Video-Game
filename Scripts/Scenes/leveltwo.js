@@ -4,6 +4,7 @@ import activate_anims from './Functions/activate_anims.js';
 import constructor_init from './Functions/constructor_init.js';
 import preload_init from './Functions/preload_init.js';
 import performAttack from './Functions/performAttack.js';
+import { customEmitter } from './events.js';
 
 // ─────────────────────────────────────────────────────────────────────────────
 //  LEVEL TWO  — The Virus Corridor
@@ -21,8 +22,8 @@ export default class LevelTwo extends Phaser.Scene {
     this.projectileDamage = 4;
   }
 
-  // ──────────────────────────────────── PRELOAD ──────────────────────────────
   preload() {
+    customEmitter.emit("L2BEGIN")
     preload_init.call(this);
 
     // Virus sprite — 4 frames × 16×16

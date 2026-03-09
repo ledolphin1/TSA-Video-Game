@@ -6,6 +6,8 @@ import activate_anims from './Functions/activate_anims.js';
 import constructor_init from './Functions/constructor_init.js';
 import preload_init from './Functions/preload_init.js';
 import performAttack from './Functions/performAttack.js';
+import { customEmitter } from './events.js';
+import { playerData } from './playerdata.js';
 export default class MainScene extends Phaser.Scene {
   constructor() {
     super({ key: 'MainScene' });
@@ -15,6 +17,7 @@ export default class MainScene extends Phaser.Scene {
   }
   
   preload() {
+    customEmitter.emit("L1BEGIN")
     preload_init.call(this)
     this.load.spritesheet('chests', 'Assets/chests.png', {
       frameWidth: 16,
@@ -136,7 +139,8 @@ export default class MainScene extends Phaser.Scene {
       this.playerVisual.play("player_falling", true)
     }
     // Attack Input
-    if (Phaser.Input.Keyboard.JustDown(this.attackKey) && !this.isAttacking && time > this.lastAttackEndTime + 10) {
+    if (Phaser.Input.Keyboard.JustDown(this.attackKey) && !this.isAttacking && time > this.lastAttackEndTime + 10 && playerData.didJump) {
+      customEmitter.emit("ATTACKED")
       this.performAttack();
     }
 
@@ -146,9 +150,10 @@ export default class MainScene extends Phaser.Scene {
     }
 
     // Ranged Attack Input
-    if (Phaser.Input.Keyboard.JustDown(this.fireKey) && !this.projectileOnCooldown) {
+    if (Phaser.Input.Keyboard.JustDown(this.fireKey) && !this.projectileOnCooldown && playerData.didAttack) {
       if (time > this.lastFiredTime + this.projectileCooldown) { // 3s cooldown
         this.fireProjectile(time);
+        customEmitter.emit("LPFIRED")
       }
     }
 
@@ -181,6 +186,7 @@ export default class MainScene extends Phaser.Scene {
 
     // Jumping
     if (this.cursors.up.isDown && (this.onGround || (time - this.lastGroundedTime < 100))) {
+      customEmitter.emit("JUMPED")
       this.player.setVelocityY(-300);
       this.lastGroundedTime = 0;
       this.isJumping = true;
@@ -201,6 +207,9 @@ export default class MainScene extends Phaser.Scene {
     }
 
     if (this.skipKey.isDown) {
+      playerData.didJump = true;
+      playerData.didAttack = true;
+      playerData.didMove = true;
       this.scene.start("boss");
       this.music.stop()
     }

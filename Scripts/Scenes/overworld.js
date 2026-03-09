@@ -1,4 +1,5 @@
 import * as Phaser from 'phaser';
+import { customEmitter } from './events';
 
 export default class Overworld extends Phaser.Scene {
     constructor() {
@@ -53,7 +54,7 @@ export default class Overworld extends Phaser.Scene {
 
     preload() {
 
-
+        customEmitter.emit("OVERWORLD_BEGIN")
 
 
         /*this.load.spritesheet('hitAnim', '/Assets/hit.png', { // not created yet
@@ -238,54 +239,9 @@ export default class Overworld extends Phaser.Scene {
         });
 
 
-        this.cooldownRadius = 8;
-        this.cooldownX = this.cameras.main.width - 15;
-        this.cooldownY = 15;
-
-        this.cooldownGraphic = this.add.graphics();
-        this.cooldownGraphic.setScrollFactor(0);
-        this.cooldownGraphic.setDepth(1000);
-        this.cooldownGraphic.setVisible(false);
-
-        this.healthBarWidth = 100;
-        this.healthBarHeight = 10;
-        this.healthBarX = 20; // distance from left
-        this.healthBarY = 20; // distance from top
-
-        this.healthBarBg = this.add.graphics();
-        this.healthBarFill = this.add.graphics();
-
-        this.healthBarBg.setScrollFactor(0);
-        this.healthBarFill.setScrollFactor(0);
-        this.healthBarBg.setDepth(1000);
-        this.healthBarFill.setDepth(1000);
-
-        this.drawHealthBar();
 
     }
 
-    drawHealthBar() {
-        const healthPercent = Phaser.Math.Clamp(this.health / this.maxHealth, 0, 1);
-
-        this.healthBarBg.clear();
-        this.healthBarFill.clear();
-
-        this.healthBarBg.lineStyle(2, 0xffffff);
-        this.healthBarBg.strokeRect(
-            this.healthBarX,
-            this.healthBarY,
-            this.healthBarWidth,
-            this.healthBarHeight
-        );
-
-        this.healthBarFill.fillStyle(0x00ff00);
-        this.healthBarFill.fillRect(
-            this.healthBarX + 2,
-            this.healthBarY + 2,
-            (this.healthBarWidth - 4) * healthPercent,
-            this.healthBarHeight - 4
-        );
-    }
 
 
 
@@ -312,10 +268,6 @@ export default class Overworld extends Phaser.Scene {
         }
 
 
-        if (Phaser.Input.Keyboard.JustDown(this.menuKey)) {
-            this.scene.pause()
-            this.scene.launch("Pause", { returnScene: this.scene.key });
-        }
 
 
         // Left/Right Movement
@@ -341,19 +293,6 @@ export default class Overworld extends Phaser.Scene {
             if (this.onGround) {
                 this.playerVisual.setTexture("ow_player_still")
             }
-        }
-
-        // Jumping
-        if (this.cursors.up.isDown && (this.onGround || (time - this.lastGroundedTime < 100))) {
-            this.player.setVelocityY(-300);
-            this.lastGroundedTime = 0;
-            this.isJumping = true;
-            this.playerVisual.play("ow_player_jump_start", true);
-        }
-
-        // Variable jump height: cut velocity when button is released
-        if (Phaser.Input.Keyboard.JustUp(this.cursors.up) && this.player.body.velocity.y < 0) {
-            this.player.setVelocityY(this.player.body.velocity.y * 0.5);
         }
 
 

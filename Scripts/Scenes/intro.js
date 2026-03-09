@@ -1,4 +1,5 @@
 import * as Phaser from 'phaser';
+import { playerData } from './playerdata';
 export default class Intro extends Phaser.Scene {
   constructor() {
     super({ key: 'Intro' });
@@ -9,6 +10,8 @@ export default class Intro extends Phaser.Scene {
     this.load.bitmapFont("arcade_font", "Assets/PressStart.png", "Assets/PressStart.xml")
   }
   create() {
+    console.log(playerData);
+    
     const video = this.add.video(0, 0, 'intro_vid');
     video.setOrigin(0, 0)
     video.play(false);

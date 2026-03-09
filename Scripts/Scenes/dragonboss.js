@@ -1,5 +1,6 @@
 import * as Phaser from 'phaser';
 import preload_init from './Functions/preload_init.js';
+import { customEmitter } from './events.js';
 export default class DragonBossScene extends Phaser.Scene {
   constructor() {
     super({ key: 'dragonBoss' });
@@ -46,6 +47,7 @@ export default class DragonBossScene extends Phaser.Scene {
   }
 
   preload() {
+    customEmitter.emit("DRAGONBOSS")
     // Player assets (reuse same keys as other scenes — guard against double-load)
     preload_init.call(this); // Use default preload loader
     // Dragon sprite — 32×24 per frame, 4 frames wide
