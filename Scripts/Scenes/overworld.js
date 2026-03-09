@@ -86,6 +86,9 @@ export default class Overworld extends Phaser.Scene {
 
     create() {
 
+        this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.S).on('down', () => {
+        this.scene.start('MainScene');
+        });
 
         this.add.image(160, 240, "overworldbg");
         console.log("overworld scene created");

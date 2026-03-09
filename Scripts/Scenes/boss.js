@@ -22,7 +22,11 @@ export default class BossScene extends Phaser.Scene {
     this.add.image(160, 220, "bossbg");
     console.log("boss scene created");
     const map = this.make.tilemap({ key: "boss_level" });
-    create_init.call(this, map,1)  
+    create_init.call(this, map,1) 
+    
+    this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.S).on('down', () => {
+    this.scene.start('LevelTwo');
+    });
  
     
     this.cameras.main.setScroll(0, 200);
@@ -371,7 +375,7 @@ export default class BossScene extends Phaser.Scene {
 
     this.time.delayedCall(500, () => {
       try { this.music.stop(); } catch (e) {}
-      this.scene.start('dragonBoss');
+      this.scene.start('LevelTwo');
     });
   }
 }

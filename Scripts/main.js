@@ -5,8 +5,9 @@ import Pause from "./Scenes/pause.js"
 import Intro from './Scenes/intro.js';
 import Options from './Scenes/options.js';
 import boss from './Scenes/boss.js';
+import LevelTwo from './Scenes/leveltwo.js';
 import Overworld from './Scenes/overworld.js';
-import DragonBossScene from './Scenes/dragonboss.js';  // NEW
+import DragonBossScene from './Scenes/dragonboss.js';
 
 
 const config = {
@@ -19,7 +20,7 @@ const config = {
   parent: 'game-container',
 
   // DragonBossScene added at the end of the scene list
-  scene: [Intro, Menu, MainScene, Pause, Options, boss, Overworld, DragonBossScene],
+  scene: [Intro, Menu, MainScene, Pause, Options, boss, LevelTwo, Overworld, DragonBossScene],
 
   physics: {
     default: 'arcade',

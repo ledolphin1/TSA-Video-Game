@@ -28,6 +28,11 @@ export default class MainScene extends Phaser.Scene {
     const map = this.make.tilemap({
       key: "map"
     })
+
+    this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.S).on('down', () => {
+    this.scene.start('boss');
+    });
+
     create_init.call(this, map);
     activate_anims.call(this);
     this.performAttack = performAttack.bind(this);
