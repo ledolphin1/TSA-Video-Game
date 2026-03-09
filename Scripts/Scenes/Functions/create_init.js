@@ -32,8 +32,8 @@ const create_init = function(map,debug){
     
     //Cooldown Bar//!
     this.cooldownRadius = 8;
-    this.cooldownX = this.cameras.main.width - 15;
-    this.cooldownY = 15;
+    this.cooldownX = 30;
+    this.cooldownY = 50;
     this.cooldownGraphic = this.add.graphics();
     this.cooldownGraphic.setScrollFactor(0);
     this.cooldownGraphic.setDepth(1000);

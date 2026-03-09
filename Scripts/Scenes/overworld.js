@@ -136,6 +136,7 @@ export default class Overworld extends Phaser.Scene {
         })
         const tileset = map.addTilesetImage("Tileset", "tiles")
         this.ground = map.createLayer("Tile Layer 1", tileset)
+        this.ground.setVisible(false);
         this.ground.setCollisionByExclusion([-1]);
 
 
