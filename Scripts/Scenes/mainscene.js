@@ -19,12 +19,12 @@ export default class MainScene extends Phaser.Scene {
   preload() {
     customEmitter.emit("L1BEGIN")
     preload_init.call(this)
-    this.load.spritesheet('chests', 'Assets/chests.png', {
+    this.load.spritesheet('chests', '/assets/chests.png', {
       frameWidth: 16,
       frameHeight: 16
     });
-    this.load.tilemapTiledJSON('map', 'Assets/Map/firstlevel.tmj');
-    this.load.image('spikes', 'Assets/Map/spikes.png');
+    this.load.tilemapTiledJSON('map', '/assets/Map/firstlevel.tmj');
+    this.load.image('spikes', '/assets/Map/spikes.png');
     
   }
   create() {

@@ -5,14 +5,14 @@ export default class Options extends Phaser.Scene {
     super({ key: 'Options' });
   }
   preload() {
-    this.load.spritesheet("knob", "Assets/knob-sheet.png", {
+    this.load.spritesheet("knob", "/assets/knob-sheet.png", {
       frameWidth: 16,
       frameHeight: 16
     })
-    this.load.image("back", "Assets/back.png")
-    this.load.image("back_yellow", "Assets/back_yellow.png")
-    this.load.image("slider", "Assets/slider.png")
-    this.load.image("sound", "Assets/sound.png")
+    this.load.image("back", "/assets/back.png")
+    this.load.image("back_yellow", "/assets/back_yellow.png")
+    this.load.image("slider", "/assets/slider.png")
+    this.load.image("sound", "/assets/sound.png")
   }
   create() {
     const { width, height } = this.scale;

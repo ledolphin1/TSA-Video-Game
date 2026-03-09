@@ -16,22 +16,22 @@ export default class arcade_exterior extends Phaser.Scene {
         customEmitter.emit("ARCADE_EXTERIOR_BEGIN");
             this.physics.world.roundPixels = true;
     this.cameras.main.setRoundPixels(true);
-        this.load.image("frame", "Assets/ARCADE_BORDER.png")
-        this.load.image('ow_player_still', 'Assets/playerIdle.png'); //player image
-        this.load.image('ow_player_falling_static', 'Assets/playerFall.png'); //player image
-        this.load.spritesheet("ow_player_jumping", "Assets/playerJump.png", {
+        this.load.image("frame", "/assets/ARCADE_BORDER.png")
+        this.load.image('ow_player_still', '/assets/playerIdle.png'); //player image
+        this.load.image('ow_player_falling_static', '/assets/playerFall.png'); //player image
+        this.load.spritesheet("ow_player_jumping", "/assets/playerJump.png", {
             frameWidth: 16,
             frameHeight: 16
         })
-        this.load.spritesheet('ow_player_running', 'Assets/playerRun.png', {
+        this.load.spritesheet('ow_player_running', '/assets/playerRun.png', {
             frameWidth: 16,
             frameHeight: 16
         })
-         this.load.video("begin", "Assets/Arcade_Exterior_begin.mp4", true)
-         this.load.video("loop", "Assets/Arcade_Exterior_loop.mp4", true)
-        this.load.audio('background', 'Assets/audio/background_music_filler.mp3');
+         this.load.video("begin", "/assets/Arcade_Exterior_begin.mp4", true)
+         this.load.video("loop", "/assets/Arcade_Exterior_loop.mp4", true)
+        this.load.audio('background', '/assets/audio/background_music_filler.mp3');
 
-        this.load.spritesheet('arrow', 'Assets/arrow.png', {
+        this.load.spritesheet('arrow', '/assets/arrow.png', {
             frameWidth: 55,
             frameHeight: 16
         });

@@ -5,9 +5,9 @@ export default class Intro extends Phaser.Scene {
     super({ key: 'Intro' });
   }
   preload() {
-    this.load.video("intro_vid", "Assets/Intro.mp4", true)
+    this.load.video("intro_vid", "/assets/Intro.mp4", true)
 
-    this.load.bitmapFont("arcade_font", "Assets/PressStart.png", "Assets/PressStart.xml")
+    this.load.bitmapFont("arcade_font", "/assets/PressStart.png", "/assets/PressStart.xml")
   }
   create() {
     console.log(playerData);

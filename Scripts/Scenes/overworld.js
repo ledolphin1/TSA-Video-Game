@@ -57,28 +57,28 @@ export default class Overworld extends Phaser.Scene {
         customEmitter.emit("OVERWORLD_BEGIN")
 
 
-        /*this.load.spritesheet('hitAnim', '/Assets/hit.png', { // not created yet
+        /*this.load.spritesheet('hitAnim', '/assets/hit.png', { // not created yet
           frameWidth: 64,
           frameHeight: 64
         });
       */
-        this.load.image("frame", "Assets/ARCADE_BORDER.png")
-        this.load.image("overworldbg", "Assets/arcade_interior.png")
-        this.load.image('ow_player_still', 'Assets/playerIdle.png'); //player image
-        this.load.image('ow_player_falling_static', 'Assets/playerFall.png'); //player image
-        this.load.spritesheet("ow_player_jumping", "Assets/playerJump.png", {
+        this.load.image("frame", "/assets/ARCADE_BORDER.png")
+        this.load.image("overworldbg", "/assets/arcade_interior.png")
+        this.load.image('ow_player_still', '/assets/playerIdle.png'); //player image
+        this.load.image('ow_player_falling_static', '/assets/playerFall.png'); //player image
+        this.load.spritesheet("ow_player_jumping", "/assets/playerJump.png", {
             frameWidth: 16,
             frameHeight: 16
         })
-        this.load.spritesheet('ow_player_running', 'Assets/playerRun.png', {
+        this.load.spritesheet('ow_player_running', '/assets/playerRun.png', {
             frameWidth: 16,
             frameHeight: 16
         })
-        this.load.audio('background', 'Assets/audio/background_music_filler.mp3');
-        this.load.tilemapTiledJSON('overworld_level', 'Assets/Map/overworld.tmj');
-        this.load.image('tiles', 'Assets/Map/tileset.png');
+        this.load.audio('background', '/assets/audio/background_music_filler.mp3');
+        this.load.tilemapTiledJSON('overworld_level', '/assets/Map/overworld.tmj');
+        this.load.image('tiles', '/assets/Map/tileset.png');
 
-        this.load.spritesheet('arcadeMachine', 'Assets/arcadeMachine.png', {
+        this.load.spritesheet('arcadeMachine', '/assets/arcadeMachine.png', {
             frameWidth: 32,
             frameHeight: 48
         });

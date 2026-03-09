@@ -51,20 +51,20 @@ export default class DragonBossScene extends Phaser.Scene {
     // Player assets (reuse same keys as other scenes — guard against double-load)
     preload_init.call(this); // Use default preload loader
     // Dragon sprite — 32×24 per frame, 4 frames wide
-    this.load.spritesheet('dragon', 'Assets/dragon.png', {
+    this.load.spritesheet('dragon', '/assets/dragon.png', {
       frameWidth: 32, frameHeight: 24
     });
 
     // Fire breath particle — 8×8 per frame, 3 frames
-    this.load.spritesheet('dragonFire', 'Assets/dragonFire.png', {
+    this.load.spritesheet('dragonFire', '/assets/dragonFire.png', {
       frameWidth: 8, frameHeight: 8
     });
 
     // Tilemap (reuse boss room layout)
-    this.load.tilemapTiledJSON('boss_level', 'Assets/Map/boss.tmj');
+    this.load.tilemapTiledJSON('boss_level', '/assets/Map/boss.tmj');
 
     // Background & UI
-    this.load.image('bossbg', 'Assets/bossbg.png');
+    this.load.image('bossbg', '/assets/bossbg.png');
   }
 
   create() {

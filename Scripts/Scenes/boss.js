@@ -14,8 +14,8 @@ export default class BossScene extends Phaser.Scene {
   preload() {
     customEmitter.emit("SNAKEBOSS_BEGIN")
     preload_init.call(this);
-    this.load.image("bossbg", "Assets/bossbg.png");
-    this.load.tilemapTiledJSON('boss_level', 'Assets/Map/boss.tmj');
+    this.load.image("bossbg", "/assets/bossbg.png");
+    this.load.tilemapTiledJSON('boss_level', '/assets/Map/boss.tmj');
   }
 
   create() {
