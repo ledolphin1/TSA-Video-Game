@@ -1,7 +1,7 @@
 import * as Phaser from 'phaser';
-import constructor_init from './Functions/constructor_init';
-import preload_init from './Functions/preload_init';
-import create_init from './Functions/create_init';
+import constructor_init from './Functions/constructor_init.js';
+import preload_init from './Functions/preload_init.js';
+import create_init from './Functions/create_init.js';
 export default class BossScene extends Phaser.Scene {
   constructor() {
     super({ key: 'boss' });

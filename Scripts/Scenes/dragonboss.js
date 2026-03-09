@@ -1,5 +1,5 @@
 import * as Phaser from 'phaser';
-import preload_init from './Functions/preload_init';
+import preload_init from './Functions/preload_init.js';
 export default class DragonBossScene extends Phaser.Scene {
   constructor() {
     super({ key: 'dragonBoss' });
@@ -192,8 +192,8 @@ export default class DragonBossScene extends Phaser.Scene {
 
     // Projectile cooldown indicator (top-right arc)
     this.cooldownRadius = 8;
-    this.cooldownX = this.cameras.main.width - 15;
-    this.cooldownY  = 15;
+    this.cooldownX = 30;
+    this.cooldownY  = 50;
     this.cooldownGraphic = this.add.graphics().setScrollFactor(0).setDepth(1000).setVisible(false);
 
     // ── Post-update visual sync ──────────────────────────────

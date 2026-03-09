@@ -43,7 +43,7 @@ export default class Options extends Phaser.Scene {
 
         gameObject.x = Phaser.Math.Clamp(dragX, minX, maxX);
 
-        this.sound.volume = Math.round((gameObject.x-47.5)/225 * 100)/100;
+        this.sound.volume = Phaser.Math.Clamp(gameObject.x,0,100);
     })
 
 

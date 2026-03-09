@@ -1,5 +1,5 @@
 import * as Phaser from 'phaser';
-import constructor_init from './Functions/constructor_init';
+import constructor_init from './Functions/constructor_init.js';
 export default class arcade_exterior extends Phaser.Scene {
     constructor() {
         super({ key: 'arcade_exterior' });
@@ -10,8 +10,8 @@ export default class arcade_exterior extends Phaser.Scene {
     }
 
     preload() {
-            this.physics.world.roundPixels = false;
-    this.cameras.main.setRoundPixels(false);
+            this.physics.world.roundPixels = true;
+    this.cameras.main.setRoundPixels(true);
         this.load.image("frame", "Assets/ARCADE_BORDER.png")
         this.load.image('ow_player_still', 'Assets/playerIdle.png'); //player image
         this.load.image('ow_player_falling_static', 'Assets/playerFall.png'); //player image
@@ -63,7 +63,7 @@ export default class arcade_exterior extends Phaser.Scene {
         this.anims.create({
             key: "ow_player_moving",
             frames: this.anims.generateFrameNumbers("ow_player_running"),
-            frameRate: 20,
+            frameRate: 15,
             repeat: -1
         })
         this.anims.create({
@@ -162,57 +162,8 @@ export default class arcade_exterior extends Phaser.Scene {
         });
         
         
-        this.cooldownRadius = 8;
-        this.cooldownX = this.cameras.main.width - 15;
-        this.cooldownY = 15;
-        
-        this.cooldownGraphic = this.add.graphics();
-        this.cooldownGraphic.setScrollFactor(0);
-        this.cooldownGraphic.setDepth(1000);
-        this.cooldownGraphic.setVisible(false);
-        
-        this.healthBarWidth = 100;
-        this.healthBarHeight = 10;
-        this.healthBarX = 20; // distance from left
-        this.healthBarY = 20; // distance from top
-        
-        this.healthBarBg = this.add.graphics();
-        this.healthBarFill = this.add.graphics();
-        
-        this.healthBarBg.setScrollFactor(0);
-        this.healthBarFill.setScrollFactor(0);
-        this.healthBarBg.setDepth(1000);
-        this.healthBarFill.setDepth(1000);
-        
-        this.drawHealthBar();
         
     }
-    
-    drawHealthBar() {
-        const healthPercent = Phaser.Math.Clamp(this.health / this.maxHealth, 0, 1);
-        
-        this.healthBarBg.clear();
-        this.healthBarFill.clear();
-        
-        this.healthBarBg.lineStyle(2, 0xffffff);
-        this.healthBarBg.strokeRect(
-            this.healthBarX,
-            this.healthBarY,
-            this.healthBarWidth,
-            this.healthBarHeight
-        );
-        
-        this.healthBarFill.fillStyle(0x00ff00);
-        this.healthBarFill.fillRect(
-            this.healthBarX + 2,
-            this.healthBarY + 2,
-            (this.healthBarWidth - 4) * healthPercent,
-            this.healthBarHeight - 4
-        );
-    }
-    
-    
-    
     
     update(time, delta) {
         if (this.player.x >= 226 && this.player.x <= 245) {
@@ -222,16 +173,13 @@ export default class arcade_exterior extends Phaser.Scene {
                 this.scene.start("overworld");
             }    
     }
-        
-        
-        
         //switched onGround to a property (just in case)
         this.onGround = this.player.body.blocked.down;
         if (this.onGround) {
             this.isJumping = false
             this.lastGroundedTime = time;
         }
-        if (this.player.body.velocity.y > 0 && !this.isAttacking) {
+        if (this.player.body.velocity.y > 0) {
             this.playerVisual.play("ow_player_falling", true)
         }
         
@@ -241,14 +189,6 @@ export default class arcade_exterior extends Phaser.Scene {
             this.scene.pause()
             this.scene.launch("Pause", { returnScene: this.scene.key });
         }
-        
-        
-        if (Phaser.Input.Keyboard.JustDown(this.menuKey)) {
-            this.scene.pause()
-            this.scene.launch("Pause", { returnScene: this.scene.key });
-        }
-
-
         // Left/Right Movement
 
         if (this.cursors.left.isDown) {
@@ -274,18 +214,18 @@ export default class arcade_exterior extends Phaser.Scene {
             }
         }
 
-        // Jumping
-        if (this.cursors.up.isDown && (this.onGround || (time - this.lastGroundedTime < 100))) {
-            this.player.setVelocityY(-300);
-            this.lastGroundedTime = 0;
-            this.isJumping = true;
-            this.playerVisual.play("ow_player_jump_start", true);
-        }
+        // // Jumping
+        // if (this.cursors.up.isDown && (this.onGround || (time - this.lastGroundedTime < 100))) {
+        //     this.player.setVelocityY(-300);
+        //     this.lastGroundedTime = 0;
+        //     this.isJumping = true;
+        //     this.playerVisual.play("ow_player_jump_start", true);
+        // }
 
-        // Variable jump height: cut velocity when button is released
-        if (Phaser.Input.Keyboard.JustUp(this.cursors.up) && this.player.body.velocity.y < 0) {
-            this.player.setVelocityY(this.player.body.velocity.y * 0.5);
-        }
+        // // Variable jump height: cut velocity when button is released
+        // if (Phaser.Input.Keyboard.JustUp(this.cursors.up) && this.player.body.velocity.y < 0) {
+        //     this.player.setVelocityY(this.player.body.velocity.y * 0.5);
+        // }
 
 
         // Update Coordinate Display
