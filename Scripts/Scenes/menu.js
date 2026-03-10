@@ -5,12 +5,12 @@ export default class Menu extends Phaser.Scene {
     super({ key: 'Menu' });
   }
   preload() {
-    this.load.image("frame", "/assets/ARCADE_BORDER.png")
-    this.load.image("title", "/assets/title.png")
-    this.load.image("play", "/assets/play.png")
-    this.load.image("options", "/assets/options.png")
-    this.load.image("options_yellow", "/assets/options_yellow.png")
-    this.load.image("play_yellow", "/assets/play_unhighlighted.png")
+    this.load.image("frame", "assets/ARCADE_BORDER.png")
+    this.load.image("title", "assets/title.png")
+    this.load.image("play", "assets/play.png")
+    this.load.image("options", "assets/options.png")
+    this.load.image("options_yellow", "assets/options_yellow.png")
+    this.load.image("play_yellow", "assets/play_unhighlighted.png")
   }
   create() {
     const { width, height } = this.scale;
