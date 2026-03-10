@@ -1,4 +1,4 @@
-import * as Phaser from 'phaser' ;
+import * as Phaser from 'phaser';
 import Menu from './Scenes/menu.js';
 import MainScene from './Scenes/mainscene.js';
 import Pause from "./Scenes/pause.js"
@@ -22,7 +22,8 @@ const config = {
   antialias:true,
   parent: 'game-container',
 
-  scene: [Intro,Menu,arcade_exterior, MainScene, Pause, Options, boss, LevelTwo, Overworld, DragonBossScene, Narator],
+  // DragonBossScene added at the end of the scene list
+  scene: [/*Intro,*/Menu/*,arcade_exterior, MainScene, Pause, Options, boss, LevelTwo, Overworld, DragonBossScene, Narator*/],
 
   physics: {
     default: 'arcade',
