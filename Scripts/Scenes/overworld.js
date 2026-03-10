@@ -1,5 +1,5 @@
 import * as Phaser from 'phaser';
-import { customEmitter } from './events';
+import { customEmitter } from './events.js';
 
 export default class Overworld extends Phaser.Scene {
     constructor() {

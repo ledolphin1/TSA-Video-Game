@@ -1,10 +1,10 @@
 import * as Phaser from 'phaser';
 
-import { playerData } from './playerdata';
-import { customEmitter } from './events';
+import { playerData } from './playerdata.js';
+import { customEmitter } from './events.js';
 export default class Narator extends Phaser.Scene {
   constructor() {
-    super({ key: 'Narator'});
+    super({ key: 'Narator',active: true});
   }
   preload() {
     this.load.bitmapFont("game_font", "/assets/pixel_fonts/fonts/square_6x6.png", "/assets/pixel_fonts/fonts/square_6x6.xml")

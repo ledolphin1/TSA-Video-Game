@@ -22,8 +22,7 @@ const config = {
   antialias:true,
   parent: 'game-container',
 
-  // DragonBossScene added at the end of the scene list
-  scene: [/*Intro,*/Menu/*,arcade_exterior, MainScene, Pause, Options, boss, LevelTwo, Overworld, DragonBossScene, Narator*/],
+  scene: [Intro,Menu,arcade_exterior, MainScene, Pause, Options, boss, LevelTwo, Overworld, DragonBossScene, Narator],
 
   physics: {
     default: 'arcade',
