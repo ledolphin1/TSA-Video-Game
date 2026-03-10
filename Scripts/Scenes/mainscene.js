@@ -25,6 +25,7 @@ export default class MainScene extends Phaser.Scene {
     });
     this.load.tilemapTiledJSON('map', '/assets/Map/firstlevel.tmj');
     this.load.image('spikes', '/assets/Map/spikes.png');
+    this.load.image('gate', '/assets/gate.png');
     
   }
   create() {
@@ -38,9 +39,24 @@ export default class MainScene extends Phaser.Scene {
 
     create_init.call(this, map);
     activate_anims.call(this);
+   
     this.performAttack = performAttack.bind(this);
     const spikeTileset = map.addTilesetImage("spikes", "spikes")
     const spikes = map.createLayer("spikes", spikeTileset)
+
+    //gate logic
+     this.gate = this.physics.add.sprite(145,179,"gate").setOrigin(0.5,1).setDepth(-5)
+    this.gate.setImmovable(true);
+    this.physics.add.collider(this.gate, this.ground);
+
+    // Interaction Logic
+    this.physics.add.overlap(this.player, this.gate, () => {
+        if (Phaser.Input.Keyboard.JustDown(this.interactKey)) {
+            // Stop music before switching if needed
+            this.sound.stopAll();
+            this.scene.start("boss");
+        }
+    });
     
     // Create Enemy Group
     this.enemies = this.physics.add.group(); //  group for enemies
@@ -48,6 +64,7 @@ export default class MainScene extends Phaser.Scene {
     //Create Spikes Collision
     spikes.setCollisionByExclusion([-1]);
     this.physics.add.collider(this.player, spikes, this.handleSpikeOverlap, null, this);
+
     // Spawn multiple enemies
     this.enemySpawnPoints = [
       { x: 770, y: 870 },
@@ -103,6 +120,7 @@ export default class MainScene extends Phaser.Scene {
 
     //Skip Key for debug
     this.skipKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.G);
+ 
 
   }
 
@@ -201,10 +219,7 @@ export default class MainScene extends Phaser.Scene {
     // Update Coordinate Display
     this.coordText.setText(`X: ${Math.round(this.player.x)} Y: ${Math.round(this.player.y)}`);
 
-    if (this.player.x <= 100 && this.player.y <= 200) {
-      this.scene.start("boss");
-      this.music.stop()
-    }
+    
 
     if (this.skipKey.isDown) {
       playerData.didJump = true;

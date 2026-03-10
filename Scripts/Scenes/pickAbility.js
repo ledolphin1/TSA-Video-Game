@@ -7,16 +7,13 @@ export default class Pause extends Phaser.Scene {
 
   preload() {
     this.load.bitmapFont("arcade_font", "/assets/PressStart.png", "/assets/PressStart.xml");
+    this.load.bitmapFont("game_font", "/assets/pixel_fonts/fonts/square_6x6.png", "/assets/pixel_fonts/fonts/square_6x6.xml")
 
   }
   create() {
     const { width, height } = this.scale;
     // Title text
-    this.specialWeapon = 0
-    this.add.text(width / 2, height / 2 - 70, "Time to Get Stronger", {
-      fontSize: '48px',
-      color: '#ffffff'
-    }).setOrigin(0.5);
+    this.add.bitmapText(width/2, 20, "Pick your power")
 
 
 
