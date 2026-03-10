@@ -4,7 +4,7 @@ import { playerData } from './playerdata';
 import { customEmitter } from './events';
 export default class Narator extends Phaser.Scene {
   constructor() {
-    super({ key: 'Narator' , active: true});
+    super({ key: 'Narator'});
   }
   preload() {
     this.load.bitmapFont("game_font", "/assets/pixel_fonts/fonts/square_6x6.png", "/assets/pixel_fonts/fonts/square_6x6.xml")
