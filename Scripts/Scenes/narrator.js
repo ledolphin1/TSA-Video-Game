@@ -26,12 +26,12 @@ export default class Narator extends Phaser.Scene {
             this.setNarrator("Enter the arcade.","Move to the door and press Z to interact.");
             playerData.didMove = true;
         }
-        customEmitter.on("OVERWORLD_BEGIN", this.setNarrator.bind(this,"Inspect the suspicious arcade.","Move to the arcade and press Z to inspect."))
+        customEmitter.on("OVERWORLD_BEGIN", this.setNarrator.bind(this,"Inspect the suspicious arcade machine.","Move to the arcade and press Z to inspect."))
         customEmitter.on("L1BEGIN", this.setNarrator.bind(this,"Don't fall on spikes.","Press up arrow to jump."))
         customEmitter.on("JUMPED", onJump.bind(this))
         customEmitter.on("ATTACKED",onAttack.bind(this))
         customEmitter.on("LPFIRED", this.setNarrator.bind(this,"Push forward! Vanquish the evil snakes!","Find the gate."))
-        customEmitter.on("SNAKEBOSS_BEGIN", this.setNarrator.bind(this,"This snake fires homing orbs!","Use your LP Canon and Plasma Saber."))
+        customEmitter.on("SNAKEBOSS_BEGIN", this.setNarrator.bind(this,"This snake fires homing orbs!","Use your Cyber Canon and Plasma Saber."))
         customEmitter.on("L2BEGIN", this.setNarrator.bind(this,"Navigate the rough terrain.","These viruses are stronger and smarter than snakes, push through!"))
         customEmitter.on("DRAGONBOSS", this.setNarrator.bind(this,"",""))
         
@@ -48,7 +48,7 @@ export default class Narator extends Phaser.Scene {
         if (playerData.didAttack){
             return;
         }
-            this.setNarrator("Push forward! Vanquish the evil snakes!","Press F to use your LP Canon.");
+            this.setNarrator("Push forward! Vanquish the evil snakes!","Press F to use your Cyber Cannon.");
             playerData.didAttack = true;
         }
         

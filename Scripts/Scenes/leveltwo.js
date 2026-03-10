@@ -39,10 +39,7 @@ export default class LevelTwo extends Phaser.Scene {
     });
 
     // Gateway portal — 4 frames × 32×32
-    this.load.spritesheet('gateway', '/assets/gateway.png', {
-      frameWidth: 32,
-      frameHeight: 32
-    });
+    this.load.image('gate', '/assets/gate.png');
 
     this.load.image('spikes', '/assets/Map/spikes.png');
     this.load.tilemapTiledJSON('leveltwo_map', '/assets/Map/leveltwo.tmj');
@@ -81,13 +78,6 @@ export default class LevelTwo extends Phaser.Scene {
       frames: this.anims.generateFrameNumbers('electroBlade', { start: 0, end: 3 }),
       frameRate: 20,
       repeat: 0
-    });
-
-    this.anims.create({
-      key: 'gateway_spin',
-      frames: this.anims.generateFrameNumbers('gateway', { start: 0, end: 3 }),
-      frameRate: 10,
-      repeat: -1
     });
 
     // ── Spikes layer ────────────────────────────────────────────────────────
@@ -153,9 +143,8 @@ export default class LevelTwo extends Phaser.Scene {
     const GATEWAY_X = 928;
     const GATEWAY_Y = 256;
 
-    this.gatewaySprite = this.add.sprite(GATEWAY_X, GATEWAY_Y, 'gateway');
-    this.gatewaySprite.setDepth(5);
-    this.gatewaySprite.play('gateway_spin');
+    this.gatewaySprite = this.add.image(GATEWAY_X, GATEWAY_Y, 'gate');
+    this.gatewaySprite.setDepth(-5);
 
     // Physics zone for gateway interaction
     this.gatewayZone = this.add.zone(GATEWAY_X, GATEWAY_Y, 28, 28);
@@ -561,15 +550,6 @@ respawn() {
 
   // ──────────────────────────────── GATEWAY ────────────────────────────────
   _enterGateway() {
-    // Visual flash
-    const flash = this.add.rectangle(
-      this.cameras.main.width / 2,
-      this.cameras.main.height / 2,
-      this.cameras.main.width,
-      this.cameras.main.height,
-      0xffffff, 1
-    ).setScrollFactor(0).setDepth(9999);
-
     if (this.music) { try { this.music.stop(); } catch(e) {} }
     if (this._glitchTimer) this._glitchTimer.remove();
 
