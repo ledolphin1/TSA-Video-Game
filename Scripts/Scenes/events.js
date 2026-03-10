@@ -1,2 +1,2 @@
-import {Events} from "phaser";
+import { Events } from "phaser";
 export const customEmitter = new Events.EventEmitter();
