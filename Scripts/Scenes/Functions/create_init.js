@@ -3,7 +3,7 @@ import fireProjectileUnbound from './fireProjectile.js';
 import handleEnemyOverlapUnbound from './handleEnemyOverlap.js';
 import drawCooldown from './drawCooldown.js';
 import * as playerFuncs from './playerFuncs.js'
-
+import { Input } from 'phaser';
 const {updatePlayerHitboxUnbound, flashPlayerUnbound, killPlayerUnbound, respawnPlayerUnbound} = playerFuncs;
 const create_init = function(map,debug){
 

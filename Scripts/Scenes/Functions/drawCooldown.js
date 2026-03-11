@@ -1,4 +1,5 @@
-  const drawCooldown = function(progress) {
+ import { Math } from "phaser";
+ const drawCooldown = function(progress) {
     this.cooldownGraphic.clear();
 
     if (progress >= 1) {
