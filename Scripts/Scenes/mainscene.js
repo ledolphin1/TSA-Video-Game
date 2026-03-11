@@ -39,7 +39,31 @@ export default class MainScene extends Phaser.Scene {
 
     create_init.call(this, map);
     activate_anims.call(this);
-   
+     // --- Post-Update Sync (Fixes Lag/Blur) ---
+    // Sync runs AFTER physics, ensuring visual matches actual body position for this frame
+    this.events.on('postupdate', () => {
+      if (this.playerVisual && this.player) {
+        let vX = this.player.x;
+        let vY = this.player.y;
+
+        // Apply Visual Offsets when attacking
+        if (this.playerVisual.texture.key === 'player_attack_sheet') {
+          // Invert X offset if facing left
+          if (this.player.flipX) {
+            vX -= this.attackVisualOffset.x;
+          } else {
+            vX += this.attackVisualOffset.x;
+          }
+          vY += this.attackVisualOffset.y;
+        }
+
+        this.playerVisual.setPosition(vX, vY);
+        this.playerVisual.setFlipX(this.player.flipX);
+
+
+      }
+    });
+  
     this.performAttack = performAttack.bind(this);
     const spikeTileset = map.addTilesetImage("spikes", "spikes")
     const spikes = map.createLayer("spikes", spikeTileset)
