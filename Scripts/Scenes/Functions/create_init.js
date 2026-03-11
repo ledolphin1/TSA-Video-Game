@@ -3,7 +3,7 @@ import fireProjectileUnbound from './fireProjectile.js';
 import handleEnemyOverlapUnbound from './handleEnemyOverlap.js';
 import drawCooldown from './drawCooldown.js';
 import * as playerFuncs from './playerFuncs.js'
-
+import * as Phaser from "phaser";
 const {updatePlayerHitboxUnbound, flashPlayerUnbound, killPlayerUnbound, respawnPlayerUnbound} = playerFuncs;
 const create_init = function(map,debug){
 
@@ -32,8 +32,8 @@ const create_init = function(map,debug){
     
     //Cooldown Bar//!
     this.cooldownRadius = 8;
-    this.cooldownX = this.cameras.main.width - 15;
-    this.cooldownY = 15;
+    this.cooldownX = 30;
+    this.cooldownY = 50;
     this.cooldownGraphic = this.add.graphics();
     this.cooldownGraphic.setScrollFactor(0);
     this.cooldownGraphic.setDepth(1000);
@@ -89,6 +89,7 @@ const create_init = function(map,debug){
     this.attackKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE);
     this.fireKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.F);
     this.menuKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.ESC)
+    this.interactKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.Z);
 
     //Coords for debug//!
     this.coordText = this.add.text(this.cameras.main.width - 10, this.cameras.main.height - 10, 'X: 0 Y: 0', {

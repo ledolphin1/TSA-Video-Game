@@ -1,3 +1,4 @@
+import * as Phaser from "phaser";
 const activate_anims = function(){
      //Activate all animations
      this.anims.create({

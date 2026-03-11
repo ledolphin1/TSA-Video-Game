@@ -1,22 +1,19 @@
-import * as Phaser from 'phaser';
+import * as Phaser from "phaser";
 
 export default class Pause extends Phaser.Scene {
   constructor() {
-    super({ key: 'pickAbility' });
+    super({ key: "pickAbility" });
   }
 
   preload() {
-    this.load.bitmapFont("arcade_font", "Assets/PressStart.png", "Assets/PressStart.xml");
+    this.load.bitmapFont("arcade_font", "public/assets/PressStart.png", "public/assets/PressStart.xml");
+    this.load.bitmapFont("game_font", "public/assets/pixel_fonts/fonts/square_6x6.png", "public/assets/pixel_fonts/fonts/square_6x6.xml")
 
   }
   create() {
     const { width, height } = this.scale;
     // Title text
-    this.specialWeapon = 0
-    this.add.text(width / 2, height / 2 - 70, "Time to Get Stronger", {
-      fontSize: '48px',
-      color: '#ffffff'
-    }).setOrigin(0.5);
+    this.add.bitmapText(width/2, 20, "Pick your power")
 
 
 

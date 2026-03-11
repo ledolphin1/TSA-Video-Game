@@ -9,7 +9,7 @@
     "deploy": "npm run build && gh-pages -d dist"
   },
   "dependencies": {
-    "phaser": "^3.60.0"
+    "phaser": "^3.90.0"
   },
   "devDependencies": {
     "gh-pages": "^6.3.0",

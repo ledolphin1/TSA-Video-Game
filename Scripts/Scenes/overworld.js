@@ -1,4 +1,5 @@
 import * as Phaser from 'phaser';
+import { customEmitter } from './events.js';
 
 export default class Overworld extends Phaser.Scene {
     constructor() {
@@ -53,31 +54,31 @@ export default class Overworld extends Phaser.Scene {
 
     preload() {
 
+        customEmitter.emit("OVERWORLD_BEGIN")
 
 
-
-        /*this.load.spritesheet('hitAnim', '/Assets/hit.png', { // not created yet
+        /*this.load.spritesheet('hitAnim', 'public/assets/hit.png', { // not created yet
           frameWidth: 64,
           frameHeight: 64
         });
       */
-        this.load.image("frame", "Assets/ARCADE_BORDER.png")
-        this.load.image("overworldbg", "Assets/arcade_interior.png")
-        this.load.image('ow_player_still', 'Assets/playerIdle.png'); //player image
-        this.load.image('ow_player_falling_static', 'Assets/playerFall.png'); //player image
-        this.load.spritesheet("ow_player_jumping", "Assets/playerJump.png", {
+        this.load.image("frame", "public/assets/ARCADE_BORDER.png")
+        this.load.image("overworldbg", "public/assets/arcade_interior.png")
+        this.load.image('ow_player_still', 'public/assets/playerIdle.png'); //player image
+        this.load.image('ow_player_falling_static', 'public/assets/playerFall.png'); //player image
+        this.load.spritesheet("ow_player_jumping", "public/assets/playerJump.png", {
             frameWidth: 16,
             frameHeight: 16
         })
-        this.load.spritesheet('ow_player_running', 'Assets/playerRun.png', {
+        this.load.spritesheet("ow_player_running", "public/assets/playerRun.png", {
             frameWidth: 16,
             frameHeight: 16
         })
-        this.load.audio('background', 'Assets/audio/background_music_filler.mp3');
-        this.load.tilemapTiledJSON('overworld_level', 'Assets/Map/overworld.tmj');
-        this.load.image('tiles', 'Assets/Map/tileset.png');
+        this.load.audio('background', 'public/assets/audio/background_music_filler.mp3');
+        this.load.tilemapTiledJSON('overworld_level', 'public/assets/Map/overworld.tmj');
+        this.load.image('tiles', 'public/assets/Map/tileset.png');
 
-        this.load.spritesheet('arcadeMachine', 'Assets/arcadeMachine.png', {
+        this.load.spritesheet('arcadeMachine', 'public/assets/arcadeMachine.png', {
             frameWidth: 32,
             frameHeight: 48
         });
@@ -86,6 +87,9 @@ export default class Overworld extends Phaser.Scene {
 
     create() {
 
+        this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.S).on('down', () => {
+        this.scene.start('MainScene');
+        });
 
         this.add.image(160, 240, "overworldbg");
         console.log("overworld scene created");
@@ -133,6 +137,7 @@ export default class Overworld extends Phaser.Scene {
         })
         const tileset = map.addTilesetImage("Tileset", "tiles")
         this.ground = map.createLayer("Tile Layer 1", tileset)
+        this.ground.setVisible(false);
         this.ground.setCollisionByExclusion([-1]);
 
 
@@ -234,54 +239,9 @@ export default class Overworld extends Phaser.Scene {
         });
 
 
-        this.cooldownRadius = 8;
-        this.cooldownX = this.cameras.main.width - 15;
-        this.cooldownY = 15;
-
-        this.cooldownGraphic = this.add.graphics();
-        this.cooldownGraphic.setScrollFactor(0);
-        this.cooldownGraphic.setDepth(1000);
-        this.cooldownGraphic.setVisible(false);
-
-        this.healthBarWidth = 100;
-        this.healthBarHeight = 10;
-        this.healthBarX = 20; // distance from left
-        this.healthBarY = 20; // distance from top
-
-        this.healthBarBg = this.add.graphics();
-        this.healthBarFill = this.add.graphics();
-
-        this.healthBarBg.setScrollFactor(0);
-        this.healthBarFill.setScrollFactor(0);
-        this.healthBarBg.setDepth(1000);
-        this.healthBarFill.setDepth(1000);
-
-        this.drawHealthBar();
 
     }
 
-    drawHealthBar() {
-        const healthPercent = Phaser.Math.Clamp(this.health / this.maxHealth, 0, 1);
-
-        this.healthBarBg.clear();
-        this.healthBarFill.clear();
-
-        this.healthBarBg.lineStyle(2, 0xffffff);
-        this.healthBarBg.strokeRect(
-            this.healthBarX,
-            this.healthBarY,
-            this.healthBarWidth,
-            this.healthBarHeight
-        );
-
-        this.healthBarFill.fillStyle(0x00ff00);
-        this.healthBarFill.fillRect(
-            this.healthBarX + 2,
-            this.healthBarY + 2,
-            (this.healthBarWidth - 4) * healthPercent,
-            this.healthBarHeight - 4
-        );
-    }
 
 
 
@@ -308,10 +268,6 @@ export default class Overworld extends Phaser.Scene {
         }
 
 
-        if (Phaser.Input.Keyboard.JustDown(this.menuKey)) {
-            this.scene.pause()
-            this.scene.launch("Pause", { returnScene: this.scene.key });
-        }
 
 
         // Left/Right Movement
@@ -337,19 +293,6 @@ export default class Overworld extends Phaser.Scene {
             if (this.onGround) {
                 this.playerVisual.setTexture("ow_player_still")
             }
-        }
-
-        // Jumping
-        if (this.cursors.up.isDown && (this.onGround || (time - this.lastGroundedTime < 100))) {
-            this.player.setVelocityY(-300);
-            this.lastGroundedTime = 0;
-            this.isJumping = true;
-            this.playerVisual.play("ow_player_jump_start", true);
-        }
-
-        // Variable jump height: cut velocity when button is released
-        if (Phaser.Input.Keyboard.JustUp(this.cursors.up) && this.player.body.velocity.y < 0) {
-            this.player.setVelocityY(this.player.body.velocity.y * 0.5);
         }
 
 

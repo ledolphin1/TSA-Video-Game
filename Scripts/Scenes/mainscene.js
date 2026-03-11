@@ -1,38 +1,62 @@
 
-import * as Phaser from 'phaser';
+import * as Phaser from "phaser";
 //import external functions
-import create_init from './Functions/create_init.js';
-import activate_anims from './Functions/activate_anims.js';
-import constructor_init from './Functions/constructor_init.js';
-import preload_init from './Functions/preload_init.js';
-import performAttack from './Functions/performAttack.js';
+import create_init from "./Functions/create_init.js";
+import activate_anims from "./Functions/activate_anims.js";
+import constructor_init from "./Functions/constructor_init.js";
+import preload_init from "./Functions/preload_init.js";
+import performAttack from "./Functions/performAttack.js";
+import { customEmitter } from "./events.js";
+import { playerData } from "./playerdata.js";
 export default class MainScene extends Phaser.Scene {
   constructor() {
-    super({ key: 'MainScene' });
+    super({ key: "MainScene" });
     constructor_init.call(this);
   
     
   }
   
   preload() {
+    customEmitter.emit("L1BEGIN")
     preload_init.call(this)
-    this.load.spritesheet('chests', 'Assets/chests.png', {
+    this.load.spritesheet("chests", "public/assets/chests.png", {
       frameWidth: 16,
       frameHeight: 16
     });
-    this.load.tilemapTiledJSON('map', 'Assets/Map/firstlevel.tmj');
-    this.load.image('spikes', 'Assets/Map/spikes.png');
+    this.load.tilemapTiledJSON("map", "public/assets/Map/firstlevel.tmj");
+    this.load.image("spikes", "public/assets/Map/spikes.png");
+    this.load.image("gate", "public/assets/gate.png");
     
   }
   create() {
     const map = this.make.tilemap({
       key: "map"
     })
+
+    this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.S).on("down", () => {
+    this.scene.start("boss");
+    });
+
     create_init.call(this, map);
     activate_anims.call(this);
+   
     this.performAttack = performAttack.bind(this);
     const spikeTileset = map.addTilesetImage("spikes", "spikes")
     const spikes = map.createLayer("spikes", spikeTileset)
+
+    //gate logic
+     this.gate = this.physics.add.sprite(145,179,"gate").setOrigin(0.5,1).setDepth(-5)
+    this.gate.setImmovable(true);
+    this.physics.add.collider(this.gate, this.ground);
+
+    // Interaction Logic
+    this.physics.add.overlap(this.player, this.gate, () => {
+        if (Phaser.Input.Keyboard.JustDown(this.interactKey)) {
+            // Stop music before switching if needed
+            this.sound.stopAll();
+            this.scene.start("boss");
+        }
+    });
     
     // Create Enemy Group
     this.enemies = this.physics.add.group(); //  group for enemies
@@ -40,6 +64,7 @@ export default class MainScene extends Phaser.Scene {
     //Create Spikes Collision
     spikes.setCollisionByExclusion([-1]);
     this.physics.add.collider(this.player, spikes, this.handleSpikeOverlap, null, this);
+
     // Spawn multiple enemies
     this.enemySpawnPoints = [
       { x: 770, y: 870 },
@@ -85,7 +110,7 @@ export default class MainScene extends Phaser.Scene {
 
     // chests
     this.chests = this.physics.add.group();
-    const chest = this.chests.create(2060, 584, 'chests', 0); // Frame 0 = closed
+    const chest = this.chests.create(2060, 584, "chests", 0); // Frame 0 = closed
     chest.body.setAllowGravity(false); // assuming chest stays in place
     // chest.setImmovable(true); 
 
@@ -95,6 +120,7 @@ export default class MainScene extends Phaser.Scene {
 
     //Skip Key for debug
     this.skipKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.G);
+ 
 
   }
 
@@ -131,7 +157,8 @@ export default class MainScene extends Phaser.Scene {
       this.playerVisual.play("player_falling", true)
     }
     // Attack Input
-    if (Phaser.Input.Keyboard.JustDown(this.attackKey) && !this.isAttacking && time > this.lastAttackEndTime + 10) {
+    if (Phaser.Input.Keyboard.JustDown(this.attackKey) && !this.isAttacking && time > this.lastAttackEndTime + 10 && playerData.didJump) {
+      customEmitter.emit("ATTACKED")
       this.performAttack();
     }
 
@@ -141,9 +168,10 @@ export default class MainScene extends Phaser.Scene {
     }
 
     // Ranged Attack Input
-    if (Phaser.Input.Keyboard.JustDown(this.fireKey) && !this.projectileOnCooldown) {
-      if (time > this.lastFiredTime + 3000) { // 3s cooldown
+    if (Phaser.Input.Keyboard.JustDown(this.fireKey) && !this.projectileOnCooldown && playerData.didAttack) {
+      if (time > this.lastFiredTime + this.projectileCooldown) { // 3s cooldown
         this.fireProjectile(time);
+        customEmitter.emit("LPFIRED")
       }
     }
 
@@ -176,6 +204,7 @@ export default class MainScene extends Phaser.Scene {
 
     // Jumping
     if (this.cursors.up.isDown && (this.onGround || (time - this.lastGroundedTime < 100))) {
+      customEmitter.emit("JUMPED")
       this.player.setVelocityY(-300);
       this.lastGroundedTime = 0;
       this.isJumping = true;
@@ -190,12 +219,12 @@ export default class MainScene extends Phaser.Scene {
     // Update Coordinate Display
     this.coordText.setText(`X: ${Math.round(this.player.x)} Y: ${Math.round(this.player.y)}`);
 
-    if (this.player.x <= 100 && this.player.y <= 200) {
-      this.scene.start("boss");
-      this.music.stop()
-    }
+    
 
     if (this.skipKey.isDown) {
+      playerData.didJump = true;
+      playerData.didAttack = true;
+      playerData.didMove = true;
       this.scene.start("boss");
       this.music.stop()
     }
@@ -227,7 +256,7 @@ export default class MainScene extends Phaser.Scene {
   }
 
   spawnEnemy(x, y) {
-    const enemy = this.enemies.create(x, y, 'enemySprite');
+    const enemy = this.enemies.create(x, y, "enemySprite");
     enemy.hp = 2; // Enemy Health
     enemy.isKnockedBack = false;
     enemy.hitCooldown = false;

@@ -1,8 +1,9 @@
-import * as Phaser from 'phaser';
-import preload_init from './Functions/preload_init';
+import * as Phaser from "phaser";
+import preload_init from "./Functions/preload_init.js";
+import { customEmitter } from "./events.js";
 export default class DragonBossScene extends Phaser.Scene {
   constructor() {
-    super({ key: 'dragonBoss' });
+    super({ key: "dragonBoss" });
 
     // Health & State — player has TWICE as much health as in boss/mainscene
     this.maxHealth = 10;
@@ -46,28 +47,29 @@ export default class DragonBossScene extends Phaser.Scene {
   }
 
   preload() {
+    customEmitter.emit("DRAGONBOSS")
     // Player assets (reuse same keys as other scenes — guard against double-load)
     preload_init.call(this); // Use default preload loader
     // Dragon sprite — 32×24 per frame, 4 frames wide
-    this.load.spritesheet('dragon', 'Assets/dragon.png', {
+    this.load.spritesheet("dragon", "public/assets/dragon.png", {
       frameWidth: 32, frameHeight: 24
     });
 
     // Fire breath particle — 8×8 per frame, 3 frames
-    this.load.spritesheet('dragonFire', 'Assets/dragonFire.png', {
+    this.load.spritesheet("dragonFire", "public/assets/dragonFire.png", {
       frameWidth: 8, frameHeight: 8
     });
 
     // Tilemap (reuse boss room layout)
-    this.load.tilemapTiledJSON('boss_level', 'Assets/Map/boss.tmj');
+    this.load.tilemapTiledJSON("boss_level", "public/assets/Map/boss.tmj");
 
     // Background & UI
-    this.load.image('bossbg', 'Assets/bossbg.png');
+    this.load.image("bossbg", "public/assets/bossbg.png");
   }
 
   create() {
     // ── Background ──────────────────────────────────────────
-    this.add.image(160, 247, 'bossbg');
+    this.add.image(160, 247, "bossbg");
 
     this.physics.world.roundPixels = false;
     this.physics.world.drawDebug = false;
@@ -76,9 +78,9 @@ export default class DragonBossScene extends Phaser.Scene {
     }
 
     // ── Tilemap ─────────────────────────────────────────────
-    const map = this.make.tilemap({ key: 'boss_level' });
-    const tileset = map.addTilesetImage('Tileset', 'tiles');
-    this.ground = map.createLayer('platforms', tileset);
+    const map = this.make.tilemap({ key: "boss_level" });
+    const tileset = map.addTilesetImage("Tileset", "tiles");
+    this.ground = map.createLayer("platforms", tileset);
     this.ground.setCollisionByExclusion([-1]);
 
     this.cameras.main.setBounds(0, 0, map.widthInPixels, map.heightInPixels);
@@ -89,25 +91,25 @@ export default class DragonBossScene extends Phaser.Scene {
 
     // Dragon flying animation (4 frames = wing flap cycle)
     this.anims.create({
-      key: 'dragon_fly',
-      frames: this.anims.generateFrameNumbers('dragon', { start: 0, end: 3 }),
+      key: "dragon_fly",
+      frames: this.anims.generateFrameNumbers("dragon", { start: 0, end: 3 }),
       frameRate: 8,
       repeat: -1
     });
 
     // Fire breath particle animation
     this.anims.create({
-      key: 'dragonFire_anim',
-      frames: this.anims.generateFrameNumbers('dragonFire', { start: 0, end: 2 }),
+      key: "dragonFire_anim",
+      frames: this.anims.generateFrameNumbers("dragonFire", { start: 0, end: 2 }),
       frameRate: 12,
       repeat: -1
     });
 
     // ── Player ───────────────────────────────────────────────
-    this.player = this.physics.add.sprite(60, 280, 'player_still');
+    this.player = this.physics.add.sprite(60, 280, "player_still");
     this.player.setVisible(false);
 
-    this.playerVisual = this.add.sprite(60, 280, 'player_still');
+    this.playerVisual = this.add.sprite(60, 280, "player_still");
     this.playerVisual.setDepth(10);
 
     const pW = this.playerHitbox.width;
@@ -119,13 +121,13 @@ export default class DragonBossScene extends Phaser.Scene {
     this.physics.add.collider(this.player, this.ground);
 
     // ── Dragon (physics sprite, flying) ──────────────────────
-    this.dragon = this.physics.add.sprite(240, 210, 'dragon');
+    this.dragon = this.physics.add.sprite(240, 210, "dragon");
     this.dragon.setScale(3);          // 3× scale → 96×72 px on screen
-    this.dragon.play('dragon_fly');
+    this.dragon.play("dragon_fly");
     this.dragon.body.allowGravity = false;
     // Do NOT use setCollideWorldBounds — we handle turnaround manually
 
-    // Tighter hitbox centered in the dragon's body
+    // Tighter hitbox centered in the dragon"s body
     const dW = this.dragonHitbox.width;
     const dH = this.dragonHitbox.height;
     this.dragon.body.setSize(dW, dH);
@@ -192,16 +194,16 @@ export default class DragonBossScene extends Phaser.Scene {
 
     // Projectile cooldown indicator (top-right arc)
     this.cooldownRadius = 8;
-    this.cooldownX = this.cameras.main.width - 15;
-    this.cooldownY  = 15;
+    this.cooldownX = 30;
+    this.cooldownY  = 50;
     this.cooldownGraphic = this.add.graphics().setScrollFactor(0).setDepth(1000).setVisible(false);
 
     // ── Post-update visual sync ──────────────────────────────
-    this.events.on('postupdate', () => {
+    this.events.on("postupdate", () => {
       if (!this.player || !this.playerVisual) return;
       let vX = this.player.x;
       let vY = this.player.y;
-      if (this.playerVisual.texture.key === 'player_attack_sheet') {
+      if (this.playerVisual.texture.key === "player_attack_sheet") {
         vX += this.player.flipX ? -this.attackVisualOffset.x : this.attackVisualOffset.x;
         vY += this.attackVisualOffset.y;
       }
@@ -210,13 +212,13 @@ export default class DragonBossScene extends Phaser.Scene {
     });
 
     // ── Music ────────────────────────────────────────────────
-    this.music = this.sound.add('background', { loop: true, volume: 0.65 });
+    this.music = this.sound.add("background", { loop: true, volume: 0.65 });
     this.music.play();
 
     // ── Victory / defeat text (hidden until triggered) ───────
     this.outcomeText = this.add.text(
       this.cameras.main.width / 2, this.cameras.main.height / 2,
-      '', { fontSize: '16px', color: '#ffffff', backgroundColor: '#000000',
+      "", { fontSize: "16px", color: "#ffffff", backgroundColor: "#000000",
             padding: { x: 6, y: 4 } }
     ).setOrigin(0.5).setScrollFactor(0).setDepth(2000).setVisible(false);
   }
@@ -248,7 +250,7 @@ export default class DragonBossScene extends Phaser.Scene {
     }
 
     if (this.player.body.velocity.y > 0 && !this.isAttacking) {
-      this.playerVisual.play('player_falling', true);
+      this.playerVisual.play("player_falling", true);
     }
 
     // ── Attack inputs ────────────────────────────────────────
@@ -263,7 +265,7 @@ export default class DragonBossScene extends Phaser.Scene {
 
     if (Phaser.Input.Keyboard.JustDown(this.menuKey)) {
       this.scene.pause();
-      this.scene.launch('Pause', { returnScene: this.scene.key });
+      this.scene.launch("Pause", { returnScene: this.scene.key });
     }
 
     if (this.isAttacking) return;
@@ -271,15 +273,15 @@ export default class DragonBossScene extends Phaser.Scene {
     // ── Movement ─────────────────────────────────────────────
     if (this.cursors.left.isDown) {
       this.player.flipX = true;
-      if (this.onGround) this.playerVisual.play('player_moving', true);
+      if (this.onGround) this.playerVisual.play("player_moving", true);
       this.player.setVelocityX(-150);
     } else if (this.cursors.right.isDown) {
       this.player.flipX = false;
-      if (this.onGround) this.playerVisual.play('player_moving', true);
+      if (this.onGround) this.playerVisual.play("player_moving", true);
       this.player.setVelocityX(150);
     } else {
       this.player.setVelocityX(0);
-      if (this.onGround) this.playerVisual.setTexture('player_still');
+      if (this.onGround) this.playerVisual.setTexture("player_still");
     }
 
     // ── Jump ─────────────────────────────────────────────────
@@ -288,7 +290,7 @@ export default class DragonBossScene extends Phaser.Scene {
       this.player.setVelocityY(-300);
       this.lastGroundedTime = 0;
       this.isJumping = true;
-      this.playerVisual.play('player_jump_start', true);
+      this.playerVisual.play("player_jump_start", true);
     }
     if (Phaser.Input.Keyboard.JustUp(this.cursors.up) && this.player.body.velocity.y < 0) {
       this.player.setVelocityY(this.player.body.velocity.y * 0.5);
@@ -346,13 +348,13 @@ export default class DragonBossScene extends Phaser.Scene {
       this.time.delayedCall(i * spreadStep, () => {
         if (!this.dragon || !this.dragon.active) return;
 
-        // Spawn from the dragon's mouth (front edge)
+        // Spawn from the dragon"s mouth (front edge)
         const mouthOffX = this.dragon.flipX ? -28 : 28;
         const mouthX    = this.dragon.x + mouthOffX;
         const mouthY    = this.dragon.y + 4;
 
-        const fb = this.add.sprite(mouthX, mouthY, 'dragonFire');
-        fb.play('dragonFire_anim');
+        const fb = this.add.sprite(mouthX, mouthY, "dragonFire");
+        fb.play("dragonFire_anim");
         fb.setDepth(9);
         this.physics.add.existing(fb);
         this.fireBalls.add(fb);
@@ -423,7 +425,7 @@ export default class DragonBossScene extends Phaser.Scene {
     this.anims.pauseAll();
 
     // Use setTimeout (not this.time.delayedCall) so the paused Phaser clock
-    // doesn't prevent this from ever firing
+    // doesn"t prevent this from ever firing
     setTimeout(() => {
       if (this.dragon && this.dragon.active) this.dragon.destroy();
       try { this.music.stop(); } catch (e) {}
@@ -431,11 +433,11 @@ export default class DragonBossScene extends Phaser.Scene {
       this.physics.world.resume();
       this.anims.resumeAll();
 
-      this.outcomeText.setText('YOU WIN!\nPress ENTER to continue');
+      this.outcomeText.setText("YOU WIN!\nPress ENTER to continue");
       this.outcomeText.setVisible(true);
 
-      this.input.keyboard.once('keydown-ENTER', () => {
-        this.scene.start('Menu');
+      this.input.keyboard.once("keydown-ENTER", () => {
+        this.scene.start("Menu");
       });
     }, 800);
   }
@@ -455,7 +457,7 @@ export default class DragonBossScene extends Phaser.Scene {
       return;
     }
 
-    // Apply knockback immediately — no world pause so there's no freeze
+    // Apply knockback immediately — no world pause so there"s no freeze
     this.isKnockedBack = true;
     const dir = (this.player.x < this.dragon.x) ? -1 : 1;
     this.player.setVelocity(dir * 110, -60);
@@ -483,7 +485,7 @@ export default class DragonBossScene extends Phaser.Scene {
     attackHitbox.setVisible(false);
     attackHitbox.body.allowGravity = false;
 
-    this.playerVisual.play('player_attack', true);
+    this.playerVisual.play("player_attack", true);
 
     // Check overlap with dragon
     this.physics.add.overlap(attackHitbox, this.dragon, (hb, dragon) => {
@@ -573,7 +575,7 @@ export default class DragonBossScene extends Phaser.Scene {
     this.isAttacking   = false;
 
     this.playerVisual.clearTint();
-    this.playerVisual.setTexture('player_still');
+    this.playerVisual.setTexture("player_still");
     this.playerVisual.setAlpha(1);
     this.player.enableBody(true, 60, 280, true, false);
     this.player.setVelocity(0, 0);
@@ -618,7 +620,7 @@ export default class DragonBossScene extends Phaser.Scene {
     this.dragonHpBarBg   = this.add.graphics().setScrollFactor(0).setDepth(1000);
     this.dragonHpBarFill = this.add.graphics().setScrollFactor(0).setDepth(1000);
     this.dragonHpLabel   = this.add.text(
-      160, 8, 'DRAGON BOSS', { fontSize: '8px', color: '#ffffff' }
+      160, 8, "DRAGON BOSS", { fontSize: "8px", color: "#ffffff" }
     ).setOrigin(0.5, 0).setScrollFactor(0).setDepth(1001);
     this._updateDragonHpBar();
   }

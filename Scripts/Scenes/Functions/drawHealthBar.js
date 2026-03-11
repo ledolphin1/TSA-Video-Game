@@ -1,3 +1,4 @@
+import * as Phaser from "phaser";
 const drawHealthBar = function () {
     const healthPercent = Phaser.Math.Clamp(this.health / this.maxHealth, 0, 1);
 

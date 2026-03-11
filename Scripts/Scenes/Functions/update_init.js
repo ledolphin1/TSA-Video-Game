@@ -1,3 +1,4 @@
+import * as Phaser from "phaser";
 const updateInit = function(time){
        if (this.playerIsDead) return; // prevent movement while dead
     if (this.isKnockedBack) return; // prevent movement while applying knockback force
