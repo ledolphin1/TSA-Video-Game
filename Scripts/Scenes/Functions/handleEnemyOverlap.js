@@ -1,3 +1,4 @@
+  import * as Phaser from "phaser";
   const handleEnemyOverlap = function(player, enemy) {
     if (this.playerIsDead || this.isInvincible) return;
     if (enemy.isKnockedBack) return; // enemy cannot hurt player while stunned

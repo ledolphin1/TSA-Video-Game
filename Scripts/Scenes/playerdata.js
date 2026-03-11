@@ -1,3 +1,4 @@
+import * as Phaser from "phaser";
 class PlayerData {
     constructor(){
         this.weapon = "lp";

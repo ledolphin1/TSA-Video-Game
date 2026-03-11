@@ -1,3 +1,4 @@
+import * as Phaser from "phaser";
 const preload_init = function (){
     this.load.spritesheet('enemySprite', "public/assets/snakeMob.png", {
       frameWidth: 22,

@@ -1,4 +1,4 @@
- import { Math } from "phaser";
+import * as Phaser from "phaser";
  const drawCooldown = function(progress) {
     this.cooldownGraphic.clear();
 

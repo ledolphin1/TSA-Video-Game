@@ -1,4 +1,4 @@
-  
+  import * as Phaser from "phaser";
   const performAttack = function() {
     this.isJumping = false;//!
     this.isAttacking = true;//!

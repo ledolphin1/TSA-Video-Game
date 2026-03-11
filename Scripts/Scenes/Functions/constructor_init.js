@@ -1,3 +1,4 @@
+import * as Phaser from "phaser";
 const constructor_init = function (){
     
     //Health & State

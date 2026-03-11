@@ -1,4 +1,4 @@
-
+import * as Phaser from "phaser";
   export const updatePlayerHitboxUnbound = function() {
     if (!this.player || !this.player.body) return;
 
