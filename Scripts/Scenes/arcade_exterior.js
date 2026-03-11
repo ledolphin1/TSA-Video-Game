@@ -1,11 +1,11 @@
-import * as Phaser from 'phaser';
-import constructor_init from './Functions/constructor_init.js';
-import { playerData } from './playerdata.js';
-import { customEmitter } from './events.js';
+import * as Phaser from "phaser";
+import constructor_init from "./Functions/constructor_init.js";
+import { playerData } from "./playerdata.js";
+import { customEmitter } from "./events.js";
 
 export default class arcade_exterior extends Phaser.Scene {
     constructor() {
-        super({ key: 'arcade_exterior' });
+        super({ key: "arcade_exterior" });
 
         constructor_init.call(this);
 
@@ -17,19 +17,19 @@ export default class arcade_exterior extends Phaser.Scene {
             this.physics.world.roundPixels = true;
     this.cameras.main.setRoundPixels(true);
         this.load.image("frame", "public/assets/ARCADE_BORDER.png")
-        this.load.image('ow_player_still', 'public/assets/playerIdle.png'); //player image
-        this.load.image('ow_player_falling_static', 'public/assets/playerFall.png'); //player image
+        this.load.image("ow_player_still", "public/assets/playerIdle.png"); //player image
+        this.load.image("ow_player_falling_static", "public/assets/playerFall.png"); //player image
         this.load.spritesheet("ow_player_jumping", "public/assets/playerJump.png", {
             frameWidth: 16,
             frameHeight: 16
         })
-        this.load.spritesheet('ow_player_running', 'public/assets/playerRun.png', {
+        this.load.spritesheet("ow_player_running", "public/assets/playerRun.png", {
             frameWidth: 16,
             frameHeight: 16
         })
          this.load.video("begin", "public/assets/Arcade_Exterior_begin.mp4", true)
          this.load.video("loop", "public/assets/Arcade_Exterior_loop.mp4", true)
-        this.load.audio('background', 'public/assets/audio/background_music_filler.mp3');
+        this.load.audio("background", "public/assets/audio/background_music_filler.mp3");
 
         this.load.spritesheet("arrow", "public/assets/arrow.png", {
             frameWidth: 55,
@@ -43,12 +43,12 @@ export default class arcade_exterior extends Phaser.Scene {
         console.log(playerData);
         this.physics.world.setBounds(0, 0, this.scale.width,this.scale.height - 36);
         // this.game.canvas.style.filter = "contrast(1) saturate(1.5) brightness(1.5)";
-        const video = this.add.video(0, 0, 'begin');
+        const video = this.add.video(0, 0, "begin");
         video.setOrigin(0,0)
         video.play(false);
         const loopvid = this.add.video(0,0,"loop")
         loopvid.setOrigin(0, 0)
-        video.on('complete', () => {
+        video.on("complete", () => {
             loopvid.play(true);
         });
         video.setTint(0xFFFFFF).setAlpha(1);
@@ -138,7 +138,7 @@ export default class arcade_exterior extends Phaser.Scene {
         this.interactKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.Z)
         
         //cords for debug
-        this.coordText = this.add.text(this.cameras.main.width - 10, this.cameras.main.height - 10, 'X: 0 Y: 0', {
+        this.coordText = this.add.text(this.cameras.main.width - 10, this.cameras.main.height - 10, "X: 0 Y: 0", {
             fontFamily: "./code_fonts/melodica.regular.otf",
             fontSize: "16px",
             fill: "#ffffff"
@@ -148,7 +148,7 @@ export default class arcade_exterior extends Phaser.Scene {
         this.coordText.setDepth(1000);
         
         //sidney asked for music
-        const music = this.sound.add('background', {
+        const music = this.sound.add("background", {
             loop: true,
             volume: 0.65
         });
@@ -158,7 +158,7 @@ export default class arcade_exterior extends Phaser.Scene {
         this.player.y = 200;
         // Post-Update Sync (Fixes Lag/Blur)
         // Sync runs AFTER physics, ensuring visual matches actual body position for this frame
-        this.events.on('postupdate', () => {
+        this.events.on("postupdate", () => {
             if (this.player && this.playerVisual) {
                 this.playerVisual.x = this.player.x;
                 this.playerVisual.y = this.player.y;
