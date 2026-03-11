@@ -10,14 +10,14 @@ export default class Pause extends Phaser.Scene {
   }
 
   preload() {
-    this.load.spritesheet("knob", "assets/knob-sheet.png", {
+    this.load.spritesheet("knob", "public/assets/knob-sheet.png", {
       frameWidth: 16,
       frameHeight: 16
     })
-    this.load.image("back", "assets/back.png")
-    this.load.image("back_yellow", "assets/back_yellow.png")
-    this.load.image("slider", "assets/slider.png")
-    this.load.image("sound", "assets/sound.png")
+    this.load.image("back", "public/assets/back.png")
+    this.load.image("back_yellow", "public/assets/back_yellow.png")
+    this.load.image("slider", "public/assets/slider.png")
+    this.load.image("sound", "public/assets/sound.png")
   }
   create() {
     this.scene.bringToTop();

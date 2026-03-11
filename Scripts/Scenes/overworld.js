@@ -62,11 +62,11 @@ export default class Overworld extends Phaser.Scene {
           frameHeight: 64
         });
       */
-        this.load.image("frame", "assets/ARCADE_BORDER.png")
-        this.load.image("overworldbg", "assets/arcade_interior.png")
+        this.load.image("frame", "public/assets/ARCADE_BORDER.png")
+        this.load.image("overworldbg", "public/assets/arcade_interior.png")
         this.load.image('ow_player_still', 'assets/playerIdle.png'); //player image
         this.load.image('ow_player_falling_static', 'assets/playerFall.png'); //player image
-        this.load.spritesheet("ow_player_jumping", "assets/playerJump.png", {
+        this.load.spritesheet("ow_player_jumping", "public/assets/playerJump.png", {
             frameWidth: 16,
             frameHeight: 16
         })

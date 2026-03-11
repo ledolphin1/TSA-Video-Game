@@ -7,7 +7,7 @@ export default class Narator extends Phaser.Scene {
     super({ key: 'Narator',active: true});
   }
   preload() {
-    this.load.bitmapFont("game_font", "assets/pixel_fonts/fonts/square_6x6.png", "assets/pixel_fonts/fonts/square_6x6.xml")
+    this.load.bitmapFont("game_font", "public/assets/pixel_fonts/fonts/square_6x6.png", "public/assets/pixel_fonts/fonts/square_6x6.xml")
   }
   create() {
       this.line1 = this.add.bitmapText(this.cameras.main.width - 10, 30, 'game_font', '', 10).setOrigin(1, 1)
