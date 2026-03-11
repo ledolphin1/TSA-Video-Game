@@ -1,8 +1,8 @@
-import * as Phaser from 'phaser';
+import * as Phaser from "phaser";
 
 export default class Pause extends Phaser.Scene {
   constructor() {
-    super({ key: 'Pause' });
+    super({ key: "Pause" });
   }
 
   init(data) {
@@ -36,11 +36,11 @@ export default class Pause extends Phaser.Scene {
     this.track = this.add.image(width / 2, height / 2 + 30, "slider").setOrigin(0.5);
 
     const handle = this.add.sprite(width / 2, height / 2 + 30, "knob").setScale(2)
-    handle.play('knob_anim'); 
+    handle.play("knob_anim"); 
     handle.setInteractive({ draggable: true });
     handle.x = this.sound.volume*225+47.5;
     this.input.setDraggable(handle);
-    this.input.on('drag', (pointer, gameObject, dragX) => {
+    this.input.on("drag", (pointer, gameObject, dragX) => {
 
         // clamp inside the track
         const minX = this.track.x - this.track.width / 2 + 10;
@@ -52,15 +52,15 @@ export default class Pause extends Phaser.Scene {
     })
 
 
-    this.backButton.on('pointerover', () => {
+    this.backButton.on("pointerover", () => {
       this.backButton.setTexture("back_yellow");
     });
 
-    this.backButton.on('pointerout', () => {
+    this.backButton.on("pointerout", () => {
       this.backButton.setTexture("back");
     });
 
-    this.backButton.on('pointerdown', () => {
+    this.backButton.on("pointerdown", () => {
       this.scene.resume(this.returnScene);
       this.scene.stop()
     });

@@ -1,11 +1,11 @@
-import * as Phaser from 'phaser';
-import constructor_init from './Functions/constructor_init.js';
-import preload_init from './Functions/preload_init.js';
-import create_init from './Functions/create_init.js';
-import { customEmitter } from './events.js';
+import * as Phaser from "phaser";
+import constructor_init from "./Functions/constructor_init.js";
+import preload_init from "./Functions/preload_init.js";
+import create_init from "./Functions/create_init.js";
+import { customEmitter } from "./events.js";
 export default class BossScene extends Phaser.Scene {
   constructor() {
-    super({ key: 'boss' });
+    super({ key: "boss" });
 
     constructor_init.call(this);
     this._bossTransitioned = false;
@@ -15,7 +15,7 @@ export default class BossScene extends Phaser.Scene {
     customEmitter.emit("SNAKEBOSS_BEGIN")
     preload_init.call(this);
     this.load.image("bossbg", "public/assets/bossbg.png");
-    this.load.tilemapTiledJSON('boss_level', 'public/assets/Map/boss.tmj');
+    this.load.tilemapTiledJSON("boss_level", "public/assets/Map/boss.tmj");
   }
 
   create() {
@@ -25,8 +25,8 @@ export default class BossScene extends Phaser.Scene {
     const map = this.make.tilemap({ key: "boss_level" });
     create_init.call(this, map,1) 
     
-    this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.S).on('down', () => {
-    this.scene.start('LevelTwo');
+    this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.S).on("down", () => {
+    this.scene.start("LevelTwo");
     });
  
     
@@ -252,7 +252,7 @@ export default class BossScene extends Phaser.Scene {
   }
 
   spawnEnemy(x, y) {
-    const enemy = this.enemies.create(x, y, 'enemySprite');
+    const enemy = this.enemies.create(x, y, "enemySprite");
     const scale = 4;
     enemy.setScale(scale);
 
@@ -338,13 +338,13 @@ export default class BossScene extends Phaser.Scene {
     }
   }
   resetEnemies(){
-    //do nothing just a blank function to call don't keep anything in here.
+    //do nothing just a blank function to call don"t keep anything in here.
   }
   _buildEnemyHpBar() {
     const bw = 120, bh = 8, bx = 100, by = 6;
     this.enemyHpBarBg   = this.add.graphics().setScrollFactor(0).setDepth(1000);
     this.enemyHpBarFill = this.add.graphics().setScrollFactor(0).setDepth(1000);
-    this.enemyHpLabel   = this.add.text(160, 8, 'SNAKE BOSS', { fontSize: '8px', color: '#ffffff' })
+    this.enemyHpLabel   = this.add.text(160, 8, "SNAKE BOSS", { fontSize: "8px", color: "#ffffff" })
       .setOrigin(0.5, 0).setScrollFactor(0).setDepth(1001);
 
     // Draw initial full bar
@@ -376,7 +376,7 @@ export default class BossScene extends Phaser.Scene {
 
     this.time.delayedCall(500, () => {
       try { this.music.stop(); } catch (e) {}
-      this.scene.start('LevelTwo');
+      this.scene.start("LevelTwo");
     });
   }
 }

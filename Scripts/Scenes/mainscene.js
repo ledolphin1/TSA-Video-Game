@@ -1,16 +1,16 @@
 
-import * as Phaser from 'phaser';
+import * as Phaser from "phaser";
 //import external functions
-import create_init from './Functions/create_init.js';
-import activate_anims from './Functions/activate_anims.js';
-import constructor_init from './Functions/constructor_init.js';
-import preload_init from './Functions/preload_init.js';
-import performAttack from './Functions/performAttack.js';
-import { customEmitter } from './events.js';
-import { playerData } from './playerdata.js';
+import create_init from "./Functions/create_init.js";
+import activate_anims from "./Functions/activate_anims.js";
+import constructor_init from "./Functions/constructor_init.js";
+import preload_init from "./Functions/preload_init.js";
+import performAttack from "./Functions/performAttack.js";
+import { customEmitter } from "./events.js";
+import { playerData } from "./playerdata.js";
 export default class MainScene extends Phaser.Scene {
   constructor() {
-    super({ key: 'MainScene' });
+    super({ key: "MainScene" });
     constructor_init.call(this);
   
     
@@ -19,13 +19,13 @@ export default class MainScene extends Phaser.Scene {
   preload() {
     customEmitter.emit("L1BEGIN")
     preload_init.call(this)
-    this.load.spritesheet('chests', 'public/assets/chests.png', {
+    this.load.spritesheet("chests", "public/assets/chests.png", {
       frameWidth: 16,
       frameHeight: 16
     });
-    this.load.tilemapTiledJSON('map', 'public/assets/Map/firstlevel.tmj');
-    this.load.image('spikes', 'public/assets/Map/spikes.png');
-    this.load.image('gate', 'public/assets/gate.png');
+    this.load.tilemapTiledJSON("map", "public/assets/Map/firstlevel.tmj");
+    this.load.image("spikes", "public/assets/Map/spikes.png");
+    this.load.image("gate", "public/assets/gate.png");
     
   }
   create() {
@@ -33,8 +33,8 @@ export default class MainScene extends Phaser.Scene {
       key: "map"
     })
 
-    this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.S).on('down', () => {
-    this.scene.start('boss');
+    this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.S).on("down", () => {
+    this.scene.start("boss");
     });
 
     create_init.call(this, map);
@@ -110,7 +110,7 @@ export default class MainScene extends Phaser.Scene {
 
     // chests
     this.chests = this.physics.add.group();
-    const chest = this.chests.create(2060, 584, 'chests', 0); // Frame 0 = closed
+    const chest = this.chests.create(2060, 584, "chests", 0); // Frame 0 = closed
     chest.body.setAllowGravity(false); // assuming chest stays in place
     // chest.setImmovable(true); 
 
@@ -256,7 +256,7 @@ export default class MainScene extends Phaser.Scene {
   }
 
   spawnEnemy(x, y) {
-    const enemy = this.enemies.create(x, y, 'enemySprite');
+    const enemy = this.enemies.create(x, y, "enemySprite");
     enemy.hp = 2; // Enemy Health
     enemy.isKnockedBack = false;
     enemy.hitCooldown = false;

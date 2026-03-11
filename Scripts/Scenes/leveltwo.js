@@ -1,10 +1,10 @@
-import * as Phaser from 'phaser';
-import create_init from './Functions/create_init.js';
-import activate_anims from './Functions/activate_anims.js';
-import constructor_init from './Functions/constructor_init.js';
-import preload_init from './Functions/preload_init.js';
-import performAttack from './Functions/performAttack.js';
-import { customEmitter } from './events.js';
+import * as Phaser from "phaser";
+import create_init from "./Functions/create_init.js";
+import activate_anims from "./Functions/activate_anims.js";
+import constructor_init from "./Functions/constructor_init.js";
+import preload_init from "./Functions/preload_init.js";
+import performAttack from "./Functions/performAttack.js";
+import { customEmitter } from "./events.js";
 
 // ─────────────────────────────────────────────────────────────────────────────
 //  LEVEL TWO  — The Virus Corridor
@@ -16,7 +16,7 @@ import { customEmitter } from './events.js';
 
 export default class LevelTwo extends Phaser.Scene {
   constructor() {
-    super({ key: 'LevelTwo' });
+    super({ key: "LevelTwo" });
     constructor_init.call(this);
     // Override projectile damage so 2 shots kill the virus (hp=8, proj=4)
     this.projectileDamage = 4;
@@ -27,30 +27,30 @@ export default class LevelTwo extends Phaser.Scene {
     preload_init.call(this);
 
     // Virus sprite — 4 frames × 16×16
-    this.load.spritesheet('virusEnemy', 'public/assets/virusEnemy.png', {
+    this.load.spritesheet("virusEnemy", "public/assets/virusEnemy.png", {
       frameWidth: 16,
       frameHeight: 16
     });
 
     // Electro blade — 4 frames × 8×8
-    this.load.spritesheet('electroBlade', 'public/assets/electroBlade.png', {
+    this.load.spritesheet("electroBlade", "public/assets/electroBlade.png", {
       frameWidth: 8,
       frameHeight: 8
     });
 
     // Gateway portal — 4 frames × 32×32
-    this.load.image('gate', 'public/assets/gate.png');
+    this.load.image("gate", "public/assets/gate.png");
 
-    this.load.image('spikes', 'public/assets/Map/spikes.png');
-    this.load.tilemapTiledJSON('leveltwo_map', 'public/assets/Map/leveltwo.tmj');
+    this.load.image("spikes", "public/assets/Map/spikes.png");
+    this.load.tilemapTiledJSON("leveltwo_map", "public/assets/Map/leveltwo.tmj");
   }
 
   // ──────────────────────────────────── CREATE ──────────────────────────────
   create() {
-    const map = this.make.tilemap({ key: 'leveltwo_map' });
+    const map = this.make.tilemap({ key: "leveltwo_map" });
 
-    this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.S).on('down', () => {
-    this.scene.start('dragonBoss');
+    this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.S).on("down", () => {
+    this.scene.start("dragonBoss");
     });
 
     // ── Base setup (player, camera, ground, controls, HUD) ──────────────────
@@ -60,29 +60,29 @@ export default class LevelTwo extends Phaser.Scene {
 
     // ── Extra animations ────────────────────────────────────────────────────
     this.anims.create({
-      key: 'virus_idle',
-      frames: this.anims.generateFrameNumbers('virusEnemy', { start: 0, end: 3 }),
+      key: "virus_idle",
+      frames: this.anims.generateFrameNumbers("virusEnemy", { start: 0, end: 3 }),
       frameRate: 12,
       repeat: -1
     });
 
     this.anims.create({
-      key: 'virus_glitch',
-      frames: this.anims.generateFrameNumbers('virusEnemy', { start: 0, end: 3 }),
+      key: "virus_glitch",
+      frames: this.anims.generateFrameNumbers("virusEnemy", { start: 0, end: 3 }),
       frameRate: 30,   // fast flicker = glitch burst
       repeat: 3
     });
 
     this.anims.create({
-      key: 'blade_swing',
-      frames: this.anims.generateFrameNumbers('electroBlade', { start: 0, end: 3 }),
+      key: "blade_swing",
+      frames: this.anims.generateFrameNumbers("electroBlade", { start: 0, end: 3 }),
       frameRate: 20,
       repeat: 0
     });
 
     // ── Spikes layer ────────────────────────────────────────────────────────
-    const spikeTileset = map.addTilesetImage('spikes', 'spikes');
-    const spikesLayer  = map.createLayer('spikes', spikeTileset);
+    const spikeTileset = map.addTilesetImage("spikes", "spikes");
+    const spikesLayer  = map.createLayer("spikes", spikeTileset);
     spikesLayer.setCollisionByExclusion([-1]);
     this.physics.add.collider(this.player, spikesLayer, this._handleSpikeOverlap, null, this);
 
@@ -143,7 +143,7 @@ export default class LevelTwo extends Phaser.Scene {
     const GATEWAY_X = 928;
     const GATEWAY_Y = 256;
 
-    this.gatewaySprite = this.add.image(GATEWAY_X, GATEWAY_Y, 'gate');
+    this.gatewaySprite = this.add.image(GATEWAY_X, GATEWAY_Y, "gate");
     this.gatewaySprite.setDepth(-5);
 
     // Physics zone for gateway interaction
@@ -153,9 +153,9 @@ export default class LevelTwo extends Phaser.Scene {
     this.gatewayZone.body.immovable = true;
 
     // ── Gateway "Press Z" prompt ─────────────────────────────────────────────
-    this.gatewayPrompt = this.add.text(GATEWAY_X, GATEWAY_Y - 22, 'Press Z', {
-      fontSize: '6px',
-      fill: '#08c7d4'
+    this.gatewayPrompt = this.add.text(GATEWAY_X, GATEWAY_Y - 22, "Press Z", {
+      fontSize: "6px",
+      fill: "#08c7d4"
     }).setOrigin(0.5, 1).setDepth(6);
     this.gatewayPrompt.setVisible(false);
 
@@ -204,7 +204,7 @@ respawn() {
   this.playerVisual.x = 50;
   this.playerVisual.y = 240;
   this.playerVisual.clearTint();
-  this.playerVisual.setTexture('player_still');
+  this.playerVisual.setTexture("player_still");
   this.playerVisual.setAlpha(1);
 
   this.drawHealthBar();
@@ -238,7 +238,7 @@ respawn() {
     }
 
     if (this.player.body.velocity.y > 0 && !this.isAttacking) {
-      this.playerVisual.play('player_falling', true);
+      this.playerVisual.play("player_falling", true);
     }
 
     if (Phaser.Input.Keyboard.JustDown(this.attackKey) && !this.isAttacking && time > this.lastAttackEndTime + 10) {
@@ -247,7 +247,7 @@ respawn() {
 
     if (Phaser.Input.Keyboard.JustDown(this.menuKey)) {
       this.scene.pause();
-      this.scene.launch('Pause', { returnScene: this.scene.key });
+      this.scene.launch("Pause", { returnScene: this.scene.key });
     }
 
     if (Phaser.Input.Keyboard.JustDown(this.fireKey) && !this.projectileOnCooldown) {
@@ -261,15 +261,15 @@ respawn() {
     // Movement
     if (this.cursors.left.isDown) {
       this.player.flipX = true;
-      if (this.onGround) this.playerVisual.play('player_moving', true);
+      if (this.onGround) this.playerVisual.play("player_moving", true);
       this.player.setVelocityX(-150);
     } else if (this.cursors.right.isDown) {
       this.player.flipX = false;
-      if (this.onGround) this.playerVisual.play('player_moving', true);
+      if (this.onGround) this.playerVisual.play("player_moving", true);
       this.player.setVelocityX(150);
     } else {
       this.player.setVelocityX(0);
-      if (this.onGround) this.playerVisual.setTexture('player_still');
+      if (this.onGround) this.playerVisual.setTexture("player_still");
     }
 
     // Jump
@@ -277,7 +277,7 @@ respawn() {
       this.player.setVelocityY(-300);
       this.lastGroundedTime = 0;
       this.isJumping = true;
-      this.playerVisual.play('player_jump_start', true);
+      this.playerVisual.play("player_jump_start", true);
     }
     if (Phaser.Input.Keyboard.JustUp(this.cursors.up) && this.player.body.velocity.y < 0) {
       this.player.setVelocityY(this.player.body.velocity.y * 0.5);
@@ -302,7 +302,7 @@ respawn() {
 
   // ──────────────────────────────── VIRUS SPAWNING ──────────────────────────
   _spawnVirus(x, y) {
-    const enemy = this.enemies.create(x, y, 'virusEnemy');
+    const enemy = this.enemies.create(x, y, "virusEnemy");
     enemy.setScale(2);        // scale up for visibility at 16px base size
     enemy.hp = 8;             // 4 melee or 2 ranged to kill
     enemy.isKnockedBack   = false;
@@ -316,7 +316,7 @@ respawn() {
     enemy._nextGlitch  = Phaser.Math.Between(800, 2400);
     enemy._glitchAccum = 0;
 
-    enemy.play('virus_idle');
+    enemy.play("virus_idle");
 
     // Hitbox
     const eW = 10, eH = 12;
@@ -399,7 +399,7 @@ respawn() {
     enemy.setVelocityX(0);
 
     // Play fast glitch anim while winding up
-    if (enemy.active) enemy.play('virus_glitch', true);
+    if (enemy.active) enemy.play("virus_glitch", true);
 
     // 250 ms pause before swing
     this.time.delayedCall(250, () => {
@@ -416,11 +416,11 @@ respawn() {
     const blade = this.add.sprite(
       enemy.x + bladeOffX,
       enemy.y,
-      'electroBlade'
+      "electroBlade"
     );
     blade.setScale(2);
     blade.setDepth(15);
-    blade.play('blade_swing');
+    blade.play("blade_swing");
 
     // Electric tint flash on the virus
     enemy.setTintFill(0x00ffff);
@@ -460,7 +460,7 @@ respawn() {
     this.time.delayedCall(350, () => {
       if (enemy.active) {
         enemy.isAttackingPlayer = false;
-        enemy.play('virus_idle', true);
+        enemy.play("virus_idle", true);
       }
     });
   }
@@ -554,7 +554,7 @@ respawn() {
     if (this._glitchTimer) this._glitchTimer.remove();
 
     this.time.delayedCall(400, () => {
-      this.scene.start('dragonBoss');
+      this.scene.start("dragonBoss");
     });
   }
 

@@ -1,8 +1,8 @@
-import * as Phaser from 'phaser';
+import * as Phaser from "phaser";
 
 export default class Pause extends Phaser.Scene {
   constructor() {
-    super({ key: 'pickAbility' });
+    super({ key: "pickAbility" });
   }
 
   preload() {
