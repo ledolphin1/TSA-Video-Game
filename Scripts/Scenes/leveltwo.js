@@ -27,22 +27,22 @@ export default class LevelTwo extends Phaser.Scene {
     preload_init.call(this);
 
     // Virus sprite — 4 frames × 16×16
-    this.load.spritesheet('virusEnemy', 'assets/virusEnemy.png', {
+    this.load.spritesheet('virusEnemy', '/assets/virusEnemy.png', {
       frameWidth: 16,
       frameHeight: 16
     });
 
     // Electro blade — 4 frames × 8×8
-    this.load.spritesheet('electroBlade', 'assets/electroBlade.png', {
+    this.load.spritesheet('electroBlade', '/assets/electroBlade.png', {
       frameWidth: 8,
       frameHeight: 8
     });
 
     // Gateway portal — 4 frames × 32×32
-    this.load.image('gate', 'assets/gate.png');
+    this.load.image('gate', '/assets/gate.png');
 
-    this.load.image('spikes', 'assets/Map/spikes.png');
-    this.load.tilemapTiledJSON('leveltwo_map', 'assets/Map/leveltwo.tmj');
+    this.load.image('spikes', '/assets/Map/spikes.png');
+    this.load.tilemapTiledJSON('leveltwo_map', '/assets/Map/leveltwo.tmj');
   }
 
   // ──────────────────────────────────── CREATE ──────────────────────────────
