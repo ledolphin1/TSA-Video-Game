@@ -70,7 +70,7 @@ export default class Overworld extends Phaser.Scene {
             frameWidth: 16,
             frameHeight: 16
         })
-        this.load.spritesheet('ow_player_running', 'public/assets/playerRun.png', {
+        this.load.spritesheet("ow_player_running", "public/assets/playerRun.png", {
             frameWidth: 16,
             frameHeight: 16
         })
