@@ -149,8 +149,8 @@ export default class MainScene extends Phaser.Scene {
   }
 
   update(time, delta) {
-    this.player.x = Math.round(this.player.x);
-    this.player.y = Math.round(this.player.y);
+    // this.player.x = Math.round(this.player.x*10)/10;
+    // this.player.y = Math.round(this.player.y*10)/10;
 
     if (this.playerIsDead) {
       this.resetEnemies();
