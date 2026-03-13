@@ -134,7 +134,6 @@ export default class MainScene extends Phaser.Scene {
     const spikeTileset = map.addTilesetImage("spikes", "spikes")
     this.ground = map.createLayer("platforms", tileset)
     const spikes = map.createLayer("spikes", spikeTileset)
-    this.ground.setCollisionByExclusion([-1]);
 
 
 
