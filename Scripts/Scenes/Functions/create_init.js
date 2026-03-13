@@ -16,7 +16,6 @@ const create_init = function(map,debug){
     this.fireProjectile = fireProjectileUnbound.bind(this);
     this.handleEnemyOverlap = handleEnemyOverlapUnbound.bind(this);
     this.killPlayer = killPlayerUnbound.bind(this);
-    this.respawnPlayer = respawnPlayerUnbound.bind(this);
     
     //Health Bar//!
     this.healthBarBg = this.add.graphics();
