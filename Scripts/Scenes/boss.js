@@ -388,7 +388,7 @@ export default class BossScene extends Phaser.Scene {
     this.playerVisual.clearTint();
     this.playerVisual.setTexture("player_still"); // Reset animation to idle
     console.log(player.x,player.y)
-    this.player.enableBody(true, 50, 20, true, false); // Reset to start pos, keep hidden
+    this.player.enableBody(true, 79, 20, true, false); // Reset to start pos, keep hidden
     this.playerVisual.setAlpha(1);
     this.player.setVelocity(0, 0);
     this.lastFiredTime = 0;
