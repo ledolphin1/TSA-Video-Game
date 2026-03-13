@@ -114,8 +114,8 @@ const create_init = function(map,debug){
     // Sync runs AFTER physics, ensuring visual matches actual body position for this frame
     this.events.on('postupdate', () => {
         if (this.playerVisual && this.player) {
-        let vX = this.player.x;
-        let vY = this.player.y;
+        let vX = Math.round(this.player.x);
+        let vY = Math.round(this.player.y);
 
         // Apply Visual Offsets when attacking
         if (this.playerVisual.texture.key === 'player_attack_sheet') {
