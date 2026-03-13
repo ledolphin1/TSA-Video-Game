@@ -19,7 +19,11 @@ const config = {
   zoom: 5,
   backgroundColor: "#ff0000ff",
   pixelArt: true,
-  // antialias:true,
+  render: {
+    pixelArt: true,
+    antialias: false,
+    roundPixels: true
+  },
   parent: "game-container",
 
   // DragonBossScene added at the end of the scene list
