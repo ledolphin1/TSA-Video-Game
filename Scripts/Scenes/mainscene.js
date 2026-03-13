@@ -1,6 +1,6 @@
 
 import * as Phaser from 'phaser';
-import preload_init from './Functions/preload_init';
+import preload_init from './Functions/preload_init.js';
 
 export default class MainScene extends Phaser.Scene {
   constructor() {
