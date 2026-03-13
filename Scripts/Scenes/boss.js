@@ -48,7 +48,7 @@ export default class BossScene extends Phaser.Scene {
     //Create Enemy Group
     this.enemies = this.physics.add.group();
 
-    this.spawnEnemy(241, 296);
+    this.spawnEnemy(241, 290);
     this._buildEnemyHpBar();
 
     this.physics.add.collider(this.enemies, this.ground);
@@ -281,7 +281,7 @@ export default class BossScene extends Phaser.Scene {
     const eWidth = 49;
     const eHeight = 61 - 14;
     const eOffsetX = (enemy.width - eWidth) / 2;
-    const eOffsetY = (enemy.height - eHeight) - 2;
+    const eOffsetY = (enemy.height - eHeight);
 
     enemy.body.setSize(eWidth, eHeight);
     enemy.body.setOffset(eOffsetX, eOffsetY);
