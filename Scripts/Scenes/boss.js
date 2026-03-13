@@ -268,8 +268,9 @@ export default class BossScene extends Phaser.Scene {
   spawnEnemy(x, y) {
     const enemy = this.enemies.create(x, y, "boss_twist");
     const scale = 1;
+    this.physics.add.collider(enemy, this.ground);
     enemy.setScale(scale);
-
+    
     enemy.hp = 20;
     enemy.canShoot = true;
     enemy.lastShotTime = 0;
