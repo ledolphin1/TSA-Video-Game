@@ -48,7 +48,7 @@ export default class BossScene extends Phaser.Scene {
     //Create Enemy Group
     this.enemies = this.physics.add.group();
 
-    this.spawnEnemy(241, 290);
+    this.spawnEnemy(241, 260);
     this._buildEnemyHpBar();
 
     this.physics.add.collider(this.enemies, this.ground);
