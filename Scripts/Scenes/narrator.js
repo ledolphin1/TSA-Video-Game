@@ -30,9 +30,9 @@ export default class Narator extends Phaser.Scene {
         customEmitter.on("L1BEGIN", this.setNarrator.bind(this,"Don't fall on spikes.","Press up arrow to jump."))
         customEmitter.on("JUMPED", onJump.bind(this))
         customEmitter.on("ATTACKED",onAttack.bind(this))
-        customEmitter.on("LPFIRED", this.setNarrator.bind(this,"Push forward! Vanquish the evil snakes!","Find the gate."))
+        customEmitter.on("LPFIRED", this.setNarrator.bind(this,"Push forward! Vanquish the evil snakes!","Find the gate. Press Z to enter it."))
         customEmitter.on("SNAKEBOSS_BEGIN", this.setNarrator.bind(this,"This snake fires homing orbs!","Use your Cyber Canon and Plasma Saber."))
-        customEmitter.on("L2BEGIN", this.setNarrator.bind(this,"Navigate the rough terrain.","These viruses are stronger and smarter than snakes, push through!"))
+        customEmitter.on("L2BEGIN", this.setNarrator.bind(this,"Navigate the rough terrain.","Viruses are tougher and smarter than snakes, push through!"))
         customEmitter.on("DRAGONBOSS", this.setNarrator.bind(this,"",""))
         
     function onJump(){

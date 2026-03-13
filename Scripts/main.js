@@ -33,7 +33,7 @@ const config = {
     default: "arcade",
     arcade: {
       gravity: { y: 600 },
-      debug: false          // set to true for hitbox debugging
+      debug: true          // set to true for hitbox debugging
     }
   }
 };

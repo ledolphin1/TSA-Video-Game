@@ -28,7 +28,7 @@ export default class DragonBossScene extends Phaser.Scene {
 
     // Dragon hitbox — intentionally slightly *smaller* than the visible sprite
     // so melee can connect at the edges without triggering contact damage
-    this.dragonHitbox = { width: 22, height: 14 };
+    this.dragonHitbox = { width: 55, height: 32 };
 
     // Visual offset for attack sprite (same as other scenes)
     this.attackVisualOffset = { x: 9, y: -8 };
@@ -54,7 +54,7 @@ export default class DragonBossScene extends Phaser.Scene {
     this.load.spritesheet("dragon", "public/assets/dragon.png", {
       frameWidth: 32, frameHeight: 24
     });
-
+    this.load.image("ai_fly","public/assets/AI_Sprite_fly.png")
     // Fire breath particle — 8×8 per frame, 3 frames
     this.load.spritesheet("dragonFire", "public/assets/dragonFire.png", {
       frameWidth: 8, frameHeight: 8
@@ -72,10 +72,10 @@ export default class DragonBossScene extends Phaser.Scene {
     this.add.image(160, 247, "bossbg");
 
     this.physics.world.roundPixels = false;
-    this.physics.world.drawDebug = false;
-    if (this.physics.world.debugGraphic) {
-      this.physics.world.debugGraphic.setVisible(false);
-    }
+    // this.physics.world.drawDebug = false;
+    // if (this.physics.world.debugGraphic) {
+    //   this.physics.world.debugGraphic.setVisible(false);
+    // }
 
     // ── Tilemap ─────────────────────────────────────────────
     const map = this.make.tilemap({ key: "boss_level" });
@@ -120,9 +120,9 @@ export default class DragonBossScene extends Phaser.Scene {
     this.physics.add.collider(this.player, this.ground);
 
     // ── Dragon (physics sprite, flying) ──────────────────────
-    this.dragon = this.physics.add.sprite(240, 210, "dragon");
-    this.dragon.setScale(3);          // 3× scale → 96×72 px on screen
-    this.dragon.play("dragon_fly");
+    this.dragon = this.physics.add.sprite(240, 210, "ai_fly");
+    this.dragon.setScale(1);          // 3× scale → 96×72 px on screen
+    this.dragon.play("ai_fly");
     this.dragon.body.allowGravity = false;
     // Do NOT use setCollideWorldBounds — we handle turnaround manually
 

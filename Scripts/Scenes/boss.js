@@ -14,6 +14,10 @@ export default class BossScene extends Phaser.Scene {
   preload() {
     customEmitter.emit("SNAKEBOSS_BEGIN")
     preload_init.call(this);
+    this.load.spritesheet('boss_move_sheet', "public/assets/AI_Sprite_Movement.png", {
+      frameWidth: 49,
+      frameHeight: 61
+    })
     this.load.image("bossbg", "public/assets/bossbg.png");
     this.load.tilemapTiledJSON("boss_level", "public/assets/Map/boss.tmj");
   }
@@ -21,6 +25,16 @@ export default class BossScene extends Phaser.Scene {
   create() {
     this._bossTransitioned = false;
     this.add.image(160, 220, "bossbg");
+    this.anims.create({
+            key: "boss_twist",
+            frames: this.anims.generateFrameNumbers("boss_move_sheet", {
+                start: 0,
+                end: 2
+            }),
+            frameRate: 5,
+            repeat: 0,
+            hideOnComplete: false
+        })
     console.log("boss scene created");
     const map = this.make.tilemap({ key: "boss_level" });
     create_init.call(this, map,1) 
@@ -252,8 +266,8 @@ export default class BossScene extends Phaser.Scene {
   }
 
   spawnEnemy(x, y) {
-    const enemy = this.enemies.create(x, y, "enemySprite");
-    const scale = 4;
+    const enemy = this.enemies.create(x, y, "boss_twist");
+    const scale = 1;
     enemy.setScale(scale);
 
     enemy.hp = 20;
@@ -261,13 +275,13 @@ export default class BossScene extends Phaser.Scene {
     enemy.lastShotTime = 0;
     enemy.isKnockedBack = false;
     enemy.hitCooldown = false;
-    enemy.play("enemy_moving");
+    enemy.play("boss_twist");
     enemy.flipX = true;
 
-    const eWidth = this.enemyHitbox.width;
-    const eHeight = this.enemyHitbox.height;
+    const eWidth = 49;
+    const eHeight = 61 - 14;
     const eOffsetX = (enemy.width - eWidth) / 2;
-    const eOffsetY = (enemy.height - eHeight);
+    const eOffsetY = (enemy.height - eHeight) - 2;
 
     enemy.body.setSize(eWidth, eHeight);
     enemy.body.setOffset(eOffsetX, eOffsetY);
@@ -286,7 +300,7 @@ export default class BossScene extends Phaser.Scene {
       if (!enemy.active) return;
       this.time.delayedCall(i * 200, () => {
         if (!enemy.active) return;
-        const proj = this.add.rectangle(enemy.body.center.x, enemy.body.center.y, 10, 10, 0xff0000);
+        const proj = this.add.rectangle(enemy.body.center.x, enemy.body.center.y, 7, 7, 0xff0000);
         this.physics.add.existing(proj);
         this.enemyProjectiles.add(proj);
 
@@ -309,13 +323,15 @@ export default class BossScene extends Phaser.Scene {
       this.enemyProjectile(time, enemy);
       enemy.lastShotTime = time;
     }
-
+    console.log("boss_can move rn")
     if (enemy.body.blocked.right) {
       enemy.setVelocityX(-50);
       enemy.flipX = false;
+      enemy.play("boss_twist")
     } else if (enemy.body.blocked.left) {
       enemy.setVelocityX(50);
       enemy.flipX = true;
+      enemy.play("boss_twist")
     }
 
     if (enemy.body.blocked.down) {
