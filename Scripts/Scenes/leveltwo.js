@@ -198,7 +198,7 @@ respawn() {
   this.isKnockedBack = false;
 
   this.player.body.enable = true;
-  this.player.body.reset(50, 240);   // reset snaps position AND clears velocity
+  this.player.body.reset(50,240);   // reset snaps position AND clears velocity
   this.player.setVelocity(0, 0);
 
   this.playerVisual.x = 50;

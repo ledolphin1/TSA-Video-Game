@@ -4,7 +4,7 @@ import handleEnemyOverlapUnbound from './handleEnemyOverlap.js';
 import drawCooldown from './drawCooldown.js';
 import * as playerFuncs from './playerFuncs.js'
 import * as Phaser from "phaser";
-const {updatePlayerHitboxUnbound, flashPlayerUnbound, killPlayerUnbound, respawnPlayerUnbound} = playerFuncs;
+const {updatePlayerHitboxUnbound, flashPlayerUnbound, killPlayerUnbound} = playerFuncs;
 const create_init = function(map,debug){
 
     //Activate all anims

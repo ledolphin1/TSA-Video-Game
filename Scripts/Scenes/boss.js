@@ -110,13 +110,14 @@ export default class BossScene extends Phaser.Scene {
       this.playerVisual.play("player_falling", true);
     }
 
-    if (Phaser.Input.Keyboard.JustDown(this.attackKey) && !this.isAttacking && time > this.lastAttackEndTime + 10) {
-      this.performAttack();
-    }
-
+    
     if (Phaser.Input.Keyboard.JustDown(this.menuKey)) {
       this.scene.pause();
       this.scene.launch("Pause", { returnScene: this.scene.key });
+    }
+    if (this.isAttacking) return;
+    if (Phaser.Input.Keyboard.JustDown(this.attackKey) && !this.isAttacking && time > this.lastAttackEndTime + 10) {
+      this.performAttack();
     }
 
     if (Phaser.Input.Keyboard.JustDown(this.fireKey)) {
@@ -125,7 +126,6 @@ export default class BossScene extends Phaser.Scene {
       }
     }
 
-    if (this.isAttacking) return;
 
     if (this.cursors.left.isDown) {
       this.player.flipX = true;
@@ -378,5 +378,19 @@ export default class BossScene extends Phaser.Scene {
       try { this.music.stop(); } catch (e) {}
       this.scene.start("LevelTwo");
     });
+  }
+  respawnPlayer() {
+    this.health = this.maxHealth;
+    this.drawHealthBar();
+    this.playerIsDead = false;
+    this.isInvincible = false;
+    // Reset Player Position and Physics
+    this.playerVisual.clearTint();
+    this.playerVisual.setTexture("player_still"); // Reset animation to idle
+    this.player.enableBody(true, 79, 232, true, false); // Reset to start pos, keep hidden
+    this.playerVisual.setAlpha(1);
+    this.player.setVelocity(0, 0);
+    this.lastFiredTime = 0;
+    this.isAttacking = false;
   }
 }

@@ -352,4 +352,18 @@ export default class MainScene extends Phaser.Scene {
       }
     }
   }
+   respawnPlayer() {
+    this.health = this.maxHealth;
+    this.drawHealthBar();
+    this.playerIsDead = false;
+    this.isInvincible = false;
+    // Reset Player Position and Physics
+    this.playerVisual.clearTint();
+    this.playerVisual.setTexture("player_still"); // Reset animation to idle
+    this.player.enableBody(true, 270, 888, true, false); // Reset to start pos, keep hidden
+    this.playerVisual.setAlpha(1);
+    this.player.setVelocity(0, 0);
+    this.lastFiredTime = 0;
+    this.isAttacking = false;
+  }
 }
