@@ -9,6 +9,7 @@ h1{
     font-weight: normal;
 }
 #game-container{
+    image-rendering: pixelated;
     justify-content: center;
     position: relative;
     display: flex;
