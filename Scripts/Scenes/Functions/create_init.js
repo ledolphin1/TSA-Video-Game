@@ -42,9 +42,9 @@ const create_init = function(map,debug){
     //Draw Health Bar//!
     this.drawHealthBar();
     
-    //Don't round pixels//!
-    this.physics.world.roundPixels = false;
-    this.cameras.main.setRoundPixels(false);
+    //Don('t) round pixels
+    this.physics.world.roundPixels = true;
+    this.cameras.main.setRoundPixels(true);
     
     
     // Create Player//!

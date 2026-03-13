@@ -14,8 +14,8 @@ export default class arcade_exterior extends Phaser.Scene {
 
     preload() {
         customEmitter.emit("ARCADE_EXTERIOR_BEGIN");
-            this.physics.world.roundPixels = true;
-    this.cameras.main.setRoundPixels(true);
+        this.physics.world.roundPixels = true;
+        this.cameras.main.setRoundPixels(true);
         this.load.image("frame", "public/assets/ARCADE_BORDER.png")
         this.load.image("ow_player_still", "public/assets/playerIdle.png"); //player image
         this.load.image("ow_player_falling_static", "public/assets/playerFall.png"); //player image
@@ -122,7 +122,7 @@ export default class arcade_exterior extends Phaser.Scene {
 
         this.physics.add.collider(this.player, this.ground)
         this.player.setCollideWorldBounds(true);
-        this.cameras.main.setRoundPixels(false);
+        this.cameras.main.setRoundPixels(true);
         // Force disable debug (just in case)
         this.physics.world.drawDebug = false;
         if (this.physics.world.debugGraphic) {

@@ -86,7 +86,6 @@ export default class DragonBossScene extends Phaser.Scene {
     this.cameras.main.setBounds(0, 0, map.widthInPixels, map.heightInPixels);
     this.cameras.main.setScroll(0, 200);
     this.physics.world.setBounds(0, 0, map.widthInPixels, map.heightInPixels);
-    this.cameras.main.setRoundPixels(false);
 
 
     // Dragon flying animation (4 frames = wing flap cycle)
