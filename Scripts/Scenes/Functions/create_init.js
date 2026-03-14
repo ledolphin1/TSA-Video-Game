@@ -7,7 +7,6 @@ import * as Phaser from "phaser";
 const {updatePlayerHitboxUnbound, flashPlayerUnbound, killPlayerUnbound} = playerFuncs;
 const create_init = function(map,debug){
 
-    //Activate all anims
     //Import Functions
     this.drawCooldown = drawCooldown.bind(this)
     this.drawHealthBar = drawHealthBarUnbound.bind(this);

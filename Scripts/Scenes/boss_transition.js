@@ -170,8 +170,8 @@ export default class boss_transition extends Phaser.Scene {
   }
 
   _updateEnemyHpBar(currentHp) {
-    const enemy = this.enemies.getFirstAlive();
-    const maxHp = enemy ? 20 : 20; // snake always starts at 20
+    // const enemy = this.enemies.getFirstAlive();
+    // const maxHp = enemy ? 20 : 20; // snake always starts at 20
     const pct   = Phaser.Math.Clamp(currentHp / 20, 0, 1);
     const bw = 120, bh = 8, bx = 100, by = 6;
 

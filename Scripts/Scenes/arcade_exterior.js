@@ -78,27 +78,7 @@ export default class arcade_exterior extends Phaser.Scene {
             repeat: -1
         })
         
-        this.anims.create({
-            key: "ow_player_jump_start",
-            frames: this.anims.generateFrameNumbers("ow_player_jumping", {
-                start: 0,
-                end: 1
-            }),
-            frameRate: 1,
-            repeat: 0,
-            hideOnComplete: false
-        })
         
-        this.anims.create({
-            key: "ow_player_falling",
-            frames: this.anims.generateFrameNumbers("ow_player_jumping", {
-                start: 0,
-                end: 1
-            }),
-            frameRate: 10,
-            repeat: 0,
-            hideOnComplete: false
-        })
         
         
         const arrow = this.add.sprite(243,120,"arrow").setOrigin(0,0).play("arrow_anim",true);
@@ -123,11 +103,6 @@ export default class arcade_exterior extends Phaser.Scene {
         this.physics.add.collider(this.player, this.ground)
         this.player.setCollideWorldBounds(true);
         this.cameras.main.setRoundPixels(true);
-        // Force disable debug (just in case)
-        this.physics.world.drawDebug = false;
-        if (this.physics.world.debugGraphic) {
-        this.physics.world.debugGraphic.setVisible(false);
-        }
 
         
         // --- Controls ---
@@ -147,7 +122,7 @@ export default class arcade_exterior extends Phaser.Scene {
         this.coordText.setScrollFactor(0);
         this.coordText.setDepth(1000);
         
-        //sidney asked for music
+    
         const music = this.sound.add("background", {
             loop: true,
             volume: 0.65

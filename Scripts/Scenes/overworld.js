@@ -168,11 +168,11 @@ export default class Overworld extends Phaser.Scene {
         this.physics.world.setBounds(0, 0, map.widthInPixels, map.heightInPixels);
         this.player.setCollideWorldBounds(true);
         this.cameras.main.setRoundPixels(false);
-        // Force disable debug (just in case)
-        this.physics.world.drawDebug = false;
-        if (this.physics.world.debugGraphic) {
-        this.physics.world.debugGraphic.setVisible(false);
-        }
+        // // Force disable debug (just in case)
+        // this.physics.world.drawDebug = false;
+        // if (this.physics.world.debugGraphic) {
+        // this.physics.world.debugGraphic.setVisible(false);
+        // }
         // --- Create Enemy Group ---
 
         // Spawn multiple enemies
@@ -181,7 +181,7 @@ export default class Overworld extends Phaser.Scene {
         // --- Arcade Machine ---
         // Place it somewhere on the ground. Player is at y=296.
         // x=200 is an arbitrary position to the right of start
-        this.arcadeMachine = this.physics.add.sprite(200, 283, "arcadeMachine");
+        this.arcadeMachine = this.physics.add.sprite(200, 283, "arcadeMachine").setScale(2);
         this.arcadeMachine.play("arcade_idle");
         this.arcadeMachine.setImmovable(true);
         this.arcadeMachine.body.allowGravity = false; // Or let it fall to ground if needed
