@@ -10,6 +10,7 @@ import Overworld from "./Scenes/overworld.js";
 import DragonBossScene from "./Scenes/dragonboss.js";  // NEW
 import arcade_exterior from "./Scenes/arcade_exterior.js";
 import Narator from "./Scenes/narrator.js";
+import boss_transition from "./Scenes/boss_transition.js";
 
 console.log("I loaded we have a chance after all")
 const config = {
@@ -27,7 +28,7 @@ const config = {
   parent: "game-container",
 
   // DragonBossScene added at the end of the scene list
-  scene: [Intro,Menu,arcade_exterior, MainScene, Pause, Options, boss, LevelTwo, Overworld, DragonBossScene, Narator],
+  scene: [Intro,Menu,arcade_exterior, MainScene, Pause, Options, boss, LevelTwo, Overworld, DragonBossScene, Narator,boss_transition],
 
   physics: {
     default: "arcade",

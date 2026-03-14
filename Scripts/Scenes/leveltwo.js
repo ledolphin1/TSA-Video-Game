@@ -50,7 +50,7 @@ export default class LevelTwo extends Phaser.Scene {
     const map = this.make.tilemap({ key: "leveltwo_map" });
 
     this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.S).on("down", () => {
-    this.scene.start("dragonBoss");
+    this.scene.start("boss");
     });
 
     // ── Base setup (player, camera, ground, controls, HUD) ──────────────────
@@ -554,7 +554,7 @@ respawn() {
     if (this._glitchTimer) this._glitchTimer.remove();
 
     this.time.delayedCall(400, () => {
-      this.scene.start("dragonBoss");
+      this.scene.start("boss");
     });
   }
 

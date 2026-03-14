@@ -3,12 +3,14 @@ import constructor_init from "./Functions/constructor_init.js";
 import preload_init from "./Functions/preload_init.js";
 import create_init from "./Functions/create_init.js";
 import { customEmitter } from "./events.js";
+import { playerData } from "./playerdata.js";
 export default class BossScene extends Phaser.Scene {
   constructor() {
     super({ key: "boss" });
 
     constructor_init.call(this);
     this._bossTransitioned = false;
+    this.freeze = false;
   }
 
   preload() {
@@ -19,10 +21,12 @@ export default class BossScene extends Phaser.Scene {
       frameHeight: 61
     })
     this.load.image("bossbg", "public/assets/bossbg.png");
+    this.load.image("boss_still", "public/assets/AI_Sprite_fstill.png");
     this.load.tilemapTiledJSON("boss_level", "public/assets/Map/boss.tmj");
   }
 
   create() {
+    this.killKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.K)
     this._bossTransitioned = false;
     this.add.image(160, 220, "bossbg");
     this.anims.create({
@@ -40,7 +44,12 @@ export default class BossScene extends Phaser.Scene {
     create_init.call(this, map,1) 
     
     this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.S).on("down", () => {
-    this.scene.start("LevelTwo");
+      console.log(this.enemy.x,"enemyx")
+      console.log(this.enemy.y,"enemyy")
+      playerData.transitionX= this.player.x;
+      playerData.transitionY= this.player.y;
+    this.scene.start("bt1");
+
     });
  
     
@@ -75,10 +84,9 @@ export default class BossScene extends Phaser.Scene {
       this._updateEnemyHpBar(enemy.hp);
 
       if (enemy.hp <= 0) {
-        enemy.destroy();
-        if (this.enemies.countActive(true) === 0) {
-          this._onBossDefeated();
-        }
+        this.boss_to_center_one_call(enemy)
+        this.freeze = true;
+        return;
       } else {
         enemy.setTintFill(0xffffff);
         this.time.delayedCall(100, () => {
@@ -89,6 +97,7 @@ export default class BossScene extends Phaser.Scene {
 
     //Player vs Enemy Collision
     this.physics.add.overlap(this.player, this.enemies, (player, enemy) => {
+      if (this.freeze) return;
       if (!this.scene.isActive()) return;
       this.handleEnemyOverlap(player, enemy);
     });
@@ -99,6 +108,10 @@ export default class BossScene extends Phaser.Scene {
 
 
   update(time, delta) {
+    if (this.freeze){
+      this.boss_to_center(time,delta)
+      return;
+    }
     if (this.projectileOnCooldown) {
       const elapsed = time - this.projectileCooldownStart;
       const progress = Phaser.Math.Clamp(elapsed / this.projectileCooldown, 0, 1);
@@ -128,6 +141,12 @@ export default class BossScene extends Phaser.Scene {
     if (Phaser.Input.Keyboard.JustDown(this.menuKey)) {
       this.scene.pause();
       this.scene.launch("Pause", { returnScene: this.scene.key });
+    }
+    if (Phaser.Input.Keyboard.JustDown(this.killKey)) {
+      console.log("i am pressed bro")
+      console.log(this.enemy.hp)
+      this.enemy.hp = 0;
+      this._updateEnemyHpBar(this.enemy.hp);
     }
     if (this.isAttacking) return;
     if (Phaser.Input.Keyboard.JustDown(this.attackKey) && !this.isAttacking && time > this.lastAttackEndTime + 10) {
@@ -213,16 +232,8 @@ export default class BossScene extends Phaser.Scene {
       this._updateEnemyHpBar(enemy.hp);
 
       if (enemy.hp <= 0) {
-        enemy.destroy();
-        this.physics.world.pause();
-        this.anims.pauseAll();
-        setTimeout(() => {
-          this.physics.world.resume();
-          this.anims.resumeAll();
-          if (this.enemies.countActive(true) === 0) {
-            this._onBossDefeated();
-          }
-        }, 100);
+        this.boss_to_center_one_call(enemy)
+        this.freeze = true;
         return;
       }
 
@@ -266,30 +277,30 @@ export default class BossScene extends Phaser.Scene {
   }
 
   spawnEnemy(x, y) {
-    const enemy = this.enemies.create(x, y, "boss_twist");
+    this.enemy = this.enemies.create(x, y, "boss_twist");
     const scale = 1;
-    this.physics.add.collider(enemy, this.ground);
-    enemy.setScale(scale);
+    this.physics.add.collider(this.enemy, this.ground);
+    this.enemy.setScale(scale);
     
-    enemy.hp = 20;
-    enemy.canShoot = true;
-    enemy.lastShotTime = 0;
-    enemy.isKnockedBack = false;
-    enemy.hitCooldown = false;
-    enemy.play("boss_twist");
-    enemy.flipX = true;
+    this.enemy.hp = 20;
+    this.enemy.canShoot = true;
+    this.enemy.lastShotTime = 0;
+    this.enemy.isKnockedBack = false;
+    this.enemy.hitCooldown = false;
+    this.enemy.play("boss_twist");
+    this.enemy.flipX = true;
 
     const eWidth = 49;
     const eHeight = 61 - 14;
-    const eOffsetX = (enemy.width - eWidth) / 2;
-    const eOffsetY = (enemy.height - eHeight);
+    const eOffsetX = (this.enemy.width - eWidth) / 2;
+    const eOffsetY = (this.enemy.height - eHeight);
 
-    enemy.body.setSize(eWidth, eHeight);
-    enemy.body.setOffset(eOffsetX, eOffsetY);
-    enemy.body.debugBodyColor = 0xff0000;
+    this.enemy.body.setSize(eWidth, eHeight);
+    this.enemy.body.setOffset(eOffsetX, eOffsetY);
+    this.enemy.body.debugBodyColor = 0xff0000;
 
-    enemy.setCollideWorldBounds(true);
-    enemy.setVelocityX(50);
+    this.enemy.setCollideWorldBounds(true);
+    this.enemy.setVelocityX(50);
   }
 
 
@@ -301,7 +312,7 @@ export default class BossScene extends Phaser.Scene {
       if (!enemy.active) return;
       this.time.delayedCall(i * 200, () => {
         if (!enemy.active) return;
-        const proj = this.add.rectangle(enemy.body.center.x, enemy.body.center.y, 7, 7, 0xff0000);
+        const proj = this.add.rectangle(enemy.body.center.x, enemy.body.center.y - 7, 7, 7, 0xff0000);
         this.physics.add.existing(proj);
         this.enemyProjectiles.add(proj);
 
@@ -391,9 +402,13 @@ export default class BossScene extends Phaser.Scene {
     if (this._bossTransitioned) return;
     this._bossTransitioned = true;
 
-    this.time.delayedCall(500, () => {
+    this.time.delayedCall(1000, () => {
       try { this.music.stop(); } catch (e) {}
-      this.scene.start("LevelTwo");
+      this.scene.start("bt1");
+      console.log(this.enemy.x,"enemyx")
+      console.log(this.enemy.y,"enemyy")
+      playerData.transitionX= this.player.x;
+      playerData.transitionY= this.player.y;
     });
   }
   respawnPlayer() {
@@ -409,5 +424,81 @@ export default class BossScene extends Phaser.Scene {
     this.player.setVelocity(0, 0);
     this.lastFiredTime = 0;
     this.isAttacking = false;
+  }
+  boss_to_center(time,delta){
+    if (Math.round(this.enemy.x) == 162){
+      this.enemy.setTexture("boss_still")
+      console.log("yes sir i happened")
+      this.enemy.body.setVelocityX(0);
+      this._onBossDefeated();
+      return;
+    }
+    if (this.playerIsDead) return;
+    if (this.isKnockedBack) return;
+
+   
+    this.onGround = this.player.body.blocked.down;
+    if (this.onGround) {
+      this.isJumping = false;
+      this.lastGroundedTime = time;
+    }
+    if (this.player.body.velocity.y > 0 && !this.isAttacking) {
+      this.playerVisual.play("player_falling", true);
+    }
+
+    
+    if (Phaser.Input.Keyboard.JustDown(this.menuKey)) {
+      this.scene.pause();
+      this.scene.launch("Pause", { returnScene: this.scene.key });
+    }
+
+    if (this.cursors.left.isDown) {
+      this.player.flipX = true;
+      if (this.onGround) {
+        this.playerVisual.play("player_moving", true);
+      }
+      this.player.setVelocityX(-150);
+    } else if (this.cursors.right.isDown) {
+      this.player.flipX = false;
+      if (this.onGround) {
+        this.playerVisual.play("player_moving", true);
+      }
+      this.player.setVelocityX(150);
+    } else {
+      this.player.setVelocityX(0);
+      if (this.onGround) {
+        this.playerVisual.setTexture("player_still");
+      }
+    }
+
+    if (this.cursors.up.isDown && (this.onGround || (time - this.lastGroundedTime < 100))) {
+      this.player.setVelocityY(-300);
+      this.lastGroundedTime = 0;
+      this.isJumping = true;
+      this.playerVisual.play("player_jump_start", true);
+    }
+
+    if (Phaser.Input.Keyboard.JustUp(this.cursors.up) && this.player.body.velocity.y < 0) {
+      this.player.setVelocityY(this.player.body.velocity.y * 0.5);
+    }
+
+    this.coordText.setText(`X: ${Math.round(this.player.x)} Y: ${Math.round(this.player.y)}`);
+  
+  }
+  boss_to_center_one_call(enemy){
+    this.enemyProjectiles.clear(true,true)
+    if (enemy.x > 162){
+      if (enemy.body.velocity.x == 50){
+        enemy.flipX = false;
+        enemy.play("boss_twist")
+      }
+      enemy.body.setVelocityX(-50)
+    } else {
+      if (enemy.body.velocity.x == -50){
+        enemy.flipX = true;
+        enemy.play("boss_twist")
+      }
+      enemy.body.setVelocityX(50)
+    }
   }
 }

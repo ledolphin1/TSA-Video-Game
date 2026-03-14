@@ -1,0 +1,191 @@
+import * as Phaser from "phaser";
+import constructor_init from "./Functions/constructor_init.js";
+import preload_init from "./Functions/preload_init.js";
+import create_init from "./Functions/create_init.js";
+import { customEmitter } from "./events.js";
+import { playerData } from "./playerdata.js";
+export default class boss_transition extends Phaser.Scene {
+  constructor() {
+    super({ key: "bt1" });
+
+    constructor_init.call(this);
+
+  }
+
+  preload() {
+    customEmitter.emit("boss_transition")
+    preload_init.call(this);
+    this.load.spritesheet('boss_transition', "public/assets/AI_Sprite_hover_to_fly.png", {
+      frameWidth: 62,
+      frameHeight: 61
+    })
+    this.load.image("bossbg", "public/assets/bossbg.png");
+    this.load.image("boss_still", "public/assets/AI_Sprite_fstill.png");
+    this.load.tilemapTiledJSON("boss_level", "public/assets/Map/boss.tmj");
+    this.load.image("boss_still", "public/assets/AI_Sprite_fstill.png");
+  }
+
+  create() {
+    this.scene.bringToTop("Narator");
+    this.add.image(160, 220, "bossbg");
+    const map = this.make.tilemap({ key: "boss_level" });
+    create_init.call(this, map,1) 
+    
+    this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.S).on("down", () => {
+        this.scene.start("dragonBoss");
+        playerData.transitionX= this.player.x;
+        playerData.transitionY= this.player.y;
+    });
+        this.anims.create({
+            key: "boss_transform",
+            frames: this.anims.generateFrameNumbers("boss_transition"),
+            frameRate: 5,
+            repeat: 0,
+            hideOnComplete: false
+        })
+    
+    this.cameras.main.setScroll(0, 200);
+    //Create Enemy Group
+    this.enemies = this.physics.add.group();
+
+    this.spawnEnemy(152, 273.5);
+    this._buildEnemyHpBar();
+
+    this.physics.add.collider(this.enemies, this.ground);
+
+    this.player.x = playerData.transitionX;
+    this.player.y = playerData.transitionY;
+    console.log("timetimetime")
+    this.enemy.body.setAllowGravity(false)
+    this.enemy.body.setVelocityY(-80);
+    setInterval(function () {
+        if(this.enemy.hp == 20){
+            this.scene.start("dragonBoss")
+        }
+        this.enemy.hp++;
+        this._updateEnemyHpBar(this.enemy.hp)
+    }.bind(this), 200);
+  }
+
+
+  update(time, delta) {
+
+    if (this.enemy.y < 240){
+        console.log("stop it now")
+        this.enemy.body.setVelocityY(0)
+    }
+    this.onGround = this.player.body.blocked.down;
+    if (this.onGround) {
+      this.isJumping = false;
+      this.lastGroundedTime = time;
+    }
+    if (this.player.body.velocity.y > 0 && !this.isAttacking) {
+      this.playerVisual.play("player_falling", true);
+    }
+
+    
+    if (Phaser.Input.Keyboard.JustDown(this.menuKey)) {
+      this.scene.pause();
+      this.scene.launch("Pause", { returnScene: this.scene.key });
+    }
+
+
+
+    if (this.cursors.left.isDown) {
+      this.player.flipX = true;
+      if (this.onGround) {
+        this.playerVisual.play("player_moving", true);
+      }
+      this.player.setVelocityX(-150);
+    } else if (this.cursors.right.isDown) {
+      this.player.flipX = false;
+      if (this.onGround) {
+        this.playerVisual.play("player_moving", true);
+      }
+      this.player.setVelocityX(150);
+    } else {
+      this.player.setVelocityX(0);
+      if (this.onGround) {
+        this.playerVisual.setTexture("player_still");
+      }
+    }
+
+    if (this.cursors.up.isDown && (this.onGround || (time - this.lastGroundedTime < 100))) {
+      this.player.setVelocityY(-300);
+      this.lastGroundedTime = 0;
+      this.isJumping = true;
+      this.playerVisual.play("player_jump_start", true);
+    }
+
+    if (Phaser.Input.Keyboard.JustUp(this.cursors.up) && this.player.body.velocity.y < 0) {
+      this.player.setVelocityY(this.player.body.velocity.y * 0.5);
+    }
+
+    this.coordText.setText(`X: ${Math.round(this.player.x)} Y: ${Math.round(this.player.y)}`);
+  }
+
+ 
+
+  spawnEnemy(x, y) {
+    this.enemy = this.enemies.create(x, y, "boss_transform");
+    const scale = 1;
+    this.physics.add.collider(this.enemy, this.ground);
+    this.enemy.setScale(scale);
+    
+    this.enemy.hp = 1;
+    this.enemy.canShoot = true;
+    this.enemy.lastShotTime = 0;
+    this.enemy.isKnockedBack = false;
+    this.enemy.hitCooldown = false;
+    this.enemy.play("boss_transform");
+    this.enemy.flipX = true;
+
+    const eWidth = 49;
+    const eHeight = 61 - 14;
+    const eOffsetX = (this.enemy.width - eWidth) / 2;
+    const eOffsetY = (this.enemy.height - eHeight);
+
+    this.enemy.body.setSize(eWidth, eHeight);
+    this.enemy.body.setOffset(eOffsetX, eOffsetY);
+    this.enemy.body.debugBodyColor = 0xff0000;
+
+    this.enemy.setCollideWorldBounds(true);
+  }
+
+
+
+
+  _buildEnemyHpBar() {
+    const bw = 120, bh = 8, bx = 100, by = 6;
+    this.enemyHpBarBg   = this.add.graphics().setScrollFactor(0).setDepth(1000);
+    this.enemyHpBarFill = this.add.graphics().setScrollFactor(0).setDepth(1000);
+    this.enemyHpLabel   = this.add.text(160, 8, "SNAKE BOSS", { fontSize: "8px", color: "#ffffff" })
+      .setOrigin(0.5, 0).setScrollFactor(0).setDepth(1001);
+
+    // Draw initial full bar
+    this.enemyHpBarBg.lineStyle(1, 0xff0000);
+    this.enemyHpBarBg.strokeRect(bx, by, bw, bh);
+    this.enemyHpBarFill.fillStyle(0xdd0000);
+    this.enemyHpBarFill.fillRect(bx + 1, by + 1, bw - 2, bh - 2);
+  }
+
+  _updateEnemyHpBar(currentHp) {
+    const enemy = this.enemies.getFirstAlive();
+    const maxHp = enemy ? 20 : 20; // snake always starts at 20
+    const pct   = Phaser.Math.Clamp(currentHp / 20, 0, 1);
+    const bw = 120, bh = 8, bx = 100, by = 6;
+
+    this.enemyHpBarBg.clear();
+    this.enemyHpBarFill.clear();
+
+    this.enemyHpBarBg.lineStyle(1, 0xff0000);
+    this.enemyHpBarBg.strokeRect(bx, by, bw, bh);
+
+    this.enemyHpBarFill.fillStyle(0xdd0000);
+    this.enemyHpBarFill.fillRect(bx + 1, by + 1, (bw - 2) * pct, bh - 2);
+  }
+
+
+
+
+}
