@@ -181,7 +181,7 @@ export default class Overworld extends Phaser.Scene {
         // --- Arcade Machine ---
         // Place it somewhere on the ground. Player is at y=296.
         // x=200 is an arbitrary position to the right of start
-        this.arcadeMachine = this.physics.add.sprite(200, 283, "arcadeMachine").setScale(2);
+        this.arcadeMachine = this.physics.add.sprite(200, 283, "arcadeMachine");
         this.arcadeMachine.play("arcade_idle");
         this.arcadeMachine.setImmovable(true);
         this.arcadeMachine.body.allowGravity = false; // Or let it fall to ground if needed

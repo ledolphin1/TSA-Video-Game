@@ -84,6 +84,7 @@ export default class BossScene extends Phaser.Scene {
       this._updateEnemyHpBar(enemy.hp);
 
       if (enemy.hp <= 0) {
+        customEmitter.emit("stage_1_defeat")
         this.boss_to_center_one_call(enemy)
         this.freeze = true;
         return;
@@ -232,6 +233,7 @@ export default class BossScene extends Phaser.Scene {
       this._updateEnemyHpBar(enemy.hp);
 
       if (enemy.hp <= 0) {
+        customEmitter.emit("stage_1_defeat")
         this.boss_to_center_one_call(enemy)
         this.freeze = true;
         return;
