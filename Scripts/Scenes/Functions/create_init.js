@@ -4,10 +4,12 @@ import handleEnemyOverlapUnbound from './handleEnemyOverlap.js';
 import drawCooldown from './drawCooldown.js';
 import * as playerFuncs from './playerFuncs.js'
 import * as Phaser from "phaser";
+import waveProj from './wave.js';
 const {updatePlayerHitboxUnbound, flashPlayerUnbound, killPlayerUnbound} = playerFuncs;
 const create_init = function(map,debug){
 
     //Import Functions
+    this.waveProj = waveProj.bind(this)
     this.drawCooldown = drawCooldown.bind(this)
     this.drawHealthBar = drawHealthBarUnbound.bind(this);
     this.updatePlayerHitbox = updatePlayerHitboxUnbound.bind(this);

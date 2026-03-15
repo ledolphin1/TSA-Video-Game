@@ -3,23 +3,21 @@ import create_init from "./Functions/create_init.js";
 import activate_anims from "./Functions/activate_anims.js";
 import constructor_init from "./Functions/constructor_init.js";
 import preload_init from "./Functions/preload_init.js";
-import performAttack from "./Functions/performAttack.js";
 import { customEmitter } from "./events.js";
 
-// ─────────────────────────────────────────────────────────────────────────────
-//  LEVEL TWO  — The Virus Corridor
-//  Enemies: computer viruses that always chase the player.
-//    • 8 HP (4 melee hits @ slashDamage=1 each, or 2 ranged hits)
-//    • When adjacent to player: pause 250 ms → swing electro blade → 2 damage
-//  Gateway at the right end: press Z to proceed to dragonBoss.
-// ─────────────────────────────────────────────────────────────────────────────
+
+//  Enemies are brute robot/virus thingies that chase the player.
+//    4 HP (4 melee hits, or 2 ranged hits)
+//    When adjacent to player: pause 250 ms → swing electro blade → 2 damage
+//  Gateway at the right end: press Z to go to .
+
 
 export default class LevelTwo extends Phaser.Scene {
   constructor() {
     super({ key: "LevelTwo" });
     constructor_init.call(this);
-    // Override projectile damage so 2 shots kill the virus (hp=8, proj=4)
-    this.projectileDamage = 4;
+    // (Don't) Override projectile damage so 2 shots (still) kill the virus (hp=4, proj=2)
+    // this.projectileDamage = 4;
   }
 
   preload() {
@@ -39,6 +37,7 @@ export default class LevelTwo extends Phaser.Scene {
     });
 
     // Gateway portal — 4 frames × 32×32
+
     this.load.image("gate", "public/assets/gate.png");
 
     this.load.image("spikes", "public/assets/Map/spikes.png");
@@ -56,7 +55,6 @@ export default class LevelTwo extends Phaser.Scene {
     // ── Base setup (player, camera, ground, controls, HUD) ──────────────────
     create_init.call(this, map);
     activate_anims.call(this);
-    this.performAttack = performAttack.bind(this);
 
     // ── Extra animations ────────────────────────────────────────────────────
     this.anims.create({
@@ -107,12 +105,6 @@ export default class LevelTwo extends Phaser.Scene {
       if (enemy && enemy.active) enemy.destroy();
     });
 
-    // ── Player projectile vs enemy ───────────────────────────────────────────
-    this.physics.add.overlap(this.playerProjectiles, this.enemies, (proj, enemy) => {
-      if (!proj.active || !enemy.active) return;
-      proj.destroy();
-      this._damageVirus(enemy, this.projectileDamage);
-    });
 
     // ── Player body vs enemy ─────────────────────────────────────────────────
     this.physics.add.overlap(this.player, this.enemies, (player, enemy) => {
@@ -304,7 +296,7 @@ respawn() {
   _spawnVirus(x, y) {
     const enemy = this.enemies.create(x, y, "virusEnemy");
     enemy.setScale(2);        // scale up for visibility at 16px base size
-    enemy.hp = 8;             // 4 melee or 2 ranged to kill
+    enemy.hp = 4;             // 4 melee or 2 ranged to kill
     enemy.isKnockedBack   = false;
     enemy.hitCooldown     = false;
     enemy.isAttackingPlayer = false;  // true during the 250ms pre-swing pause
@@ -388,7 +380,74 @@ respawn() {
       if (enemy.body.blocked.left)  enemy.setVelocityX(SPEED);
     }
   }
+   performAttack() {
+    this.isJumping = false;//!
+    this.isAttacking = true;//!
+    this.player.setVelocityX(0); // Stop horizontal movement//!
+    this.player.setVelocityY(0); // Stop vertical movement//!
+    this.player.body.allowGravity = false; // Disable gravity//!
 
+    // Force immediate hitbox adjustment for the new animation frame
+    this.time.delayedCall(1, () => {//!
+      this.updatePlayerHitbox();//!
+    });//!
+
+    // Calculate hitbox position based on facing direction
+    const offsetX = this.player.flipX ? -20 : 20; // Left or Right
+    const startX = this.player.x + offsetX;
+    const startY = this.player.y;
+    // Create a temporary hitbox for the attack
+    // Using a clear sprite or zone. For debug visibility we can use a small colored sprite or just a physics body.
+    // We'll use a physics sprite without texture (invisible) but debug body visible.
+    const attackHitbox = this.physics.add.sprite(startX, startY, null);
+    attackHitbox.body.setSize(30, 25);
+    attackHitbox.setVisible(false); // Invisible sprite
+    attackHitbox.body.allowGravity = false;
+    attackHitbox.body.debugBodyColor = 0xffff00; // Yellow for attack
+    this.playerVisual.play("player_attack", true);
+
+    // Check overlap with enemies
+    this.physics.add.overlap(attackHitbox, this.enemies, (hitbox, enemy) => {
+      this.playerVisual.play("player_attack", true);
+      this._damageVirus(enemy,this.slashDamage)
+      // Hitstop effect
+      this.physics.world.pause();
+      this.anims.pauseAll();
+
+      // Resume Game Loop after freeze
+      setTimeout(() => {
+        this.physics.world.resume();
+        this.anims.resumeAll();
+      }, 100);
+
+      // Reset Enemy State
+      setTimeout(() => {
+        if (enemy.active) {
+          enemy.clearTint();
+          enemy.isKnockedBack = false;
+          enemy.hitCooldown = false;
+
+          // Face Player and Move
+          const recoverDir = (this.player.x < enemy.x) ? -1 : 1;
+          enemy.setVelocityX(recoverDir * 50);
+          enemy.flipX = (recoverDir === 1);
+        }
+      }, 400);
+    });
+
+    // Remove hitbox after short duration
+    this.time.delayedCall(100, () => {
+      attackHitbox.destroy();
+    });
+
+    // Reset attack state after fixed duration (independent of animation)
+    this.time.delayedCall(250, () => {
+      this.isAttacking = false;
+      this.lastAttackEndTime = this.time.now;
+      this.player.body.allowGravity = true; // Restore gravity
+      this.updatePlayerHitbox(); // Reset hitbox for normal sprite
+    });
+  }
   // ── Virus attack sequence ─────────────────────────────────────────────────
   _beginVirusAttack(enemy) {
     if (!enemy.active) return;
@@ -501,9 +560,15 @@ respawn() {
   }
 
   // ──────────────────────────────── DAMAGE VIRUS ────────────────────────────
+  projectileEnemyCollisionHandle(projectile,enemy,dmg){
+      this._damageVirus(enemy,dmg)
+  }
   _damageVirus(enemy, amount) {
+    console.log("virus has been hit")
     if (!enemy.active) return;
+    console.log("enemy passed active check")
     if (enemy.hitCooldown) return;
+    console.log("enemy passed cooldown check")
 
     enemy.hitCooldown = true;
     enemy.hp -= amount;

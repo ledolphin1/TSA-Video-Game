@@ -114,14 +114,11 @@ export default class MainScene extends Phaser.Scene {
     // enemy projectiles
     this.projectiles = this.physics.add.group();
 
-    this.physics.add.collider(this.projectiles, this.ground, (proj) => {
-      proj.destroy();
-    });
+    // this.physics.add.collider(this.projectiles, this.ground, (proj) => {
+    //   proj.destroy();
+    // });
 
-    this.physics.add.overlap(this.playerProjectiles, this.enemies, (proj, enemy) => {
-      proj.destroy();
-      enemy.destroy();
-    });
+
 
     // player-enemy/projectile collision
     this.physics.add.overlap(this.player, this.enemies, (player, enemy) => {
@@ -363,5 +360,38 @@ export default class MainScene extends Phaser.Scene {
     this.player.setVelocity(0, 0);
     this.lastFiredTime = 0;
     this.isAttacking = false;
+  }
+  projectileEnemyCollisionHandle(projectile,enemy,dmg){
+    console.log(projectile.body)
+        if (enemy.hitCooldown) {
+            return;
+        }
+        enemy.hitCooldown = true;
+        enemy.hp -= dmg;
+        console.log("hp")
+          if (enemy.hp <= 0) {
+        enemy.destroy();
+      } else {
+        // Flash white
+        enemy.setTintFill(0xffffff);
+
+        enemy.isKnockedBack = true;
+        // projectile direction
+        const kbDir = (projectile.body.velocity.x > 0) ? 1 : -1;
+        enemy.setVelocity(kbDir * this.knockbackSpeedX, -this.knockbackSpeedY);
+
+        setTimeout(() => {
+          if (enemy.active) {
+            enemy.clearTint();
+            enemy.isKnockedBack = false;
+            enemy.hitCooldown = false;
+
+            // Face Player and Move
+            const recoverDir = (this.player.x < enemy.x) ? -1 : 1;
+            enemy.setVelocityX(recoverDir * 50);
+            enemy.flipX = (recoverDir === 1);
+          }
+        }, 400);
+    }
   }
 }

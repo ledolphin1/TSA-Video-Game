@@ -75,26 +75,14 @@ export default class BossScene extends Phaser.Scene {
       if (this.isInvincible) return;
       proj.destroy();
     });
-
-    
-    this.physics.add.overlap(this.playerProjectiles, this.enemies, (proj, enemy) => {
-      if (!this.scene.isActive()) return;
-      proj.destroy();
-      enemy.hp -= this.projectileDamage;
-      this._updateEnemyHpBar(enemy.hp);
-
-      if (enemy.hp <= 0) {
-        customEmitter.emit("stage_1_defeat")
-        this.boss_to_center_one_call(enemy)
-        this.freeze = true;
-        return;
-      } else {
-        enemy.setTintFill(0xffffff);
-        this.time.delayedCall(100, () => {
-          if (enemy.active) enemy.clearTint();
-        });
+     this.physics.add.overlap(this.playerProjectiles, this.enemyProjectiles, (pproj, proj) => {
+      if (proj && proj.active) {
+        console.log("destroy enemy projs")
+        proj.destroy();
       }
     });
+    
+
 
     //Player vs Enemy Collision
     this.physics.add.overlap(this.player, this.enemies, (player, enemy) => {
@@ -156,7 +144,7 @@ export default class BossScene extends Phaser.Scene {
 
     if (Phaser.Input.Keyboard.JustDown(this.fireKey)) {
       if (!this.projectileOnCooldown) {
-        this.fireProjectile(time);
+        this.waveProj(time);
       }
     }
 
@@ -221,6 +209,7 @@ export default class BossScene extends Phaser.Scene {
         proj.destroy();
       }
     });
+   
 
     this.physics.add.overlap(attackHitbox, this.enemies, (hitbox, enemy) => {
       if (!this.scene.isActive()) return;
@@ -337,7 +326,6 @@ export default class BossScene extends Phaser.Scene {
       this.enemyProjectile(time, enemy);
       enemy.lastShotTime = time;
     }
-    console.log("boss_can move rn")
     if (enemy.body.blocked.right) {
       enemy.setVelocityX(-50);
       enemy.flipX = false;
@@ -501,6 +489,41 @@ export default class BossScene extends Phaser.Scene {
         enemy.play("boss_twist")
       }
       enemy.body.setVelocityX(50)
+    }
+  }
+   projectileEnemyCollisionHandle(projectile,enemy,dmg){
+      if (!this.scene.isActive()) return;
+      enemy.hp -= dmg;
+      console.log(enemy.hp)
+      
+      this._updateEnemyHpBar(enemy.hp);
+      if (enemy.hp <= 0) {
+        customEmitter.emit("stage_1_defeat")
+        this.boss_to_center_one_call(enemy)
+        this.freeze = true;
+        return;
+      } else {
+      
+        // Flash white
+        enemy.setTintFill(0xffffff);
+
+        enemy.isKnockedBack = true;
+        // projectile direction
+        const kbDir = (projectile.body.velocity.x > 0) ? 1 : -1;
+        enemy.setVelocity(kbDir * this.knockbackSpeedX, -this.knockbackSpeedY);
+
+        setTimeout(() => {
+          if (enemy.active) {
+            enemy.clearTint();
+            enemy.isKnockedBack = false;
+            enemy.hitCooldown = false;
+
+            // Face Player and Move
+            const recoverDir = (this.player.x < enemy.x) ? -1 : 1;
+            enemy.setVelocityX(recoverDir * 50);
+            enemy.flipX = (recoverDir === 1);
+          }
+        }, 400);
     }
   }
 }

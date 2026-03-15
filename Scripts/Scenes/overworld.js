@@ -189,6 +189,7 @@ export default class Overworld extends Phaser.Scene {
 
         // Interaction Logic
         this.physics.add.overlap(this.player, this.arcadeMachine, () => {
+            console.log("overlap_behaviour check")
             if (Phaser.Input.Keyboard.JustDown(this.interactKey)) {
                 // Stop music before switching if needed
                 this.sound.stopAll();
