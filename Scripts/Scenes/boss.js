@@ -144,7 +144,7 @@ export default class BossScene extends Phaser.Scene {
 
     if (Phaser.Input.Keyboard.JustDown(this.fireKey)) {
       if (!this.projectileOnCooldown) {
-        this.waveProj(time);
+        this.selectAbility(time);
       }
     }
 
@@ -494,7 +494,7 @@ export default class BossScene extends Phaser.Scene {
       enemy.body.setVelocityX(50)
     }
   }
-   projectileEnemyCollisionHandle(projectile,enemy,dmg){
+   projectileEnemyCollisionHandle(projectile,enemy,dmg,poison){
       if (!this.scene.isActive()) return;
       enemy.hp -= dmg;
       console.log(enemy.hp)
@@ -506,27 +506,29 @@ export default class BossScene extends Phaser.Scene {
         this.freeze = true;
         return;
       } else {
-      
-        // Flash white
-        enemy.setTintFill(0xffffff);
+        if (!poison){
 
-        enemy.isKnockedBack = true;
-        // projectile direction
-        const kbDir = (projectile.body.velocity.x > 0) ? 1 : -1;
-        enemy.setVelocity(kbDir * this.knockbackSpeedX, -this.knockbackSpeedY);
+          // Flash white
+          enemy.setTintFill(0xffffff);
+  
+          enemy.isKnockedBack = true;
+          // projectile direction
+          const kbDir = (projectile.body.velocity.x > 0) ? 1 : -1;
+          enemy.setVelocity(kbDir * this.knockbackSpeedX, -this.knockbackSpeedY);
+          setTimeout(() => {
+            if (enemy.active) {
+              enemy.clearTint();
+              enemy.isKnockedBack = false;
+              enemy.hitCooldown = false;
+  
+              // Face Player and Move
+              const recoverDir = (this.player.x < enemy.x) ? -1 : 1;
+              enemy.setVelocityX(recoverDir * 50);
+              enemy.flipX = (recoverDir === 1);
+            }
+          }, 400);
+        }
 
-        setTimeout(() => {
-          if (enemy.active) {
-            enemy.clearTint();
-            enemy.isKnockedBack = false;
-            enemy.hitCooldown = false;
-
-            // Face Player and Move
-            const recoverDir = (this.player.x < enemy.x) ? -1 : 1;
-            enemy.setVelocityX(recoverDir * 50);
-            enemy.flipX = (recoverDir === 1);
-          }
-        }, 400);
     }
   }
 }

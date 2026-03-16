@@ -5,11 +5,18 @@ import drawCooldown from './drawCooldown.js';
 import * as playerFuncs from './playerFuncs.js'
 import * as Phaser from "phaser";
 import waveProj from './wave.js';
+import hyper from './hyper.js';
+import poison from './poison.js';
+import selectAbility from './selectAbility.js';
+
 const {updatePlayerHitboxUnbound, flashPlayerUnbound, killPlayerUnbound} = playerFuncs;
 const create_init = function(map,debug){
 
     //Import Functions
+    this.selectAbility = selectAbility.bind(this)
     this.waveProj = waveProj.bind(this)
+    this.poison = poison.bind(this)
+    this.hyper = hyper.bind(this);
     this.drawCooldown = drawCooldown.bind(this)
     this.drawHealthBar = drawHealthBarUnbound.bind(this);
     this.updatePlayerHitbox = updatePlayerHitboxUnbound.bind(this);

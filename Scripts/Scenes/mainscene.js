@@ -186,7 +186,7 @@ export default class MainScene extends Phaser.Scene {
     // Ranged Attack Input
     if (Phaser.Input.Keyboard.JustDown(this.fireKey) && !this.projectileOnCooldown && playerData.didAttack) {
       if (time > this.lastFiredTime + this.projectileCooldown) { // 3s cooldown
-        this.waveProj(time);
+        this.selectAbility(time);
         customEmitter.emit("LPFIRED")
       }
     }
@@ -297,11 +297,12 @@ export default class MainScene extends Phaser.Scene {
 
     chest.setFrame(1);
     chest.disableBody();
-    const text = this.add.text(chest.x, chest.y - 20, "Special Unlocked! Press F to Use", { fontSize: "12px", fill: "#fff" });
+    // const text = this.add.text(chest.x, chest.y - 20, "Special Unlocked! Press F to Use", { fontSize: "12px", fill: "#fff" });
+    this.scene.pause();
+    this.scene.launch("pickAbility", { returnScene: this.scene.key });
     this.projectileCooldownStart = 0; 
     // Fade out text and destroy chest after delay
     this.time.delayedCall(2000, () => {
-      text.destroy();
       chest.destroy();
     });
   }
@@ -355,7 +356,7 @@ export default class MainScene extends Phaser.Scene {
     this.lastFiredTime = 0;
     this.isAttacking = false;
   }
-  projectileEnemyCollisionHandle(projectile,enemy,dmg){
+  projectileEnemyCollisionHandle(projectile,enemy,dmg,poison){
     console.log(projectile.body)
         if (enemy.hitCooldown) {
             return;
@@ -366,6 +367,9 @@ export default class MainScene extends Phaser.Scene {
           if (enemy.hp <= 0) {
         enemy.destroy();
       } else {
+        if (poison){
+          return;
+        }
         // Flash white
         enemy.setTintFill(0xffffff);
 

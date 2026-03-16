@@ -3,10 +3,16 @@ import preload_init from "./Functions/preload_init.js";
 import { customEmitter } from "./events.js";
 import { playerData } from "./playerdata.js";
 import waveProj from "./Functions/wave.js";
+import hyper from "./Functions/hyper.js";
+import poison from "./Functions/poison.js";
+import selectAbility from "./Functions/selectAbility.js";
+
 export default class DragonBossScene extends Phaser.Scene {
   constructor() {
     super({ key: "dragonBoss" });
-
+    this.waveProj = waveProj.bind(this);
+    this.hyper = hyper.bind(this);
+    this.poison = poison.bind(this);
     // Health & State — player has TWICE as much health as in boss/mainscene
     this.maxHealth = 10;
     this.health = this.maxHealth;
@@ -266,7 +272,7 @@ export default class DragonBossScene extends Phaser.Scene {
     }
 
     if (Phaser.Input.Keyboard.JustDown(this.fireKey) && !this.projectileOnCooldown) {
-      waveProj.call(this,time);
+      selectAbility.call(this,time);
     }
 
     if (Phaser.Input.Keyboard.JustDown(this.menuKey)) {
@@ -388,22 +394,24 @@ export default class DragonBossScene extends Phaser.Scene {
   // ============================================================
   //  DAMAGE DRAGON (melee or projectile)
   // ============================================================
-  _damageDragon(amount) {
+  _damageDragon(amount,poison) {
     console.log("ouch")
     if (!this.dragon || !this.dragon.active) return;
     if (this.dragonDefeated) return;
-    if (this._dragonHitLock) return;
+    // if (this._dragonHitLock) return;
 
-    this._dragonHitLock = true;
-    setTimeout(() => { this._dragonHitLock = false; }, 300);
+    // this._dragonHitLock = true;
+    // setTimeout(() => { this._dragonHitLock = false; }, 300);
 
     this.dragonHp = Math.max(0, this.dragonHp - amount);
     this._updateDragonHpBar();
+if (!poison){
+  this.dragon.setTintFill(0xffffff);
+  setTimeout(() => {
+    if (this.dragon && this.dragon.active) this.dragon.clearTint();
+  }, 120);
 
-    this.dragon.setTintFill(0xffffff);
-    setTimeout(() => {
-      if (this.dragon && this.dragon.active) this.dragon.clearTint();
-    }, 120);
+}
 
     if (this.dragonHp <= 0) {
       this._defeatDragon();
@@ -530,10 +538,10 @@ export default class DragonBossScene extends Phaser.Scene {
   // ============================================================
   //  PLAYER PROJECTILE  (mirrors boss.js pattern exactly)
   // ============================================================
-  projectileEnemyCollisionHandle(projectile,enemy,dmg){
-    this._damageDragon(dmg);
+  projectileEnemyCollisionHandle(projectile,enemy,dmg,poison){
+    this._damageDragon(dmg,poison);
   }
-  _fireProjectile(time) {
+  fireProjectile(time) {
     this.projectileOnCooldown    = true;
     this.projectileCooldownStart = time;
     this.lastFiredTime           = time;

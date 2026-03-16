@@ -23,5 +23,7 @@ const preload_init = function (){
     this.load.image('tiles', "public/assets/Map/tileset.png");
     this.load.image('lpProjectile',"public/assets/projectile.png")
     this.load.image('wave',"public/assets/wave.png")
+    this.load.image('hyper',"public/assets/high-power-proj.png")
+    this.load.image('poison',"public/assets/poison_proj.png")
 }
 export default preload_init;

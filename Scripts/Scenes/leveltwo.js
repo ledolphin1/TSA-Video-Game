@@ -207,7 +207,6 @@ respawn() {
       return;
     }
     if (this.isKnockedBack) return;
-
     // Cooldown arc
     if (this.projectileOnCooldown) {
       const elapsed  = time - this.projectileCooldownStart;
@@ -219,6 +218,9 @@ respawn() {
     // Update all viruses
     this.enemies.children.iterate(enemy => {
       if (enemy && enemy.active) this._updateVirus(enemy, time);
+      if(enemy.isPoisoned){
+        enemy.setTintFill(0x00ff00)
+      }
     });
 
     // ── Standard player logic (mirrors mainscene.js) ─────────────────────────
@@ -243,7 +245,7 @@ respawn() {
 
     if (Phaser.Input.Keyboard.JustDown(this.fireKey) && !this.projectileOnCooldown) {
       if (time > this.lastFiredTime + 3000) {
-        this.waveProj(time);
+        this.selectAbility(time);
       }
     }
 
@@ -295,7 +297,7 @@ respawn() {
   _spawnVirus(x, y) {
     const enemy = this.enemies.create(x, y, "virusEnemy");
     enemy.setScale(2);        // scale up for visibility at 16px base size
-    enemy.hp = 4;             // 4 melee or 2 ranged to kill
+    enemy.hp = 8;             // 4 melee or 2 ranged to kill
     enemy.isKnockedBack   = false;
     enemy.hitCooldown     = false;
     enemy.isAttackingPlayer = false;  // true during the 250ms pre-swing pause
@@ -559,19 +561,19 @@ respawn() {
   }
 
   // ──────────────────────────────── DAMAGE VIRUS ────────────────────────────
-  projectileEnemyCollisionHandle(projectile,enemy,dmg){
-      this._damageVirus(enemy,dmg)
+  projectileEnemyCollisionHandle(projectile,enemy,dmg,poison){
+      this._damageVirus(enemy,dmg,poison)
   }
-  _damageVirus(enemy, amount) {
+  _damageVirus(enemy, amount,poison) {
     console.log("virus has been hit")
     if (!enemy.active) return;
     console.log("enemy passed active check")
-    if (enemy.hitCooldown) return;
+    // if (enemy.hitCooldown) return;
     console.log("enemy passed cooldown check")
 
     enemy.hitCooldown = true;
     enemy.hp -= amount;
-
+    console.log("virus hp", enemy.hp);
     // Glitch flash
     this._triggerVirusGlitch(enemy);
 
@@ -588,7 +590,9 @@ respawn() {
       enemy.destroy();
       return;
     }
-
+    if (poison){
+      return;
+    }
     // Knockback (white flash)
     enemy.setTintFill(0xffffff);
     enemy.isKnockedBack = true;

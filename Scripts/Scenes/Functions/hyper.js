@@ -1,9 +1,9 @@
-  const fireProjectile = function (time) {
+  const hyper = function (time) {
     this.projectileOnCooldown = true;
     this.projectileCooldownStart = time;
 
     this.lastFiredTime = time;
-    const proj = this.physics.add.sprite(this.player.x,this.player.y,"lpProjectile");
+    const proj = this.physics.add.sprite(this.player.x,this.player.y,"hyper");
     proj.flipX = this.player.flipX ? true : false;
     this.physics.add.existing(proj);
     this.playerProjectiles.add(proj); // Use separate group!
@@ -19,13 +19,17 @@
 
     // Add collision with enemies
     this.physics.add.overlap(proj, this.enemies, (projectile, enemy) => {
-      console.log(projectile.body)
-      this.projectileEnemyCollisionHandle(projectile,enemy,this.projectileDamage)
+      this.projectileEnemyCollisionHandle(projectile,enemy, 5)
       projectile.destroy()
     });
+    this.physics.add.overlap(proj, this.dragon, (projectile,enemy) => {
+      this.projectileEnemyCollisionHandle(projectile,enemy, 5)
+      projectile.destroy()
+    });
+   
     // hit wall
-    this.physics.add.collider(proj, this.ground, () => {
-      proj.destroy();
+    this.physics.add.collider(proj, this.ground, (projectile) => {
+      projectile.destroy();
     });
   }
-  export default fireProjectile;
+  export default hyper;
