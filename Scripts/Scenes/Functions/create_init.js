@@ -4,11 +4,12 @@ import handleEnemyOverlapUnbound from './handleEnemyOverlap.js';
 import drawCooldown from './drawCooldown.js';
 import * as playerFuncs from './playerFuncs.js'
 import * as Phaser from "phaser";
-const {updatePlayerHitboxUnbound, flashPlayerUnbound, killPlayerUnbound, respawnPlayerUnbound} = playerFuncs;
+import waveProj from './wave.js';
+const {updatePlayerHitboxUnbound, flashPlayerUnbound, killPlayerUnbound} = playerFuncs;
 const create_init = function(map,debug){
 
-    //Activate all anims
     //Import Functions
+    this.waveProj = waveProj.bind(this)
     this.drawCooldown = drawCooldown.bind(this)
     this.drawHealthBar = drawHealthBarUnbound.bind(this);
     this.updatePlayerHitbox = updatePlayerHitboxUnbound.bind(this);
@@ -16,7 +17,6 @@ const create_init = function(map,debug){
     this.fireProjectile = fireProjectileUnbound.bind(this);
     this.handleEnemyOverlap = handleEnemyOverlapUnbound.bind(this);
     this.killPlayer = killPlayerUnbound.bind(this);
-    this.respawnPlayer = respawnPlayerUnbound.bind(this);
     
     //Health Bar//!
     this.healthBarBg = this.add.graphics();
@@ -42,9 +42,9 @@ const create_init = function(map,debug){
     //Draw Health Bar//!
     this.drawHealthBar();
     
-    //Don't round pixels//!
-    this.physics.world.roundPixels = false;
-    this.cameras.main.setRoundPixels(false);
+    //Don('t) round pixels
+    this.physics.world.roundPixels = true;
+    this.cameras.main.setRoundPixels(true);
     
     
     // Create Player//!
@@ -72,17 +72,13 @@ const create_init = function(map,debug){
     this.physics.add.collider(this.player, this.ground)
     
     //Camera configurations (also adapts to the given map)//!
-    this.cameras.main.startFollow(this.player, true, 1, 1);//TODO
+    this.cameras.main.startFollow(this.player, false, 1, 1);//ALWAYS THIS SETTING
     this.cameras.main.setBounds(0, 0, map.widthInPixels, map.heightInPixels);
     this.physics.world.setBounds(0, 0, map.widthInPixels, map.heightInPixels);
     this.player.setCollideWorldBounds(true);
   
     // player projectiles//!
     this.playerProjectiles = this.physics.add.group();
-
-    this.physics.add.collider(this.playerProjectiles, this.ground, (proj) => {
-      proj.destroy();
-    });
 
     //Controls//!
     this.cursors = this.input.keyboard.createCursorKeys()
@@ -115,8 +111,8 @@ const create_init = function(map,debug){
     // Sync runs AFTER physics, ensuring visual matches actual body position for this frame
     this.events.on('postupdate', () => {
         if (this.playerVisual && this.player) {
-        let vX = this.player.x;
-        let vY = this.player.y;
+        let vX = Math.round(this.player.x);
+        let vY = Math.round(this.player.y);
 
         // Apply Visual Offsets when attacking
         if (this.playerVisual.texture.key === 'player_attack_sheet') {

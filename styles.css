@@ -9,6 +9,8 @@ h1{
     font-weight: normal;
 }
 #game-container{
+    width: 1600px;
+    height: 900px;
     justify-content: center;
     position: relative;
     display: flex;
@@ -17,4 +19,8 @@ h1{
     border: 7px;
     border-style: solid;
     border-color: springgreen;
+}
+canvas {
+  image-rendering: pixelated;
+  image-rendering: crisp-edges;
 }

@@ -9,6 +9,9 @@ class PlayerData {
         this.didJump= false;
         this.didAttack = false;
         this.currentScene = false;
+        this.transitionX = 0;
+        this.transitionY = 0;
+        this.didBeatS1 = false;
     }
 }
 export const playerData = new PlayerData;

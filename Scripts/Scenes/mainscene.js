@@ -34,12 +34,36 @@ export default class MainScene extends Phaser.Scene {
     })
 
     this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.S).on("down", () => {
-    this.scene.start("boss");
+    this.scene.start("LevelTwo");
     });
 
     create_init.call(this, map);
     activate_anims.call(this);
-   
+     // --- Post-Update Sync (Fixes Lag/Blur) ---
+    // Sync runs AFTER physics, ensuring visual matches actual body position for this frame
+    this.events.on('postupdate', () => {
+      if (this.playerVisual && this.player) {
+        let vX = this.player.x;
+        let vY = this.player.y;
+
+        // Apply Visual Offsets when attacking
+        if (this.playerVisual.texture.key === 'player_attack_sheet') {
+          // Invert X offset if facing left
+          if (this.player.flipX) {
+            vX -= this.attackVisualOffset.x;
+          } else {
+            vX += this.attackVisualOffset.x;
+          }
+          vY += this.attackVisualOffset.y;
+        }
+
+        this.playerVisual.setPosition(vX, vY);
+        this.playerVisual.setFlipX(this.player.flipX);
+
+
+      }
+    });
+  
     this.performAttack = performAttack.bind(this);
     const spikeTileset = map.addTilesetImage("spikes", "spikes")
     const spikes = map.createLayer("spikes", spikeTileset)
@@ -54,7 +78,7 @@ export default class MainScene extends Phaser.Scene {
         if (Phaser.Input.Keyboard.JustDown(this.interactKey)) {
             // Stop music before switching if needed
             this.sound.stopAll();
-            this.scene.start("boss");
+            this.scene.start("LevelTwo");
         }
     });
     
@@ -90,15 +114,6 @@ export default class MainScene extends Phaser.Scene {
     // enemy projectiles
     this.projectiles = this.physics.add.group();
 
-    this.physics.add.collider(this.projectiles, this.ground, (proj) => {
-      proj.destroy();
-    });
-
-    this.physics.add.overlap(this.playerProjectiles, this.enemies, (proj, enemy) => {
-      proj.destroy();
-      enemy.destroy();
-    });
-
     // player-enemy/projectile collision
     this.physics.add.overlap(this.player, this.enemies, (player, enemy) => {
       this.handleEnemyOverlap(player, enemy);
@@ -125,6 +140,7 @@ export default class MainScene extends Phaser.Scene {
   }
 
   update(time, delta) {
+
     if (this.playerIsDead) {
       this.resetEnemies();
       return;
@@ -170,7 +186,7 @@ export default class MainScene extends Phaser.Scene {
     // Ranged Attack Input
     if (Phaser.Input.Keyboard.JustDown(this.fireKey) && !this.projectileOnCooldown && playerData.didAttack) {
       if (time > this.lastFiredTime + this.projectileCooldown) { // 3s cooldown
-        this.fireProjectile(time);
+        this.waveProj(time);
         customEmitter.emit("LPFIRED")
       }
     }
@@ -225,8 +241,8 @@ export default class MainScene extends Phaser.Scene {
       playerData.didJump = true;
       playerData.didAttack = true;
       playerData.didMove = true;
-      this.scene.start("boss");
       this.music.stop()
+      this.scene.start("LevelTwo");
     }
 
   }
@@ -323,6 +339,53 @@ export default class MainScene extends Phaser.Scene {
           enemy.flipX = true;
         }
       }
+    }
+  }
+   respawnPlayer() {
+    this.health = this.maxHealth;
+    this.drawHealthBar();
+    this.playerIsDead = false;
+    this.isInvincible = false;
+    // Reset Player Position and Physics
+    this.playerVisual.clearTint();
+    this.playerVisual.setTexture("player_still"); // Reset animation to idle
+    this.player.enableBody(true, 270, 888, true, false); // Reset to start pos, keep hidden
+    this.playerVisual.setAlpha(1);
+    this.player.setVelocity(0, 0);
+    this.lastFiredTime = 0;
+    this.isAttacking = false;
+  }
+  projectileEnemyCollisionHandle(projectile,enemy,dmg){
+    console.log(projectile.body)
+        if (enemy.hitCooldown) {
+            return;
+        }
+        enemy.hitCooldown = true;
+        enemy.hp -= dmg;
+        console.log("hp")
+          if (enemy.hp <= 0) {
+        enemy.destroy();
+      } else {
+        // Flash white
+        enemy.setTintFill(0xffffff);
+
+        enemy.isKnockedBack = true;
+        // projectile direction
+        const kbDir = (projectile.body.velocity.x > 0) ? 1 : -1;
+        enemy.setVelocity(kbDir * this.knockbackSpeedX, -this.knockbackSpeedY);
+
+        setTimeout(() => {
+          if (enemy.active) {
+            enemy.clearTint();
+            enemy.isKnockedBack = false;
+            enemy.hitCooldown = false;
+
+            // Face Player and Move
+            const recoverDir = (this.player.x < enemy.x) ? -1 : 1;
+            enemy.setVelocityX(recoverDir * 50);
+            enemy.flipX = (recoverDir === 1);
+          }
+        }, 400);
     }
   }
 }

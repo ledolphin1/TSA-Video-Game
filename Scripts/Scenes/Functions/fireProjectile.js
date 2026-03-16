@@ -18,40 +18,10 @@
     });
 
     // Add collision with enemies
-    this.physics.add.overlap(proj, this.enemies, (projectile, enemy) => {
-      if (enemy.hitCooldown) {
-        projectile.destroy();
-        return;
-      }
-      enemy.hitCooldown = true;
-      projectile.destroy();
-
-      enemy.hp -= this.projectileDamage;
-
-      if (enemy.hp <= 0) {
-        enemy.destroy();
-      } else {
-        // Flash white
-        enemy.setTintFill(0xffffff);
-
-        enemy.isKnockedBack = true;
-        // projectile direction
-        const kbDir = (projectile.body.velocity.x > 0) ? 1 : -1;
-        enemy.setVelocity(kbDir * this.knockbackSpeedX, -this.knockbackSpeedY);
-
-        setTimeout(() => {
-          if (enemy.active) {
-            enemy.clearTint();
-            enemy.isKnockedBack = false;
-            enemy.hitCooldown = false;
-
-            // Face Player and Move
-            const recoverDir = (this.player.x < enemy.x) ? -1 : 1;
-            enemy.setVelocityX(recoverDir * 50);
-            enemy.flipX = (recoverDir === 1);
-          }
-        }, 400);
-      }
+    this.physics.add.overlap(this.playerProjectiles, this.enemies, (projectile, enemy) => {
+      console.log(projectile.body)
+      this.projectileEnemyCollisionHandle(projectile,enemy,this.projectileDamage)
+      projectile.destroy()
     });
     // hit wall
     this.physics.add.collider(proj, this.ground, () => {

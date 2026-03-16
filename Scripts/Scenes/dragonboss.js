@@ -1,6 +1,8 @@
 import * as Phaser from "phaser";
 import preload_init from "./Functions/preload_init.js";
 import { customEmitter } from "./events.js";
+import { playerData } from "./playerdata.js";
+import waveProj from "./Functions/wave.js";
 export default class DragonBossScene extends Phaser.Scene {
   constructor() {
     super({ key: "dragonBoss" });
@@ -28,7 +30,7 @@ export default class DragonBossScene extends Phaser.Scene {
 
     // Dragon hitbox — intentionally slightly *smaller* than the visible sprite
     // so melee can connect at the edges without triggering contact damage
-    this.dragonHitbox = { width: 22, height: 14 };
+    this.dragonHitbox = { width: 55, height: 32 };
 
     // Visual offset for attack sprite (same as other scenes)
     this.attackVisualOffset = { x: 9, y: -8 };
@@ -54,7 +56,7 @@ export default class DragonBossScene extends Phaser.Scene {
     this.load.spritesheet("dragon", "public/assets/dragon.png", {
       frameWidth: 32, frameHeight: 24
     });
-
+    this.load.image("ai_fly","public/assets/AI_Sprite_fly.png")
     // Fire breath particle — 8×8 per frame, 3 frames
     this.load.spritesheet("dragonFire", "public/assets/dragonFire.png", {
       frameWidth: 8, frameHeight: 8
@@ -68,14 +70,15 @@ export default class DragonBossScene extends Phaser.Scene {
   }
 
   create() {
+    this.scene.bringToTop("Narator");
     // ── Background ──────────────────────────────────────────
     this.add.image(160, 247, "bossbg");
 
     this.physics.world.roundPixels = false;
-    this.physics.world.drawDebug = false;
-    if (this.physics.world.debugGraphic) {
-      this.physics.world.debugGraphic.setVisible(false);
-    }
+    // this.physics.world.drawDebug = false;
+    // if (this.physics.world.debugGraphic) {
+    //   this.physics.world.debugGraphic.setVisible(false);
+    // }
 
     // ── Tilemap ─────────────────────────────────────────────
     const map = this.make.tilemap({ key: "boss_level" });
@@ -86,7 +89,6 @@ export default class DragonBossScene extends Phaser.Scene {
     this.cameras.main.setBounds(0, 0, map.widthInPixels, map.heightInPixels);
     this.cameras.main.setScroll(0, 200);
     this.physics.world.setBounds(0, 0, map.widthInPixels, map.heightInPixels);
-    this.cameras.main.setRoundPixels(false);
 
 
     // Dragon flying animation (4 frames = wing flap cycle)
@@ -106,7 +108,7 @@ export default class DragonBossScene extends Phaser.Scene {
     });
 
     // ── Player ───────────────────────────────────────────────
-    this.player = this.physics.add.sprite(60, 280, "player_still");
+    this.player = this.physics.add.sprite(playerData.transitionX, playerData.transitionY, "player_still");
     this.player.setVisible(false);
 
     this.playerVisual = this.add.sprite(60, 280, "player_still");
@@ -121,9 +123,9 @@ export default class DragonBossScene extends Phaser.Scene {
     this.physics.add.collider(this.player, this.ground);
 
     // ── Dragon (physics sprite, flying) ──────────────────────
-    this.dragon = this.physics.add.sprite(240, 210, "dragon");
-    this.dragon.setScale(3);          // 3× scale → 96×72 px on screen
-    this.dragon.play("dragon_fly");
+    this.dragon = this.physics.add.sprite(162, 210, "ai_fly");
+    this.dragon.setScale(1);          // 3× scale → 96×72 px on screen
+    this.dragon.play("ai_fly");
     this.dragon.body.allowGravity = false;
     // Do NOT use setCollideWorldBounds — we handle turnaround manually
 
@@ -135,24 +137,23 @@ export default class DragonBossScene extends Phaser.Scene {
       (this.dragon.width - dW) / 2,
       (this.dragon.height - dH) / 2 + 2
     );
-
     // Dragon movement bookkeeping
     this.dragon.moveDir = -1;          // -1 = left, 1 = right
     this.dragon.lastFireTime = 0;
     this.dragon.fireCooldown = 2200;   // ms between breath bursts
     this.dragon.burstCount = 0;
-
+    
     // Dragon health bar (drawn above the dragon)
     this._buildDragonHpBar();
-
+    
     // ── Fire Breath Group ────────────────────────────────────
     this.fireBalls = this.physics.add.group();
-
+    
     // Fire hits ground → destroy
     this.physics.add.collider(this.fireBalls, this.ground, (fb) => {
       if (fb.active) fb.destroy();
     });
-
+    
     // Fire hits player → damage (one hit per fireball)
     this.physics.add.overlap(this.player, this.fireBalls, (player, fb) => {
       if (!fb.active || fb._hit) return;
@@ -160,14 +161,13 @@ export default class DragonBossScene extends Phaser.Scene {
       fb.destroy();
       this._handleDragonHit();
     });
-
+    
     // ── Player Projectiles ───────────────────────────────────
     this.playerProjectiles = this.physics.add.group();
-    this.physics.add.collider(this.playerProjectiles, this.ground, (proj) => {
-      if (proj.active) proj.destroy();
-    });
+  
+  
     // NOTE: per-shot overlap is registered inside _fireProjectile, exactly like boss.js
-
+    
     // Player touching dragon body → damage with cooldown (prevents per-frame drain)
     this._dragonContactCooldown = false;
     this.physics.add.overlap(this.player, this.dragon, () => {
@@ -176,28 +176,33 @@ export default class DragonBossScene extends Phaser.Scene {
       setTimeout(() => { this._dragonContactCooldown = false; }, 600);
       this._handleDragonHit();
     });
-
+    this.physics.add.overlap(this.playerProjectiles, this.fireBalls, (pproj, proj) => {
+      if (proj && proj.active) {
+        console.log("destroy enemy projs")
+        proj.destroy();
+      }
+    });
     // ── Controls ─────────────────────────────────────────────
     this.cursors   = this.input.keyboard.createCursorKeys();
     this.attackKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE);
     this.fireKey   = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.F);
     this.menuKey   = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.ESC);
-
+    
     this.lastFiredTime = 0;
-
+    
     // ── HUD: Player Health Bar ───────────────────────────────
     this.healthBarBg   = this.add.graphics().setScrollFactor(0).setDepth(1000);
     this.healthBarFill = this.add.graphics().setScrollFactor(0).setDepth(1000);
     this.healthBarX = 20; this.healthBarY = 20;
     this.healthBarWidth = 100; this.healthBarHeight = 10;
     this._drawPlayerHpBar();
-
+    
     // Projectile cooldown indicator (top-right arc)
     this.cooldownRadius = 8;
     this.cooldownX = 30;
     this.cooldownY  = 50;
     this.cooldownGraphic = this.add.graphics().setScrollFactor(0).setDepth(1000).setVisible(false);
-
+    
     // ── Post-update visual sync ──────────────────────────────
     this.events.on("postupdate", () => {
       if (!this.player || !this.playerVisual) return;
@@ -210,22 +215,23 @@ export default class DragonBossScene extends Phaser.Scene {
       this.playerVisual.setPosition(vX, vY);
       this.playerVisual.setFlipX(this.player.flipX);
     });
-
+    
     // ── Music ────────────────────────────────────────────────
     this.music = this.sound.add("background", { loop: true, volume: 0.65 });
     this.music.play();
-
+    
     // ── Victory / defeat text (hidden until triggered) ───────
     this.outcomeText = this.add.text(
       this.cameras.main.width / 2, this.cameras.main.height / 2,
       "", { fontSize: "16px", color: "#ffffff", backgroundColor: "#000000",
-            padding: { x: 6, y: 4 } }
-    ).setOrigin(0.5).setScrollFactor(0).setDepth(2000).setVisible(false);
-  }
-
-  // ============================================================
-  //  UPDATE
-  // ============================================================
+        padding: { x: 6, y: 4 } }
+      ).setOrigin(0.5).setScrollFactor(0).setDepth(2000).setVisible(false);
+      this.dragon.flipX = false;
+    }
+    
+    // ============================================================
+    //  UPDATE
+    // ============================================================
   update(time, delta) {
     if (this.dragonDefeated) return;
     if (this.playerIsDead) return;
@@ -260,7 +266,7 @@ export default class DragonBossScene extends Phaser.Scene {
     }
 
     if (Phaser.Input.Keyboard.JustDown(this.fireKey) && !this.projectileOnCooldown) {
-      this._fireProjectile(time);
+      waveProj.call(this,time);
     }
 
     if (Phaser.Input.Keyboard.JustDown(this.menuKey)) {
@@ -383,6 +389,7 @@ export default class DragonBossScene extends Phaser.Scene {
   //  DAMAGE DRAGON (melee or projectile)
   // ============================================================
   _damageDragon(amount) {
+    console.log("ouch")
     if (!this.dragon || !this.dragon.active) return;
     if (this.dragonDefeated) return;
     if (this._dragonHitLock) return;
@@ -523,6 +530,9 @@ export default class DragonBossScene extends Phaser.Scene {
   // ============================================================
   //  PLAYER PROJECTILE  (mirrors boss.js pattern exactly)
   // ============================================================
+  projectileEnemyCollisionHandle(projectile,enemy,dmg){
+    this._damageDragon(dmg);
+  }
   _fireProjectile(time) {
     this.projectileOnCooldown    = true;
     this.projectileCooldownStart = time;
@@ -661,5 +671,19 @@ export default class DragonBossScene extends Phaser.Scene {
     );
     this.cooldownGraphic.closePath();
     this.cooldownGraphic.fillPath();
+  }
+  respawnPlayer() {
+    this.health = this.maxHealth;
+    this.drawHealthBar();
+    this.playerIsDead = false;
+    this.isInvincible = false;
+    // Reset Player Position and Physics
+    this.playerVisual.clearTint();
+    this.playerVisual.setTexture("player_still"); // Reset animation to idle
+    this.player.enableBody(true, 270, 888, true, false); // Reset to start pos, keep hidden
+    this.playerVisual.setAlpha(1);
+    this.player.setVelocity(0, 0);
+    this.lastFiredTime = 0;
+    this.isAttacking = false;
   }
 }

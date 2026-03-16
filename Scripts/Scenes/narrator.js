@@ -30,10 +30,12 @@ export default class Narator extends Phaser.Scene {
         customEmitter.on("L1BEGIN", this.setNarrator.bind(this,"Don't fall on spikes.","Press up arrow to jump."))
         customEmitter.on("JUMPED", onJump.bind(this))
         customEmitter.on("ATTACKED",onAttack.bind(this))
-        customEmitter.on("LPFIRED", this.setNarrator.bind(this,"Push forward! Vanquish the evil snakes!","Find the gate."))
-        customEmitter.on("SNAKEBOSS_BEGIN", this.setNarrator.bind(this,"This snake fires homing orbs!","Use your Cyber Canon and Plasma Saber."))
-        customEmitter.on("L2BEGIN", this.setNarrator.bind(this,"Navigate the rough terrain.","These viruses are stronger and smarter than snakes, push through!"))
-        customEmitter.on("DRAGONBOSS", this.setNarrator.bind(this,"",""))
+        customEmitter.on("LPFIRED", this.setNarrator.bind(this,"Push forward! Vanquish the evil snakes!","Find the gate. Press Z to enter it."))
+        customEmitter.on("SNAKEBOSS_BEGIN", this.setNarrator.bind(this,"Avoid the orbs shot by the robot","Use your Cyber Canon and Plasma Saber."))
+        customEmitter.on("L2BEGIN", this.setNarrator.bind(this,"Navigate the rough terrain.","Viruses are tougher and smarter than snakes, push through!"))
+        customEmitter.on("DRAGONBOSS", this.setNarrator.bind(this,"Defeat the flying robot!","Don't give in!"))
+        customEmitter.on("boss_transition", this.setNarrator.bind(this,"He is not defeated?",""))
+        customEmitter.on("stage_1_defeat", onBeatS1.bind(this))
         
     function onJump(){
         if (playerData.didJump){
@@ -41,6 +43,13 @@ export default class Narator extends Phaser.Scene {
         }
             this.setNarrator("Push forward! Vanquish the evil snakes!","Press SPACE to use your Plasma Saber.");
             playerData.didJump = true;
+        }
+    function onBeatS1(){
+        if (playerData.didBeatS1){
+            return;
+        }
+            this.setNarrator("Nice job beating the mighty robot!","Time to move on...");
+            playerData.didBeatS1 = true;
         }
         
   

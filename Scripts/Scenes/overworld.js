@@ -168,11 +168,11 @@ export default class Overworld extends Phaser.Scene {
         this.physics.world.setBounds(0, 0, map.widthInPixels, map.heightInPixels);
         this.player.setCollideWorldBounds(true);
         this.cameras.main.setRoundPixels(false);
-        // Force disable debug (just in case)
-        this.physics.world.drawDebug = false;
-        if (this.physics.world.debugGraphic) {
-        this.physics.world.debugGraphic.setVisible(false);
-        }
+        // // Force disable debug (just in case)
+        // this.physics.world.drawDebug = false;
+        // if (this.physics.world.debugGraphic) {
+        // this.physics.world.debugGraphic.setVisible(false);
+        // }
         // --- Create Enemy Group ---
 
         // Spawn multiple enemies
@@ -189,6 +189,7 @@ export default class Overworld extends Phaser.Scene {
 
         // Interaction Logic
         this.physics.add.overlap(this.player, this.arcadeMachine, () => {
+            console.log("overlap_behaviour check")
             if (Phaser.Input.Keyboard.JustDown(this.interactKey)) {
                 // Stop music before switching if needed
                 this.sound.stopAll();
