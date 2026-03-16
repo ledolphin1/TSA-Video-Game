@@ -247,10 +247,13 @@ export default class BossScene extends Phaser.Scene {
           enemy.clearTint();
           enemy.isKnockedBack = false;
           enemy.hitCooldown = false;
-
+          var old_flipX = enemy.flipX;
           const recoverDir = (this.player.x < enemy.x) ? -1 : 1;
           enemy.setVelocityX(recoverDir * 50);
           enemy.flipX = (recoverDir === 1);
+          if (enemy.flipX != old_flipX){
+            enemy.play("boss_twist")
+          }
         }
       }, 400);
     });

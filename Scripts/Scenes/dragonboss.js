@@ -164,9 +164,7 @@ export default class DragonBossScene extends Phaser.Scene {
     
     // ── Player Projectiles ───────────────────────────────────
     this.playerProjectiles = this.physics.add.group();
-    this.physics.add.collider(this.playerProjectiles, this.ground, (proj) => {
-      if (proj.active) proj.destroy();
-    });
+  
   
     // NOTE: per-shot overlap is registered inside _fireProjectile, exactly like boss.js
     

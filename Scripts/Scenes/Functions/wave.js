@@ -43,9 +43,6 @@
         console.log("this happened")
         this.projectileEnemyCollisionHandle(projectile,enemy,this.waveAttackDmg)
     });
-    // hit wall
-    this.physics.add.collider(proj, this.ground, () => {
-      proj.destroy();
-    });
+   
   }
   export default waveProj;

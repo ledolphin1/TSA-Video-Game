@@ -54,8 +54,7 @@ export default class LevelTwo extends Phaser.Scene {
 
     // ── Base setup (player, camera, ground, controls, HUD) ──────────────────
     create_init.call(this, map);
-    activate_anims.call(this);
-
+    this.cameras.main.startFollow(this.player, false, 1, 1);
     // ── Extra animations ────────────────────────────────────────────────────
     this.anims.create({
       key: "virus_idle",
@@ -244,7 +243,7 @@ respawn() {
 
     if (Phaser.Input.Keyboard.JustDown(this.fireKey) && !this.projectileOnCooldown) {
       if (time > this.lastFiredTime + 3000) {
-        this.fireProjectile(time);
+        this.waveProj(time);
       }
     }
 

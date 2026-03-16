@@ -114,12 +114,6 @@ export default class MainScene extends Phaser.Scene {
     // enemy projectiles
     this.projectiles = this.physics.add.group();
 
-    // this.physics.add.collider(this.projectiles, this.ground, (proj) => {
-    //   proj.destroy();
-    // });
-
-
-
     // player-enemy/projectile collision
     this.physics.add.overlap(this.player, this.enemies, (player, enemy) => {
       this.handleEnemyOverlap(player, enemy);
@@ -192,7 +186,7 @@ export default class MainScene extends Phaser.Scene {
     // Ranged Attack Input
     if (Phaser.Input.Keyboard.JustDown(this.fireKey) && !this.projectileOnCooldown && playerData.didAttack) {
       if (time > this.lastFiredTime + this.projectileCooldown) { // 3s cooldown
-        this.fireProjectile(time);
+        this.waveProj(time);
         customEmitter.emit("LPFIRED")
       }
     }
