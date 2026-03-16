@@ -1,5 +1,5 @@
 import * as Phaser from "phaser";
-import { playerData } from "./playerdata";
+import { playerData } from "./playerdata.js";
 
 export default class pickAbility extends Phaser.Scene {
   constructor() {

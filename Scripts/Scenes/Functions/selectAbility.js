@@ -1,4 +1,4 @@
-import { playerData } from "../playerdata";
+import { playerData } from "./playerdata.js";
 
   const selectAbility = function (time) {
     switch (playerData.weapon){
