@@ -2,6 +2,7 @@ import * as Phaser from "phaser";
 import preload_init from "./Functions/preload_init.js";
 import { customEmitter } from "./events.js";
 import { playerData } from "./playerdata.js";
+import waveProj from "./Functions/wave.js";
 export default class DragonBossScene extends Phaser.Scene {
   constructor() {
     super({ key: "dragonBoss" });
@@ -166,6 +167,7 @@ export default class DragonBossScene extends Phaser.Scene {
     this.physics.add.collider(this.playerProjectiles, this.ground, (proj) => {
       if (proj.active) proj.destroy();
     });
+  
     // NOTE: per-shot overlap is registered inside _fireProjectile, exactly like boss.js
     
     // Player touching dragon body → damage with cooldown (prevents per-frame drain)
@@ -176,7 +178,12 @@ export default class DragonBossScene extends Phaser.Scene {
       setTimeout(() => { this._dragonContactCooldown = false; }, 600);
       this._handleDragonHit();
     });
-    
+    this.physics.add.overlap(this.playerProjectiles, this.fireBalls, (pproj, proj) => {
+      if (proj && proj.active) {
+        console.log("destroy enemy projs")
+        proj.destroy();
+      }
+    });
     // ── Controls ─────────────────────────────────────────────
     this.cursors   = this.input.keyboard.createCursorKeys();
     this.attackKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE);
@@ -261,7 +268,7 @@ export default class DragonBossScene extends Phaser.Scene {
     }
 
     if (Phaser.Input.Keyboard.JustDown(this.fireKey) && !this.projectileOnCooldown) {
-      this._fireProjectile(time);
+      waveProj.call(this,time);
     }
 
     if (Phaser.Input.Keyboard.JustDown(this.menuKey)) {
@@ -384,6 +391,7 @@ export default class DragonBossScene extends Phaser.Scene {
   //  DAMAGE DRAGON (melee or projectile)
   // ============================================================
   _damageDragon(amount) {
+    console.log("ouch")
     if (!this.dragon || !this.dragon.active) return;
     if (this.dragonDefeated) return;
     if (this._dragonHitLock) return;
@@ -524,6 +532,9 @@ export default class DragonBossScene extends Phaser.Scene {
   // ============================================================
   //  PLAYER PROJECTILE  (mirrors boss.js pattern exactly)
   // ============================================================
+  projectileEnemyCollisionHandle(projectile,enemy,dmg){
+    this._damageDragon(dmg);
+  }
   _fireProjectile(time) {
     this.projectileOnCooldown    = true;
     this.projectileCooldownStart = time;

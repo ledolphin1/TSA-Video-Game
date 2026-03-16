@@ -35,6 +35,14 @@
         console.log("this happened")
         this.projectileEnemyCollisionHandle(projectile,enemy,this.waveAttackDmg)
     });
+    this.physics.add.overlap(proj, this.dragon, (projectile,enemy) => {
+    if(projectile.enemiesColided.includes(enemy)){
+            return
+        }
+        projectile.enemiesColided.push(enemy);
+        console.log("this happened")
+        this.projectileEnemyCollisionHandle(projectile,enemy,this.waveAttackDmg)
+    });
     // hit wall
     this.physics.add.collider(proj, this.ground, () => {
       proj.destroy();
