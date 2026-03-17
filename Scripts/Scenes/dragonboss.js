@@ -146,7 +146,7 @@ export default class DragonBossScene extends Phaser.Scene {
     // Dragon movement bookkeeping
     this.dragon.moveDir = -1;          // -1 = left, 1 = right
     this.dragon.lastFireTime = 0;
-    this.dragon.fireCooldown = 2200;   // ms between breath bursts
+    this.dragon.fireCooldown = 1900;   // ms between breath bursts
     this.dragon.burstCount = 0;
     
     // Dragon health bar (drawn above the dragon)
@@ -353,8 +353,8 @@ export default class DragonBossScene extends Phaser.Scene {
   _breathFire() {
     if (!this.dragon || !this.dragon.active) return;
 
-    const numShots   = 4;
-    const spreadStep = 150; // ms between each ball in a burst
+    const numShots   = 6;
+    const spreadStep = 200; // ms between each ball in a burst
 
     for (let i = 0; i < numShots; i++) {
       this.time.delayedCall(i * spreadStep, () => {

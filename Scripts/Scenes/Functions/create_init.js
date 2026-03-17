@@ -93,6 +93,9 @@ const create_init = function(map,debug){
     this.fireKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.F);
     this.menuKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.ESC)
     this.interactKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.Z);
+    this.skipKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.S);
+    this.selectAbilityKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.E);
+
 
     //Coords for debug//!
     this.coordText = this.add.text(this.cameras.main.width - 10, this.cameras.main.height - 10, 'X: 0 Y: 0', {
