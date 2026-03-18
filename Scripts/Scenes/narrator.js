@@ -133,7 +133,7 @@ export default class Narator extends Phaser.Scene {
         customEmitter.on("CHESTOPEN", onOpenChest.bind(this))
         customEmitter.on("playerSelect", playerSelect.bind(this))
         customEmitter.on("return", returnToPrevious.bind(this))
-        customEmitter.on("SNAKEBOSS_BEGIN", this.setNarrator.bind(this,"Avoid the orbs shot by the robot","Use your Cyber Canon and Plasma Saber."))
+        customEmitter.on("SNAKEBOSS_BEGIN", this.setNarrator.bind(this,"Avoid the orbs shot by the robot","Use your Cyber Cannon and Plasma Saber."))
         customEmitter.on("L2BEGIN", this.setNarrator.bind(this,"Navigate the rough terrain.","Viruses are tougher than snakes, push through!"))
         customEmitter.on("DRAGONBOSS", this.setNarrator.bind(this,"Defeat the flying robot!","Don't give in!"))
         customEmitter.on("DRAGONBOSS_CLEAR", this.setNarrator.bind(this,"",""))
@@ -149,7 +149,7 @@ export default class Narator extends Phaser.Scene {
         }
     function chestAbility(){
             
-            this.setNarrator("Pick a new ability, Hover over projectiles to see their info.","To swap abilities in-game press E.")
+            this.setNarrator("Pick a new ability, Hover over projectiles to see their info.","To swap abilities in-game, press E.")
         }
     function playerSelect(){
             playerData.oldText1 = this.line1.text;
@@ -165,10 +165,10 @@ export default class Narator extends Phaser.Scene {
                 this.setNarrator("Waves pass through walls and enemies.","However they are short range.");
                 break;
             case "hyper":
-                this.setNarrator("Hyper Canon is like the Cyber Canon.","However it deals more damge on impact.");
+                this.setNarrator("Hyper Cannon is like the Cyber Cannon.","However it deals more damage on impact.");
                 break;
             case "poison":
-                this.setNarrator("Poison Canons deal damage over time.","Very useful for damage-soaking enemies.")
+                this.setNarrator("Poison Cannons deal damage over time.","Very useful for damaging enemies.")
                 break;
         }
         if(playerData.didOpenChest){
@@ -196,7 +196,7 @@ export default class Narator extends Phaser.Scene {
         if (playerData.didFire){
             return;
         }
-            this.setNarrator("Find chests to unlock new abilities.","Abilities are great for beating enemies.");
+            this.setNarrator("Find chests to unlock new abilities.","Abilities are great for defeating enemies.");
             playerData.didFire = true;
     }
         
