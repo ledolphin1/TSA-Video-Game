@@ -80,7 +80,6 @@ const create_init = function(map,debug){
     this.physics.add.collider(this.player, this.ground)
     
     //Camera configurations (also adapts to the given map)//!
-    this.cameras.main.startFollow(this.player, false, 1, 1);//ALWAYS THIS SETTING
     this.cameras.main.setBounds(0, 0, map.widthInPixels, map.heightInPixels);
     this.physics.world.setBounds(0, 0, map.widthInPixels, map.heightInPixels);
     this.player.setCollideWorldBounds(true);

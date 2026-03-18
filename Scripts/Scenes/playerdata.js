@@ -11,10 +11,12 @@ class PlayerData {
         this.didMove= false;
         this.didJump= false;
         this.didAttack = false;
+        this.didFire = false;
+        this.didOpenChest = false;
+        this.isAbleToUseEMenu = false;
         this.currentScene = false;
         this.transitionX = 0;
         this.transitionY = 0;
-        
         //level milestones
         this.didBeatL1 = false;
         this.didBeatL2 = false;
@@ -28,6 +30,8 @@ class PlayerData {
             meleeAttacks: 0,
             bossesDefeated: 0
         };
+        this.oldText1 = "",
+        this.oldText2 = ""
     }
 
     resetRunStats(){

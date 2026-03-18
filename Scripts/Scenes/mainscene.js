@@ -33,15 +33,17 @@ export default class MainScene extends Phaser.Scene {
     const map = this.make.tilemap({
       key: "map"
     })
-
+    
     this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.S).on("down", () => {
       playerData.didBeatL1 = true;
       this.sound.stopAll()
       fadeToScene(this, "overworld");
     });
-
+    
     create_init.call(this, map);
     activate_anims.call(this);
+    
+    this.cameras.main.startFollow(this.player, false, 1, 1);//ALWAYS THIS SETTING
      // --- Post-Update Sync (Fixes Lag/Blur) ---
     // Sync runs AFTER physics, ensuring visual matches actual body position for this frame
     this.events.on('postupdate', () => {
@@ -136,6 +138,10 @@ export default class MainScene extends Phaser.Scene {
     this.physics.add.overlap(this.player, this.chests, (player, chest) => {
       this.handleChestOverlap(player, chest);
     });
+    const chest2 = this.chests.create(1266, 312, "chests", 0); // Frame 0 = closed
+    chest2.body.setAllowGravity(false); // assuming chest stays in place
+    // chest.setImmovable(true); 
+
 
     //Skip Key for debug
     this.skipKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.G);
@@ -186,6 +192,14 @@ export default class MainScene extends Phaser.Scene {
       this.scene.pause()
       this.scene.launch("Pause", { returnScene: this.scene.key });
     }
+    
+    if (Phaser.Input.Keyboard.JustDown(this.selectAbilityKey)) {
+      if (!playerData.isAbleToUseEMenu){
+          return;
+        }
+         this.scene.pause()
+         this.scene.launch("playerSelectAbility", { returnScene: this.scene.key });
+       }
 
     // Ranged Attack Input
     if (Phaser.Input.Keyboard.JustDown(this.fireKey) && !this.projectileOnCooldown && playerData.didAttack) {
@@ -299,7 +313,7 @@ export default class MainScene extends Phaser.Scene {
   }
 
   handleChestOverlap(player, chest) {
-
+    
     chest.setFrame(1);
     chest.disableBody();
     // const text = this.add.text(chest.x, chest.y - 20, "Special Unlocked! Press F to Use", { fontSize: "12px", fill: "#fff" });

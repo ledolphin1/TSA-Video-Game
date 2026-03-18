@@ -98,6 +98,7 @@ export default class Narator extends Phaser.Scene {
             };
 
             this.setNarrator = function(t1, t2) {
+                    console.log("I should narrate now.")
                     this._typingRunId += 1;
                     const runId = this._typingRunId;
                     this._clearTypingEvents();
@@ -127,7 +128,11 @@ export default class Narator extends Phaser.Scene {
         customEmitter.on("L1BEGIN", this.setNarrator.bind(this,"Don't fall on spikes.","Press up arrow to jump."))
         customEmitter.on("JUMPED", onJump.bind(this))
         customEmitter.on("ATTACKED",onAttack.bind(this))
-        customEmitter.on("LPFIRED", this.setNarrator.bind(this,"Push forward! Vanquish the evil snakes!","Find the gate. Press Z to enter it."))
+        customEmitter.on("LPFIRED", onFire.bind(this))
+        customEmitter.on("pickAbility",chestAbility.bind(this))
+        customEmitter.on("CHESTOPEN", onOpenChest.bind(this))
+        customEmitter.on("playerSelect", playerSelect.bind(this))
+        customEmitter.on("return", returnToPrevious.bind(this))
         customEmitter.on("SNAKEBOSS_BEGIN", this.setNarrator.bind(this,"Avoid the orbs shot by the robot","Use your Cyber Canon and Plasma Saber."))
         customEmitter.on("L2BEGIN", this.setNarrator.bind(this,"Navigate the rough terrain.","Viruses are tougher and smarter than snakes, push through!"))
         customEmitter.on("DRAGONBOSS", this.setNarrator.bind(this,"Defeat the flying robot!","Don't give in!"))
@@ -142,6 +147,35 @@ export default class Narator extends Phaser.Scene {
             this.setNarrator("Push forward! Vanquish the evil snakes!","Press SPACE to use your Plasma Saber.");
             playerData.didJump = true;
         }
+    function chestAbility(){
+            
+            this.setNarrator("Pick a new ability, Hover over projectiles to see their info.","To swap abilities in-game press E.")
+        }
+    function playerSelect(){
+            playerData.oldText1 = this.line1.text;
+            playerData.oldText2 = this.line2.text;
+            this.setNarrator("Change your ability!","Hover over abilities for info.")
+        }
+    function returnToPrevious(){
+        this.setNarrator(playerData.oldText1,playerData.oldText2)
+    }
+    function onOpenChest(){
+        switch(playerData.weapon){
+            case "wave":
+                this.setNarrator("Waves pass through walls and enemies.","However they are short range.");
+                break;
+            case "hyper":
+                this.setNarrator("Hyper Canon is like the Cyber Canon.","However it deals more damge on impact.");
+                break;
+            case "poison":
+                this.setNarrator("Poison Canons deal damage over time.","Very useful for damage-soaking enemies.")
+                break;
+        }
+        if(playerData.didOpenChest){
+            this.time.delayedCall(4000,this.setNarrator.bind(this,"Find the gate.","Press Z to enter it."))
+        }
+        playerData.didOpenChest = true;
+        }
     function onBeatS1(){
         if (playerData.didBeatS1){
             return;
@@ -155,9 +189,16 @@ export default class Narator extends Phaser.Scene {
         if (playerData.didAttack){
             return;
         }
-            this.setNarrator("Push forward! Vanquish the evil snakes!","Press F to use your Cyber Cannon.");
+            this.setNarrator("Press F to use your Cyber Cannon.","Try it!");
             playerData.didAttack = true;
+    }
+    function onFire(){
+        if (playerData.didFire){
+            return;
         }
+            this.setNarrator("Find chests to unlock new abilities.","Abilities are great for beating enemies.");
+            playerData.didFire = true;
+    }
         
     }
  

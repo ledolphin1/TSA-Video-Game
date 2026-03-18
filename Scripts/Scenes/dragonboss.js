@@ -81,8 +81,7 @@ export default class DragonBossScene extends Phaser.Scene {
     this.scene.bringToTop("Narator");
     // ── Background ──────────────────────────────────────────
     this.add.image(160, 247, "bossbg");
-
-    this.physics.world.roundPixels = false;
+    
     // this.physics.world.drawDebug = false;
     // if (this.physics.world.debugGraphic) {
     //   this.physics.world.debugGraphic.setVisible(false);
@@ -197,7 +196,7 @@ export default class DragonBossScene extends Phaser.Scene {
     this.attackKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE);
     this.fireKey   = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.F);
     this.menuKey   = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.ESC);
-    
+    this.selectAbilityKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.E)
     this.lastFiredTime = 0;
     
     // ── HUD: Player Health Bar ───────────────────────────────
@@ -284,7 +283,14 @@ export default class DragonBossScene extends Phaser.Scene {
       this.scene.pause();
       this.scene.launch("Pause", { returnScene: this.scene.key });
     }
-
+    
+    if (Phaser.Input.Keyboard.JustDown(this.selectAbilityKey)) {
+        if (!playerData.isAbleToUseEMenu){
+          return;
+        }
+         this.scene.pause()
+         this.scene.launch("playerSelectAbility", { returnScene: this.scene.key });
+       }
     if (this.isAttacking) return;
 
     // ── Movement ─────────────────────────────────────────────

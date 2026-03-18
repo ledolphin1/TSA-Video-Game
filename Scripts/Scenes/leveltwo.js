@@ -55,9 +55,10 @@ export default class LevelTwo extends Phaser.Scene {
       playerData.didBeatL2 = true;
       fadeToScene(this, "overworld");
     });
-
     // ── Base setup (player, camera, ground, controls, HUD) ──────────────────
     create_init.call(this, map);
+    
+    this.cameras.main.startFollow(this.player, false, 1, 1);//ALWAYS THIS SETTING
     // ── Extra animations ────────────────────────────────────────────────────
     this.anims.create({
       key: "virus_idle",
@@ -248,7 +249,14 @@ respawn() {
       this.scene.pause();
       this.scene.launch("Pause", { returnScene: this.scene.key });
     }
-
+    
+    if (Phaser.Input.Keyboard.JustDown(this.selectAbilityKey)) {
+      if (!playerData.isAbleToUseEMenu){
+          return;
+        }
+         this.scene.pause()
+         this.scene.launch("playerSelectAbility", { returnScene: this.scene.key });
+       }
     if (Phaser.Input.Keyboard.JustDown(this.fireKey) && !this.projectileOnCooldown) {
       if (time > this.lastFiredTime + 3000) {
         this.selectAbility(time);
