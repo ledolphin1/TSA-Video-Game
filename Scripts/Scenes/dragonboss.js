@@ -417,9 +417,9 @@ export default class DragonBossScene extends Phaser.Scene {
     this._updateDragonHpBar();
 if (!poison){
   this.dragon.setTintFill(0xffffff);
-  setTimeout(() => {
+  this.time.delayedCall(120,() => {
     if (this.dragon && this.dragon.active) this.dragon.clearTint();
-  }, 120);
+  });
 
 }
 
@@ -430,12 +430,12 @@ if (!poison){
 
     this.physics.world.pause();
     this.anims.pauseAll();
-    setTimeout(() => {
+    this.time.delayedCall(80,() => {
       if (!this.dragonDefeated) {
         this.physics.world.resume();
         this.anims.resumeAll();
       }
-    }, 80);
+    });
   }
 
   // ============================================================
@@ -486,7 +486,7 @@ if (!poison){
     const dir = (this.player.x < this.dragon.x) ? -1 : 1;
     this.player.setVelocity(dir * 110, -60);
 
-    setTimeout(() => { this.isKnockedBack = false; }, 250);
+    this.time.delayedCall(250,() => { this.isKnockedBack = false; });
     this._flashPlayer();
   }
 
@@ -513,7 +513,7 @@ if (!poison){
     this.physics.add.overlap(attackHitbox, this.dragon, (hb, dragon) => {
       if (this.dragon._hitCooldown) return;
       this.dragon._hitCooldown = true;
-      setTimeout(() => { if (this.dragon) this.dragon._hitCooldown = false; }, 300);
+      this.time.delayedCall(300,() => { if (this.dragon) this.dragon._hitCooldown = false; });
       this._damageDragon(this.slashDamage);
     });
 

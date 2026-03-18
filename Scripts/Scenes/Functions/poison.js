@@ -58,6 +58,7 @@
           enemy.poisoCount = 0;
         }
         if (!enemy.isPoisoned){
+          
             enemy.poison = this.time.addEvent(
               {
                 delay: 1000,
