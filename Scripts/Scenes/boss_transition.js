@@ -170,7 +170,7 @@ export default class boss_transition extends Phaser.Scene {
     this.enemyHpBarBg.lineStyle(1, 0xff0000);
     this.enemyHpBarBg.strokeRect(bx, by, bw, bh);
     this.enemyHpBarFill.fillStyle(0xdd0000);
-    this.enemyHpBarFill.fillRect(bx + 1, by + 1, bw - 2, bh - 2);
+    this.enemyHpBarFill.fillRect(bx + 1, by + 1.5, bw - 2.5, bh - 2.5);
   }
 
   _updateEnemyHpBar(currentHp) {
@@ -186,7 +186,7 @@ export default class boss_transition extends Phaser.Scene {
     this.enemyHpBarBg.strokeRect(bx, by, bw, bh);
 
     this.enemyHpBarFill.fillStyle(0xdd0000);
-    this.enemyHpBarFill.fillRect(bx + 1, by + 1, (bw - 2) * pct, bh - 2);
+    this.enemyHpBarFill.fillRect(bx + 1, by + 1.5, (bw - 2.5) * pct, bh - 2.5);
   }
 
 

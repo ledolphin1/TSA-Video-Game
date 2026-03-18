@@ -79,10 +79,6 @@ export default class Overworld extends Phaser.Scene {
     create() {
         setupSceneFade(this, { pauseGameplay: true, duration: 350 });
 
-        this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.S).on('down', () => {
-        fadeToScene(this, 'MainScene');
-        });
-
         this.add.image(160, 240, "overworldbg");
         console.log("overworld scene created");
         this.physics.world.roundPixels = false;
@@ -223,7 +219,7 @@ export default class Overworld extends Phaser.Scene {
             if (Phaser.Input.Keyboard.JustDown(this.interactKey)) {
                 if (playerData.didBeatL1){
                     this.sound.stopAll();
-                    this.scene.start("LevelTwo");
+                    fadeToScene(this,"LevelTwo");
                 } 
             }
         });
@@ -255,7 +251,7 @@ export default class Overworld extends Phaser.Scene {
                 }
                 if (playerData.didBeatL2){
                     this.sound.stopAll();
-                    this.scene.start("boss");
+                    fadeToScene(this,"boss");
                 }
             }
         });

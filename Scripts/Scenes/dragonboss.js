@@ -443,7 +443,7 @@ if (!poison){
     playerData.stats.bossesDefeated += 1;
 
     customEmitter.emit("DRAGONBOSS_CLEAR");
-
+    this.sound.stopAll()
     this.dragon.setTint(0xff4400);
     this.physics.world.pause();
     this.anims.pauseAll();
@@ -649,7 +649,7 @@ if (!poison){
     this.dragonHpBarBg.strokeRect(bx, by, bw, bh);
 
     this.dragonHpBarFill.fillStyle(0xff2200);
-    this.dragonHpBarFill.fillRect(bx + 1, by + 1, (bw - 2) * pct, bh - 2);
+    this.dragonHpBarFill.fillRect(bx + 1, by + 1.5, (bw - 2.5) * pct, bh - 2.5);
   }
 
   _updateDragonHpBarPos() {

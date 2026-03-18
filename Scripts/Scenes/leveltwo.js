@@ -58,7 +58,6 @@ export default class LevelTwo extends Phaser.Scene {
 
     // ── Base setup (player, camera, ground, controls, HUD) ──────────────────
     create_init.call(this, map);
-    this.cameras.main.startFollow(this.player, false, 1, 1);
     // ── Extra animations ────────────────────────────────────────────────────
     this.anims.create({
       key: "virus_idle",
