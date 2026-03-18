@@ -27,9 +27,9 @@ export default class WinCredits extends Phaser.Scene {
 
     const statLines = [
       "RUN STATS",
-      `Enemy Kills: ${playerData.stats.enemyKills}`,
+      `Enemies Defeated: ${playerData.stats.enemyKills}`,
       `Damage Taken: ${playerData.stats.damageTaken}`,
-      `Deaths: ${playerData.stats.deaths}`,
+      `Times Defeated: ${playerData.stats.deaths}`,
       `Projectiles Fired: ${playerData.stats.projectilesFired}`,
       `Melee Attacks: ${playerData.stats.meleeAttacks}`
     ];
