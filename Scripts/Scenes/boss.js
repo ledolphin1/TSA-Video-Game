@@ -4,7 +4,6 @@ import preload_init from "./Functions/preload_init.js";
 import create_init from "./Functions/create_init.js";
 import { customEmitter } from "./events.js";
 import { playerData } from "./playerdata.js";
-import { fadeToScene } from "./Functions/sceneFade.js";
 export default class BossScene extends Phaser.Scene {
   constructor() {
     super({ key: "boss" });
@@ -50,7 +49,7 @@ export default class BossScene extends Phaser.Scene {
       playerData.transitionX= this.player.x;
       playerData.transitionY= this.player.y;
       this.sound.stopAll();
-    fadeToScene(this, "bt1");
+      this.scene.start("bt1");
 
     });
  
@@ -409,11 +408,9 @@ export default class BossScene extends Phaser.Scene {
 
     this.time.delayedCall(1000, () => {
       try { this.music.stop(); } catch (e) {}
-      fadeToScene(this, "bt1");
-      console.log(this.enemy.x,"enemyx")
-      console.log(this.enemy.y,"enemyy")
       playerData.transitionX= this.player.x;
       playerData.transitionY= this.player.y;
+      this.scene.start("bt1");
     });
   }
   respawnPlayer() {

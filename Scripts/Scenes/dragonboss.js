@@ -6,7 +6,7 @@ import waveProj from "./Functions/wave.js";
 import hyper from "./Functions/hyper.js";
 import poison from "./Functions/poison.js";
 import selectAbility from "./Functions/selectAbility.js";
-import { setupSceneFade, fadeToScene } from "./Functions/sceneFade.js";
+import { fadeToScene } from "./Functions/sceneFade.js";
 
 export default class DragonBossScene extends Phaser.Scene {
   constructor() {
@@ -77,7 +77,6 @@ export default class DragonBossScene extends Phaser.Scene {
   }
 
   create() {
-    setupSceneFade(this, { pauseGameplay: true, duration: 350 });
     this.scene.bringToTop("Narator");
     // ── Background ──────────────────────────────────────────
     this.add.image(160, 247, "bossbg");

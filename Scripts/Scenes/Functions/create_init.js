@@ -117,16 +117,12 @@ const create_init = function(map,debug){
     this.lastFiredTime = 0; // Initialize cooldown timer//!
 
     
-    // --- Post-Update Sync (Fixes Lag/Blur) ---//!
-    // Sync runs AFTER physics, ensuring visual matches actual body position for this frame
     this.events.on('postupdate', () => {
         if (this.playerVisual && this.player) {
-        let vX = Math.round(this.player.x);
-        let vY = Math.round(this.player.y);
+      let vX = this.player.x;
+      let vY = this.player.y;
 
-        // Apply Visual Offsets when attacking
         if (this.playerVisual.texture.key === 'player_attack_sheet') {
-            // Invert X offset if facing left
             if (this.player.flipX) {
             vX -= this.attackVisualOffset.x;
             } else {
@@ -142,6 +138,8 @@ const create_init = function(map,debug){
         }
     });
 
+    if (this.scene && this.scene.key !== "boss" && this.scene.key !== "bt1" && this.scene.key !== "dragonBoss") {
       setupSceneFade(this, { pauseGameplay: true, duration: 350 });
+    }
 }
 export default create_init;
