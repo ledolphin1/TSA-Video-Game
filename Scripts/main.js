@@ -12,6 +12,8 @@ import arcade_exterior from "./Scenes/arcade_exterior.js";
 import Narator from "./Scenes/narrator.js";
 import boss_transition from "./Scenes/boss_transition.js";
 import pickAbility from "./Scenes/pickAbility.js";
+import CarSfIntro from "./Scenes/car_sf_intro.js";
+import WinCredits from "./Scenes/win_credits.js";
 
 console.log("I loaded we have a chance after all")
 const config = {
@@ -29,7 +31,7 @@ const config = {
   parent: "game-container",
 
   // DragonBossScene added at the end of the scene list
-  scene: [Intro,Menu,arcade_exterior, MainScene, Pause, Options, boss, LevelTwo, Overworld, DragonBossScene, Narator,boss_transition,pickAbility],
+  scene: [Intro, Menu, CarSfIntro, arcade_exterior, MainScene, Pause, Options, boss, LevelTwo, Overworld, DragonBossScene, Narator, boss_transition, pickAbility, WinCredits],
 
   physics: {
     default: "arcade",

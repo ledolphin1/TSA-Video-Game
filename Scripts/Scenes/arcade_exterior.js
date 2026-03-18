@@ -2,6 +2,7 @@ import * as Phaser from "phaser";
 import constructor_init from "./Functions/constructor_init.js";
 import { playerData } from "./playerdata.js";
 import { customEmitter } from "./events.js";
+import { setupSceneFade, fadeToScene } from "./Functions/sceneFade.js";
 
 export default class arcade_exterior extends Phaser.Scene {
     constructor() {
@@ -39,6 +40,7 @@ export default class arcade_exterior extends Phaser.Scene {
     }
 
     create() {
+        setupSceneFade(this, { pauseGameplay: false, duration: 350 });
         playerData.currentScene = "arcade_exterior";
         console.log(playerData);
         this.physics.world.setBounds(0, 0, this.scale.width,this.scale.height - 36);
@@ -150,7 +152,7 @@ export default class arcade_exterior extends Phaser.Scene {
             if (Phaser.Input.Keyboard.JustDown(this.interactKey)) {
         
                 this.sound.stopAll();   
-                this.scene.start("overworld");
+                fadeToScene(this, "overworld");
             }    
     }
         //switched onGround to a property (just in case)

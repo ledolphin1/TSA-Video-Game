@@ -1,8 +1,10 @@
+    import { playerData } from "../playerdata.js";
   const waveProj = function (time) {
     this.projectileOnCooldown = true;
     this.projectileCooldownStart = time;
     this.waveAttackDmg = 3;
     this.lastFiredTime = time;
+        playerData.stats.projectilesFired += 1;
     const proj = this.physics.add.sprite(this.player.x,this.player.y,"wave").setData("enemies_pierced",0);
     proj.flipX = this.player.flipX ? true : false;
     this.physics.add.existing(proj);

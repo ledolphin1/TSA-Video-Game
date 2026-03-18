@@ -1,5 +1,6 @@
 import * as Phaser from "phaser";
 import { playerData } from "./playerdata.js";
+import { setupSceneFade, fadeToScene } from "./Functions/sceneFade.js";
 export default class Intro extends Phaser.Scene {
   constructor() {
     super({ key: "Intro" });
@@ -10,13 +11,14 @@ export default class Intro extends Phaser.Scene {
     this.load.bitmapFont("arcade_font", "public/assets/PressStart.png", "public/assets/PressStart.xml")
   }
   create() {
+    setupSceneFade(this, { pauseGameplay: false, duration: 350 });
     console.log(playerData);
     
     const video = this.add.video(0, 0, "intro_vid");
     video.setOrigin(0, 0)
     video.play(false);
     video.on("complete", () => {
-      this.scene.start("Menu");
+      fadeToScene(this, "Menu");
     });
 
     this.cameras.main.roundPixels = true;
@@ -32,15 +34,15 @@ export default class Intro extends Phaser.Scene {
     })
 
     skipText.on("pointerdown", () => {
-      this.scene.start("Menu");
+      fadeToScene(this, "Menu");
     });
 
     // Keyboard Skip
     this.input.keyboard.on("keydown-SPACE", () => {
-      this.scene.start("Menu");
+      fadeToScene(this, "Menu");
     });
     this.input.keyboard.on("keydown-ENTER", () => {
-      this.scene.start("Menu");
+      fadeToScene(this, "Menu");
     });
   }
 }

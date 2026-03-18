@@ -19,6 +19,23 @@ class PlayerData {
         this.didBeatL2 = false;
         this.didBeatS1 = false;
         this.didBeatBoss = false;
+        this.stats = {
+            enemyKills: 0,
+            damageTaken: 0,
+            deaths: 0,
+            projectilesFired: 0,
+            meleeAttacks: 0,
+            bossesDefeated: 0
+        };
+    }
+
+    resetRunStats(){
+        this.stats.enemyKills = 0;
+        this.stats.damageTaken = 0;
+        this.stats.deaths = 0;
+        this.stats.projectilesFired = 0;
+        this.stats.meleeAttacks = 0;
+        this.stats.bossesDefeated = 0;
     }
 }
 export const playerData = new PlayerData;

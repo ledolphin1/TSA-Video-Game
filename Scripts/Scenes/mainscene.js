@@ -8,6 +8,7 @@ import preload_init from "./Functions/preload_init.js";
 import performAttack from "./Functions/performAttack.js";
 import { customEmitter } from "./events.js";
 import { playerData } from "./playerdata.js";
+import { fadeToScene } from "./Functions/sceneFade.js";
 export default class MainScene extends Phaser.Scene {
   constructor() {
     super({ key: "MainScene" });
@@ -36,7 +37,7 @@ export default class MainScene extends Phaser.Scene {
     this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.S).on("down", () => {
       playerData.didBeatL1 = true;
       this.sound.stopAll()
-    this.scene.start("overworld");
+      fadeToScene(this, "overworld");
     });
 
     create_init.call(this, map);
@@ -81,7 +82,7 @@ export default class MainScene extends Phaser.Scene {
             // Stop music before switching if needed
             this.sound.stopAll();
             playerData.didBeatL1 = true;
-            this.scene.start("overworld");
+            fadeToScene(this, "overworld");
         }
     });
     
@@ -246,7 +247,7 @@ export default class MainScene extends Phaser.Scene {
       playerData.didMove = true;
       this.music.stop()
       playerData.didBeatL1 = true;
-      this.scene.start("overworld");
+      fadeToScene(this, "overworld");
     }
 
   }
@@ -369,6 +370,7 @@ export default class MainScene extends Phaser.Scene {
         enemy.hp -= dmg;
         console.log("hp")
           if (enemy.hp <= 0) {
+        playerData.stats.enemyKills += 1;
         enemy.destroy();
       } else {
         if (poison){

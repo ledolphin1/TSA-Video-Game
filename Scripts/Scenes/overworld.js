@@ -1,6 +1,7 @@
 import * as Phaser from 'phaser';
 import { customEmitter } from './events.js';
 import { playerData } from './playerdata.js';
+import { setupSceneFade, fadeToScene } from './Functions/sceneFade.js';
 
 export default class Overworld extends Phaser.Scene {
     constructor() {
@@ -76,9 +77,10 @@ export default class Overworld extends Phaser.Scene {
     }
 
     create() {
+        setupSceneFade(this, { pauseGameplay: false, duration: 350 });
 
         this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.S).on('down', () => {
-        this.scene.start('MainScene');
+        fadeToScene(this, 'MainScene');
         });
 
         this.add.image(160, 240, "overworldbg");
@@ -187,7 +189,7 @@ export default class Overworld extends Phaser.Scene {
             }
             if (Phaser.Input.Keyboard.JustDown(this.interactKey)) {
                 this.sound.stopAll();
-                this.scene.start("MainScene");
+                fadeToScene(this, "MainScene");
             }
         });
         

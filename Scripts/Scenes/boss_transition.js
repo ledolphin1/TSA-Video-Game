@@ -4,6 +4,7 @@ import preload_init from "./Functions/preload_init.js";
 import create_init from "./Functions/create_init.js";
 import { customEmitter } from "./events.js";
 import { playerData } from "./playerdata.js";
+import { fadeToScene } from "./Functions/sceneFade.js";
 export default class boss_transition extends Phaser.Scene {
   constructor() {
     super({ key: "bt1" });
@@ -32,7 +33,7 @@ export default class boss_transition extends Phaser.Scene {
     create_init.call(this, map,1) 
     
     this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.S).on("down", () => {
-        this.scene.start("dragonBoss");
+      fadeToScene(this, "dragonBoss");
         playerData.transitionX= this.player.x;
         playerData.transitionY= this.player.y;
     });
@@ -58,13 +59,19 @@ export default class boss_transition extends Phaser.Scene {
     console.log("timetimetime")
     this.enemy.body.setAllowGravity(false)
     this.enemy.body.setVelocityY(-80);
-    setInterval(function () {
-        if(this.enemy.hp == 20){
-            this.scene.start("dragonBoss")
+    this._transformEvent = this.time.addEvent({
+      delay: 200,
+      loop: true,
+      callback: () => {
+        if (this.enemy.hp >= 20) {
+          this._transformEvent.remove(false);
+          fadeToScene(this, "dragonBoss");
+          return;
         }
-        this.enemy.hp++;
-        this._updateEnemyHpBar(this.enemy.hp)
-    }.bind(this), 200);
+        this.enemy.hp += 1;
+        this._updateEnemyHpBar(this.enemy.hp);
+      }
+    });
   }
 
 
@@ -159,9 +166,6 @@ export default class boss_transition extends Phaser.Scene {
     const bw = 120, bh = 8, bx = 100, by = 6;
     this.enemyHpBarBg   = this.add.graphics().setScrollFactor(0).setDepth(1000);
     this.enemyHpBarFill = this.add.graphics().setScrollFactor(0).setDepth(1000);
-    this.enemyHpLabel   = this.add.text(160, 8, "SNAKE BOSS", { fontSize: "8px", color: "#ffffff" })
-      .setOrigin(0.5, 0).setScrollFactor(0).setDepth(1001);
-
     // Draw initial full bar
     this.enemyHpBarBg.lineStyle(1, 0xff0000);
     this.enemyHpBarBg.strokeRect(bx, by, bw, bh);

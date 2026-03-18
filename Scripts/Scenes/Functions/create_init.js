@@ -8,6 +8,7 @@ import waveProj from './wave.js';
 import hyper from './hyper.js';
 import poison from './poison.js';
 import selectAbility from './selectAbility.js';
+import { setupSceneFade } from './sceneFade.js';
 
 const {updatePlayerHitboxUnbound, flashPlayerUnbound, killPlayerUnbound} = playerFuncs;
 const create_init = function(map,debug){
@@ -141,5 +142,7 @@ const create_init = function(map,debug){
 
         }
     });
+
+      setupSceneFade(this, { pauseGameplay: true, duration: 350 });
 }
 export default create_init;

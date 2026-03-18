@@ -4,6 +4,7 @@ import preload_init from "./Functions/preload_init.js";
 import create_init from "./Functions/create_init.js";
 import { customEmitter } from "./events.js";
 import { playerData } from "./playerdata.js";
+import { fadeToScene } from "./Functions/sceneFade.js";
 export default class BossScene extends Phaser.Scene {
   constructor() {
     super({ key: "boss" });
@@ -48,7 +49,7 @@ export default class BossScene extends Phaser.Scene {
       console.log(this.enemy.y,"enemyy")
       playerData.transitionX= this.player.x;
       playerData.transitionY= this.player.y;
-    this.scene.start("bt1");
+    fadeToScene(this, "bt1");
 
     });
  
@@ -183,6 +184,7 @@ export default class BossScene extends Phaser.Scene {
   }
 
   performAttack() {
+    playerData.stats.meleeAttacks += 1;
     this.isJumping = false;
     this.isAttacking = true;
     this.player.setVelocityX(0);
@@ -222,6 +224,8 @@ export default class BossScene extends Phaser.Scene {
       this._updateEnemyHpBar(enemy.hp);
 
       if (enemy.hp <= 0) {
+        playerData.stats.enemyKills += 1;
+        playerData.stats.bossesDefeated += 1;
         customEmitter.emit("stage_1_defeat")
         this.boss_to_center_one_call(enemy)
         this.freeze = true;
@@ -365,8 +369,6 @@ export default class BossScene extends Phaser.Scene {
     const bw = 120, bh = 8, bx = 100, by = 6;
     this.enemyHpBarBg   = this.add.graphics().setScrollFactor(0).setDepth(1000);
     this.enemyHpBarFill = this.add.graphics().setScrollFactor(0).setDepth(1000);
-    this.enemyHpLabel   = this.add.text(160, 8, "SNAKE BOSS", { fontSize: "8px", color: "#ffffff" })
-      .setOrigin(0.5, 0).setScrollFactor(0).setDepth(1001);
 
     // Draw initial full bar
     this.enemyHpBarBg.lineStyle(1, 0xff0000);
@@ -397,7 +399,7 @@ export default class BossScene extends Phaser.Scene {
 
     this.time.delayedCall(1000, () => {
       try { this.music.stop(); } catch (e) {}
-      this.scene.start("bt1");
+      fadeToScene(this, "bt1");
       console.log(this.enemy.x,"enemyx")
       console.log(this.enemy.y,"enemyy")
       playerData.transitionX= this.player.x;
@@ -501,6 +503,8 @@ export default class BossScene extends Phaser.Scene {
       
       this._updateEnemyHpBar(enemy.hp);
       if (enemy.hp <= 0) {
+        playerData.stats.enemyKills += 1;
+        playerData.stats.bossesDefeated += 1;
         customEmitter.emit("stage_1_defeat")
         this.boss_to_center_one_call(enemy)
         this.freeze = true;
