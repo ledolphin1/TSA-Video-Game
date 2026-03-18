@@ -26,18 +26,25 @@
           enemy.poisoCount = 0;
         }
         if (!enemy.isPoisoned){
-            enemy.poison = setInterval(() => {
+            enemy.poison = this.time.addEvent(
+              {
+                delay: 1000,
+                callback: () => {
                 if (enemy.poisoCount == 5){
                     enemy.isPoisoned = false;
                     enemy.poisoCount = 0;
                     console.log("no more poison")
                     enemy.clearTint();
-                    clearInterval(enemy.poison);
+                    enemy.poison.remove();
                     return;
                 }
                 this.projectileEnemyCollisionHandle(projectile,enemy,1,1)
                 enemy.poisoCount++;
-            }, 500);
+            },
+              callbackScope:this,
+              loop: true
+
+          });
         }
         projectile.destroy()
         enemy.isPoisoned = true;
@@ -51,19 +58,26 @@
           enemy.poisoCount = 0;
         }
         if (!enemy.isPoisoned){
-            enemy.poison = setInterval(() => {
+            enemy.poison = this.time.addEvent(
+              {
+                delay: 1000,
+                callback: () => {
                 if (enemy.poisoCount == 5){
                     enemy.isPoisoned = false;
                     enemy.poisoCount = 0;
                     console.log("no more poison")
                     enemy.clearTint();
-                    clearInterval(enemy.poison);
+                    enemy.poison.remove();
                     return;
                 }
-                console.log("hi man")
                 this.projectileEnemyCollisionHandle(projectile,enemy,1,1)
                 enemy.poisoCount++;
-            }, 500);
+            },
+              callbackScope:this,
+              loop: true
+
+          });
+        
         }
         projectile.destroy()
         enemy.isPoisoned = true;
