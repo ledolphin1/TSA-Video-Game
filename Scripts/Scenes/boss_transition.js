@@ -32,11 +32,11 @@ export default class boss_transition extends Phaser.Scene {
     const map = this.make.tilemap({ key: "boss_level" });
     create_init.call(this, map,1) 
     
-    this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.S).on("down", () => {
-      fadeToScene(this, "dragonBoss");
-        playerData.transitionX= this.player.x;
-        playerData.transitionY= this.player.y;
-    });
+    // this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.S).on("down", () => {
+    //   fadeToScene(this, "dragonBoss");
+    //     playerData.transitionX= this.player.x;
+    //     playerData.transitionY= this.player.y;
+    // });
         this.anims.create({
             key: "boss_transform",
             frames: this.anims.generateFrameNumbers("boss_transition"),
@@ -65,6 +65,9 @@ export default class boss_transition extends Phaser.Scene {
       callback: () => {
         if (this.enemy.hp >= 20) {
           this._transformEvent.remove(false);
+          this.sound.stopAll();
+          playerData.transitionX = this.player.x
+          playerData.transitionY = this.player.y
           fadeToScene(this, "dragonBoss");
           return;
         }
