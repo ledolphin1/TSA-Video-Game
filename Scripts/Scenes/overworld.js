@@ -43,6 +43,14 @@ export default class Overworld extends Phaser.Scene {
             frameWidth: 16,
             frameHeight: 16
         })
+        this.load.spritesheet("ow_player_spawn", "public/assets/playerspawn.png", {
+            frameWidth: 16,
+            frameHeight: 16
+        })
+        this.load.spritesheet("ow_player_deconstruct", "public/assets/playerdeconstruct.png", {
+            frameWidth: 16,
+            frameHeight: 16
+        })
         this.load.spritesheet("ow_player_running", "public/assets/playerRun.png", {
             frameWidth: 16,
             frameHeight: 16
@@ -92,18 +100,19 @@ export default class Overworld extends Phaser.Scene {
             frameRate: 20,
             repeat: -1
         })
-       
         this.anims.create({
-            key: "ow_player_jump_start",
-            frames: this.anims.generateFrameNumbers("ow_player_jumping", {
-                start: 0,
-                end: 1
-            }),
-            frameRate: 1,
-            repeat: 0,
-            hideOnComplete: false
+            key: "ow_player_spawning",
+            frames: this.anims.generateFrameNumbers("ow_player_spawn"),
+            frameRate: 10,
+            repeat: 1
         })
-        
+        this.anims.create({
+            key: "ow_player_deconstructing",
+            frames: this.anims.generateFrameNumbers("ow_player_deconstruct"),
+            frameRate: 10,
+            hideOnComplete: true
+        })
+       
         this.anims.create({
             key: "ow_player_falling",
             frames: this.anims.generateFrameNumbers("ow_player_jumping", {
@@ -191,8 +200,17 @@ export default class Overworld extends Phaser.Scene {
             this.arcadeMachinePurple.play("arcade_active_purple")
             }
             if (Phaser.Input.Keyboard.JustDown(this.interactKey)) {
-                this.sound.stopAll();
-                fadeToScene(this, "codeSpooky");
+                if (this.isTransitioning){
+                    return;
+                }
+                this.isTransitioning = true;
+                this.playerVisual.play("ow_player_deconstructing");
+                this.player.setVelocityX(0)
+                this.time.delayedCall(1220,function(){
+                    this.isTransitioning = false;
+                    this.sound.stopAll();
+                    fadeToScene(this, "codeSpooky");
+                }.bind(this))
             }
         });
         
@@ -218,8 +236,17 @@ export default class Overworld extends Phaser.Scene {
             }
             if (Phaser.Input.Keyboard.JustDown(this.interactKey)) {
                 if (playerData.didBeatL1){
+                    if (this.isTransitioning){
+                    return;
+                }
+                this.isTransitioning = true;
+                this.playerVisual.play("ow_player_deconstructing");
+                this.player.setVelocityX(0)
+                this.time.delayedCall(1220,function(){
+                    this.isTransitioning = false;
                     this.sound.stopAll();
-                    fadeToScene(this,"LevelTwo");
+                    fadeToScene(this, "LevelTwo");
+                }.bind(this))
                 } 
             }
         });
@@ -250,8 +277,17 @@ export default class Overworld extends Phaser.Scene {
                     return;
                 }
                 if (playerData.didBeatL2){
+                    if (this.isTransitioning){
+                    return;
+                }
+                this.isTransitioning = true;
+                this.playerVisual.play("ow_player_deconstructing");
+                this.player.setVelocityX(0)
+                this.time.delayedCall(1220,function(){
+                    this.isTransitioning = false;
                     this.sound.stopAll();
-                    fadeToScene(this,"boss");
+                    fadeToScene(this, "boss");
+                }.bind(this))
                 }
             }
         });
@@ -305,6 +341,10 @@ export default class Overworld extends Phaser.Scene {
     
     
     update(time, delta) {
+        if (this.isTransitioning){
+            return;
+        }
+
         if (!this.physics.overlap(this.player, this.arcadeMachinePurple) && !playerData.didBeatL1) {
             this.arcadeMachinePurple.setTexture("arcadeMachinePurpleBlank");
         }
