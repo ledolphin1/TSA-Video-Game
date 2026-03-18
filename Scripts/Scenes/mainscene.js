@@ -34,7 +34,9 @@ export default class MainScene extends Phaser.Scene {
     })
 
     this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.S).on("down", () => {
-    this.scene.start("LevelTwo");
+      playerData.didBeatL1 = true;
+      this.sound.stopAll()
+    this.scene.start("overworld");
     });
 
     create_init.call(this, map);
@@ -78,7 +80,8 @@ export default class MainScene extends Phaser.Scene {
         if (Phaser.Input.Keyboard.JustDown(this.interactKey)) {
             // Stop music before switching if needed
             this.sound.stopAll();
-            this.scene.start("LevelTwo");
+            playerData.didBeatL1 = true;
+            this.scene.start("overworld");
         }
     });
     
@@ -242,7 +245,8 @@ export default class MainScene extends Phaser.Scene {
       playerData.didAttack = true;
       playerData.didMove = true;
       this.music.stop()
-      this.scene.start("LevelTwo");
+      playerData.didBeatL1 = true;
+      this.scene.start("overworld");
     }
 
   }

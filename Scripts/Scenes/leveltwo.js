@@ -4,6 +4,7 @@ import activate_anims from "./Functions/activate_anims.js";
 import constructor_init from "./Functions/constructor_init.js";
 import preload_init from "./Functions/preload_init.js";
 import { customEmitter } from "./events.js";
+import { playerData } from "./playerdata.js";
 
 
 //  Enemies are brute robot/virus thingies that chase the player.
@@ -49,7 +50,9 @@ export default class LevelTwo extends Phaser.Scene {
     const map = this.make.tilemap({ key: "leveltwo_map" });
 
     this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.S).on("down", () => {
-    this.scene.start("boss");
+      this.sound.stopAll();
+      playerData.didBeatL2 = true;
+      this.scene.start("overworld");
     });
 
     // ── Base setup (player, camera, ground, controls, HUD) ──────────────────
@@ -622,7 +625,9 @@ respawn() {
     if (this._glitchTimer) this._glitchTimer.remove();
 
     this.time.delayedCall(400, () => {
-      this.scene.start("boss");
+      this.sound.stopAll();
+      playerData.didBeatL2 = true;
+      this.scene.start("overworld");
     });
   }
 
