@@ -7,8 +7,9 @@ export default class Intro extends Phaser.Scene {
   }
   preload() {
     this.load.video("intro_vid", "public/assets/Intro.mp4", true)
-
+    
     this.load.bitmapFont("arcade_font", "public/assets/PressStart.png", "public/assets/PressStart.xml")
+
   }
   create() {
     setupSceneFade(this, { pauseGameplay: false, duration: 350 });

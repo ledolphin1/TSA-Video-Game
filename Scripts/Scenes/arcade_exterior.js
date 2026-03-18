@@ -14,6 +14,7 @@ export default class arcade_exterior extends Phaser.Scene {
     }
 
     preload() {
+        this.load.bitmapFont("game_font", "public/assets/pixel_fonts/fonts/square_6x6.png", "public/assets/pixel_fonts/fonts/square_6x6.xml")
         customEmitter.emit("ARCADE_EXTERIOR_BEGIN");
         this.physics.world.roundPixels = true;
         this.cameras.main.setRoundPixels(true);
@@ -59,11 +60,10 @@ export default class arcade_exterior extends Phaser.Scene {
         loopvid.setDepth(-758743895789345)
 
         video.preFX.addColorMatrix().brightness(1.5);
-        video.preFX.addColorMatrix().saturate(1.5);
+        video.preFX.addColorMatrix().saturate(1);
 
         loopvid.preFX.addColorMatrix().brightness(1.5);
-        loopvid.preFX.addColorMatrix().saturate(1.5);
-
+        loopvid.preFX.addColorMatrix().saturate(1);
         
         
         //upload animations
@@ -95,26 +95,32 @@ export default class arcade_exterior extends Phaser.Scene {
         // Auto-center hitbox
         const pWidth = this.playerHitbox.width;
         const pHeight = this.playerHitbox.height;
-        const pOffsetX = (this.player.width - pWidth) / 2;
-        const pOffsetY = (this.player.height - pHeight); // Align to bottom
-        // If you want pure center: (this.player.height - pHeight) / 2
-
-        this.player.body.setSize(pWidth, pHeight);
-        this.player.body.setOffset(pOffsetX, pOffsetY);
-
-        this.physics.add.collider(this.player, this.ground)
-        this.player.setCollideWorldBounds(true);
-        this.cameras.main.setRoundPixels(true);
-
-        
-        // --- Controls ---
-        this.cursors = this.input.keyboard.createCursorKeys();
-        
-        
-        this.menuKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.ESC)
-        this.interactKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.Z)
-        
-        //cords for debug
+            const pOffsetX = (this.player.width - pWidth) / 2;
+            const pOffsetY = (this.player.height - pHeight); // Align to bottom
+            // If you want pure center: (this.player.height - pHeight) / 2
+            
+            this.player.body.setSize(pWidth, pHeight);
+            this.player.body.setOffset(pOffsetX, pOffsetY);
+            
+            this.physics.add.collider(this.player, this.ground)
+            this.player.setCollideWorldBounds(true);
+            this.cameras.main.setRoundPixels(true);
+            
+            this.dialogue = this.add.bitmapText(this.playerVisual.x, 100, "game_font", "I can't believe it's finally closing", 10).setOrigin(0.5, 0)
+            this.dialogue2 = this.add.bitmapText(this.playerVisual.x, 110, "game_font", "I'd like to play some games one last time!", 10).setOrigin(0.5, 0)
+            this.time.delayedCall(5000,function (){
+                    this.dialogue.destroy();
+                    this.dialogue2.destroy();
+                }.bind(this))
+            
+            // --- Controls ---
+            this.cursors = this.input.keyboard.createCursorKeys();
+            
+            
+            this.menuKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.ESC)
+            this.interactKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.Z)
+            
+            //cords for debug
         this.coordText = this.add.text(this.cameras.main.width - 10, this.cameras.main.height - 10, "X: 0 Y: 0", {
             fontFamily: "./code_fonts/melodica.regular.otf",
             fontSize: "16px",
@@ -148,6 +154,8 @@ export default class arcade_exterior extends Phaser.Scene {
     }
     
     update(time, delta) {
+        this.dialogue.x = this.playerVisual.x;
+        this.dialogue2.x = this.playerVisual.x;
         if (this.player.x >= 226 && this.player.x <= 245) {
             if (Phaser.Input.Keyboard.JustDown(this.interactKey)) {
         
