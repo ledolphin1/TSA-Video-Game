@@ -15,6 +15,7 @@ import pickAbility from "./Scenes/pickAbility.js";
 import CarSfIntro from "./Scenes/car_sf_intro.js";
 import WinCredits from "./Scenes/win_credits.js";
 import playerSelectAbility from "./Scenes/playerSelectAbility.js";
+import codeSpooky from "./Scenes/codeSpooky.js";
 console.log("I loaded we have a chance after all")
 const config = {
   type: Phaser.AUTO,
@@ -31,7 +32,7 @@ const config = {
   parent: "game-container",
 
   // DragonBossScene added at the end of the scene list
-  scene: [Intro, Menu, CarSfIntro, arcade_exterior, MainScene, Pause, Options, boss, LevelTwo, Overworld, DragonBossScene, Narator, boss_transition, pickAbility, WinCredits,playerSelectAbility],
+  scene: [Intro, Menu, CarSfIntro,codeSpooky, arcade_exterior, MainScene, Pause, Options, boss, LevelTwo, Overworld, DragonBossScene, Narator, boss_transition, pickAbility, WinCredits,playerSelectAbility],
 
   physics: {
     default: "arcade",

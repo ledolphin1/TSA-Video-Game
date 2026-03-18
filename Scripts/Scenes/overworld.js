@@ -192,7 +192,7 @@ export default class Overworld extends Phaser.Scene {
             }
             if (Phaser.Input.Keyboard.JustDown(this.interactKey)) {
                 this.sound.stopAll();
-                fadeToScene(this, "MainScene");
+                fadeToScene(this, "codeSpooky");
             }
         });
         

@@ -124,6 +124,7 @@ export default class Narator extends Phaser.Scene {
             playerData.didMove = true;
         }
         customEmitter.on("OVERWORLD_BEGIN", this.setNarrator.bind(this,"Inspect the suspicious arcade machine.","Move to the arcade and press Z to inspect."))
+        customEmitter.on("codespooky", this.setNarrator.bind(this,"",""))
         customEmitter.on("L1BEGIN", this.setNarrator.bind(this,"Don't fall on spikes.","Press up arrow to jump."))
         customEmitter.on("JUMPED", onJump.bind(this))
         customEmitter.on("ATTACKED",onAttack.bind(this))
