@@ -98,7 +98,6 @@ export default class Narator extends Phaser.Scene {
             };
 
             this.setNarrator = function(t1, t2) {
-                    console.log("I should narrate now.")
                     this._typingRunId += 1;
                     const runId = this._typingRunId;
                     this._clearTypingEvents();
@@ -134,7 +133,7 @@ export default class Narator extends Phaser.Scene {
         customEmitter.on("playerSelect", playerSelect.bind(this))
         customEmitter.on("return", returnToPrevious.bind(this))
         customEmitter.on("SNAKEBOSS_BEGIN", this.setNarrator.bind(this,"Avoid the orbs shot by the robot","Use your Cyber Canon and Plasma Saber."))
-        customEmitter.on("L2BEGIN", this.setNarrator.bind(this,"Navigate the rough terrain.","Viruses are tougher and smarter than snakes, push through!"))
+        customEmitter.on("L2BEGIN", this.setNarrator.bind(this,"Navigate the rough terrain.","Viruses are tougher than snakes, push through!"))
         customEmitter.on("DRAGONBOSS", this.setNarrator.bind(this,"Defeat the flying robot!","Don't give in!"))
         customEmitter.on("DRAGONBOSS_CLEAR", this.setNarrator.bind(this,"",""))
         customEmitter.on("boss_transition", this.setNarrator.bind(this,"He is not defeated?",""))

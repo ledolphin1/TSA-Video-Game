@@ -25,5 +25,6 @@ const preload_init = function (){
     this.load.image('wave',"public/assets/wave.png")
     this.load.image('hyper',"public/assets/high-power-proj.png")
     this.load.image('poison',"public/assets/poison_proj.png")
+    this.load.image('main_bg',"public/assets/bg_repeat_main.png")
 }
 export default preload_init;

@@ -57,7 +57,7 @@ export default class LevelTwo extends Phaser.Scene {
     });
     // ── Base setup (player, camera, ground, controls, HUD) ──────────────────
     create_init.call(this, map);
-    
+        this.add.tileSprite(0,0,map.widthInPixels,map.heightInPixels,"main_bg").setOrigin(0,0).setDepth(-7)
     this.cameras.main.startFollow(this.player, false, 1, 1);//ALWAYS THIS SETTING
     // ── Extra animations ────────────────────────────────────────────────────
     this.anims.create({

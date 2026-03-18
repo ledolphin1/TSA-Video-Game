@@ -42,6 +42,7 @@ export default class MainScene extends Phaser.Scene {
     
     create_init.call(this, map);
     activate_anims.call(this);
+    this.add.tileSprite(0,0,map.widthInPixels,map.heightInPixels,"main_bg").setOrigin(0,0).setDepth(-7)
     
     this.cameras.main.startFollow(this.player, false, 1, 1);//ALWAYS THIS SETTING
      // --- Post-Update Sync (Fixes Lag/Blur) ---
