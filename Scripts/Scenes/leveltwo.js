@@ -4,6 +4,8 @@ import activate_anims from "./Functions/activate_anims.js";
 import constructor_init from "./Functions/constructor_init.js";
 import preload_init from "./Functions/preload_init.js";
 import { customEmitter } from "./events.js";
+import { playerData } from "./playerdata.js";
+import { fadeToScene } from "./Functions/sceneFade.js";
 
 
 //  Enemies are brute robot/virus thingies that chase the player.
@@ -49,7 +51,7 @@ export default class LevelTwo extends Phaser.Scene {
     const map = this.make.tilemap({ key: "leveltwo_map" });
 
     this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.S).on("down", () => {
-    this.scene.start("boss");
+    fadeToScene(this, "boss");
     });
 
     // ── Base setup (player, camera, ground, controls, HUD) ──────────────────
@@ -107,11 +109,13 @@ export default class LevelTwo extends Phaser.Scene {
 
     // ── Player body vs enemy ─────────────────────────────────────────────────
     this.physics.add.overlap(this.player, this.enemies, (player, enemy) => {
+      if (this._isSceneTransitioning) return;
       if (enemy.isAttackingPlayer) return;
       if (this.playerIsDead) return;
       if (this.isInvincible) return;
 
       this.health -= 1;
+      playerData.stats.damageTaken += 1;
       this.health = Math.max(0, this.health);
       this.drawHealthBar();
       this.isInvincible = true;
@@ -173,6 +177,7 @@ export default class LevelTwo extends Phaser.Scene {
   die() {
     if (this.playerIsDead) return;
     this.playerIsDead = true;
+    playerData.stats.deaths += 1;
     this.isJumping    = false;
 
     this.player.setVelocity(0, 0);
@@ -382,6 +387,7 @@ respawn() {
     }
   }
    performAttack() {
+    playerData.stats.meleeAttacks += 1;
     this.isJumping = false;//!
     this.isAttacking = true;//!
     this.player.setVelocityX(0); // Stop horizontal movement//!
@@ -492,8 +498,10 @@ respawn() {
     const dx = Math.abs(this.player.x - enemy.x);
     const dy = Math.abs(this.player.y - enemy.y);
     if (dx <= 22 && dy <= 20) {
+      if (this._isSceneTransitioning) return;
       if (!this.playerIsDead && !this.isInvincible) {
         this.health -= 2;
+        playerData.stats.damageTaken += 2;
         this.health = Math.max(0, this.health);
         this.drawHealthBar();
         this.isInvincible = true;
@@ -588,6 +596,7 @@ respawn() {
         this.time.delayedCall(150 + i * 60, () => { if (spark.active) spark.destroy(); });
       }
       enemy.destroy();
+      playerData.stats.enemyKills += 1;
       return;
     }
     if (poison){
@@ -622,7 +631,7 @@ respawn() {
     if (this._glitchTimer) this._glitchTimer.remove();
 
     this.time.delayedCall(400, () => {
-      this.scene.start("boss");
+      fadeToScene(this, "boss");
     });
   }
 

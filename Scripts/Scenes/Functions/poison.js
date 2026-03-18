@@ -1,8 +1,10 @@
+  import { playerData } from "../playerdata.js";
   const poison = function (time) {
     this.projectileOnCooldown = true;
     this.projectileCooldownStart = time;
 
     this.lastFiredTime = time;
+    playerData.stats.projectilesFired += 1;
     const proj = this.physics.add.sprite(this.player.x,this.player.y,"poison");
     proj.flipX = this.player.flipX ? true : false;
     this.physics.add.existing(proj);

@@ -8,6 +8,7 @@ import preload_init from "./Functions/preload_init.js";
 import performAttack from "./Functions/performAttack.js";
 import { customEmitter } from "./events.js";
 import { playerData } from "./playerdata.js";
+import { fadeToScene } from "./Functions/sceneFade.js";
 export default class MainScene extends Phaser.Scene {
   constructor() {
     super({ key: "MainScene" });
@@ -34,7 +35,7 @@ export default class MainScene extends Phaser.Scene {
     })
 
     this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.S).on("down", () => {
-    this.scene.start("LevelTwo");
+    fadeToScene(this, "LevelTwo");
     });
 
     create_init.call(this, map);
@@ -78,7 +79,7 @@ export default class MainScene extends Phaser.Scene {
         if (Phaser.Input.Keyboard.JustDown(this.interactKey)) {
             // Stop music before switching if needed
             this.sound.stopAll();
-            this.scene.start("LevelTwo");
+            fadeToScene(this, "LevelTwo");
         }
     });
     
@@ -242,7 +243,7 @@ export default class MainScene extends Phaser.Scene {
       playerData.didAttack = true;
       playerData.didMove = true;
       this.music.stop()
-      this.scene.start("LevelTwo");
+      fadeToScene(this, "LevelTwo");
     }
 
   }
@@ -365,6 +366,7 @@ export default class MainScene extends Phaser.Scene {
         enemy.hp -= dmg;
         console.log("hp")
           if (enemy.hp <= 0) {
+        playerData.stats.enemyKills += 1;
         enemy.destroy();
       } else {
         if (poison){

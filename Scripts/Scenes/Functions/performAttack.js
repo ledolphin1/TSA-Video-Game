@@ -1,5 +1,7 @@
   import * as Phaser from "phaser";
+  import { playerData } from "../playerdata.js";
   const performAttack = function() {
+    playerData.stats.meleeAttacks += 1;
     this.isJumping = false;//!
     this.isAttacking = true;//!
     this.player.setVelocityX(0); // Stop horizontal movement//!
@@ -36,6 +38,7 @@
       enemy.hp -= this.slashDamage;
 
       if (enemy.hp <= 0) {
+        playerData.stats.enemyKills += 1;
         enemy.destroy();
         this.physics.world.pause();
         this.anims.pauseAll();
