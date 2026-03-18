@@ -77,7 +77,7 @@ export default class Overworld extends Phaser.Scene {
     }
 
     create() {
-        setupSceneFade(this, { pauseGameplay: false, duration: 350 });
+        setupSceneFade(this, { pauseGameplay: true, duration: 350 });
 
         this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.S).on('down', () => {
         fadeToScene(this, 'MainScene');
