@@ -1,7 +1,8 @@
 import * as Phaser from "phaser";
 class PlayerData {
     constructor(){
-        
+        this.didLoadOverworld = false;
+
         this.weapons = ["lp"];
         this.weapon = "lp";
         

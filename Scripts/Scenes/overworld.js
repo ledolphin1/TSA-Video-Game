@@ -86,7 +86,10 @@ export default class Overworld extends Phaser.Scene {
         this.add.image(160, 240, "overworldbg");
         console.log("overworld scene created");
         this.physics.world.roundPixels = false;
+        
+        function owAnims(){
         //upload animations
+
         this.anims.create({
             key: "ow_player_moving",
             frames: this.anims.generateFrameNumbers("ow_player_running"),
@@ -135,7 +138,11 @@ export default class Overworld extends Phaser.Scene {
             frameRate: 10,
             repeat: -1
         });
-
+    }
+    if (!playerData.didLoadOverworld){
+        owAnims.call(this);
+        playerData.didLoadOverworld = true;
+    }
         const map = this.make.tilemap({
             key: "overworld_level"
         })
