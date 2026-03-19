@@ -14,6 +14,12 @@ const activate_anims = function(){
       repeat: -1
     })
     this.anims.create({
+      key: "enemy_end",
+      frames: this.anims.generateFrameNumbers("enemySpriteDeath"),
+      frameRate: 20,
+      hideOnComplete: true
+    })
+    this.anims.create({
       key: "player_jump_start",
       frames: this.anims.generateFrameNumbers("player_jumping", {
         start: 0,

@@ -126,6 +126,9 @@ export default class MainScene extends Phaser.Scene {
 
     // player-enemy/projectile collision
     this.physics.add.overlap(this.player, this.enemies, (player, enemy) => {
+      if (enemy.isDead){
+        return;
+      }
       this.handleEnemyOverlap(player, enemy);
     });
     this.physics.add.overlap(this.player, this.projectiles, (player, projectile) => {
@@ -285,7 +288,11 @@ export default class MainScene extends Phaser.Scene {
 
   handleEnemySpike(enemy, spike) {
     if (spike && spike.index !== -1) {
-      enemy.destroy();
+      enemy.play("enemy_end")
+      enemy.body.enable = false;
+      this.time.delayedCall(350,function(){
+        enemy.destroy();
+      })
     }
   }
 
@@ -401,7 +408,11 @@ export default class MainScene extends Phaser.Scene {
         console.log("hp")
           if (enemy.hp <= 0) {
         playerData.stats.enemyKills += 1;
-        enemy.destroy();
+        enemy.play("enemy_end")
+        enemy.body.enable = false;
+        this.time.delayedCall(350,function(){
+          enemy.destroy();
+        })
       } else {
         if (poison){
           return;

@@ -5,6 +5,11 @@ const preload_init = function (){
       frameHeight: 11
     }); // enemy spritesheet
     
+    this.load.spritesheet('enemySpriteDeath', "public/assets/snakeMob_end.png", {
+      frameWidth: 22,
+      frameHeight: 11
+    }); // enemy spritesheet
+    
     this.load.spritesheet('player_attack_sheet', "public/assets/mainCharacterAttack.png", {
       frameWidth: 64,
       frameHeight: 64
