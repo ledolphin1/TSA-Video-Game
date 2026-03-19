@@ -31,6 +31,9 @@ export default class boss_transition extends Phaser.Scene {
     this.add.image(160, 220, "bossbg");
     const map = this.make.tilemap({ key: "boss_level" });
     create_init.call(this, map,1) 
+    if (this.music && this.music.isPlaying) {
+      this.music.stop();
+    }
     
     // this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.S).on("down", () => {
     //   fadeToScene(this, "dragonBoss");
@@ -56,6 +59,45 @@ export default class boss_transition extends Phaser.Scene {
 
     this.player.x = playerData.transitionX;
     this.player.y = playerData.transitionY;
+
+    const transformDelayMs = 200;
+    const targetHp = 20;
+    const startHp = 1;
+    const fadeToDragonMs = 350;
+    const sceneDurationMs = ((targetHp - startHp) + 1) * transformDelayMs + fadeToDragonMs;
+
+    this.scarySuspense = this.sound.add("scarysuspense", {
+      loop: false,
+      volume: 0.3,
+      rate: 1
+    });
+    this.scarySuspense.play();
+
+    const fadeDurationMs = Math.min(3000, sceneDurationMs);
+    const fadeStartMs = Math.max(0, sceneDurationMs - fadeDurationMs);
+    this.time.delayedCall(fadeStartMs, () => {
+      if (!this.scarySuspense || !this.scarySuspense.isPlaying) return;
+      this.tweens.add({
+        targets: this.scarySuspense,
+        volume: 0,
+        duration: fadeDurationMs,
+        onComplete: () => {
+          if (this.scarySuspense && this.scarySuspense.isPlaying) {
+            this.scarySuspense.stop();
+          }
+        }
+      });
+    });
+
+    this.events.once("shutdown", () => {
+      if (this.scarySuspense && this.scarySuspense.isPlaying) {
+        this.scarySuspense.stop();
+      }
+      if (this.scarySuspense) {
+        this.scarySuspense.destroy();
+      }
+    });
+
     console.log("timetimetime")
     this.enemy.body.setAllowGravity(false)
     this.enemy.body.setVelocityY(-80);
@@ -65,7 +107,6 @@ export default class boss_transition extends Phaser.Scene {
       callback: () => {
         if (this.enemy.hp >= 20) {
           this._transformEvent.remove(false);
-          this.sound.stopAll();
           playerData.transitionX = this.player.x
           playerData.transitionY = this.player.y
           fadeToScene(this, "dragonBoss");
@@ -120,7 +161,10 @@ export default class boss_transition extends Phaser.Scene {
       }
     }
 
+    this.updateWalkingSfx(this.onGround && (this.cursors.left.isDown || this.cursors.right.isDown));
+
     if (this.cursors.up.isDown && (this.onGround || (time - this.lastGroundedTime < 100))) {
+      this.sound.play("jump", { volume: 0.125, seek: 0.425 });
       this.player.setVelocityY(-300);
       this.lastGroundedTime = 0;
       this.isJumping = true;

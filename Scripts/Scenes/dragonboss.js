@@ -223,10 +223,42 @@ export default class DragonBossScene extends Phaser.Scene {
       this.playerVisual.setPosition(vX, vY);
       this.playerVisual.setFlipX(this.player.flipX);
     });
+    this.events.once("shutdown", () => {
+      if (this.walkingSfx && this.walkingSfx.isPlaying) {
+        this.walkingSfx.stop();
+      }
+      if (this.walkingSfx) {
+        this.walkingSfx.destroy();
+      }
+    });
     
     // ── Music ────────────────────────────────────────────────
-    this.music = this.sound.add("background", { loop: true, volume: 0.65 });
-    this.music.play();
+    let sharedBgMusic = this.game.__sharedBackgroundMusic;
+    if (!sharedBgMusic || sharedBgMusic.key !== "background" || sharedBgMusic.manager !== this.sound) {
+      sharedBgMusic = this.sound.add("background", { loop: true, volume: 0.3 });
+      this.game.__sharedBackgroundMusic = sharedBgMusic;
+    }
+    sharedBgMusic.loop = true;
+    sharedBgMusic.volume = 0.3;
+    if (!sharedBgMusic.isPlaying) {
+      sharedBgMusic.play();
+    }
+    this.music = sharedBgMusic;
+    this.walkingSfx = this.sound.add("walking", {
+      loop: true,
+      rate: 1.5,
+      volume: 0.5
+    });
+    this.updateWalkingSfx = function(isWalking) {
+      if (!this.walkingSfx) return;
+      if (isWalking) {
+        if (!this.walkingSfx.isPlaying) {
+          this.walkingSfx.play();
+        }
+      } else if (this.walkingSfx.isPlaying) {
+        this.walkingSfx.stop();
+      }
+    };
     
     // ── Victory / defeat text (hidden until triggered) ───────
     this.outcomeText = this.add.text(
@@ -241,10 +273,22 @@ export default class DragonBossScene extends Phaser.Scene {
     //  UPDATE
     // ============================================================
   update(time, delta) {
-    if (this._isSceneTransitioning) return;
-    if (this.dragonDefeated) return;
-    if (this.playerIsDead) return;
-    if (this.isKnockedBack) return;
+    if (this._isSceneTransitioning) {
+      this.updateWalkingSfx(false);
+      return;
+    }
+    if (this.dragonDefeated) {
+      this.updateWalkingSfx(false);
+      return;
+    }
+    if (this.playerIsDead) {
+      this.updateWalkingSfx(false);
+      return;
+    }
+    if (this.isKnockedBack) {
+      this.updateWalkingSfx(false);
+      return;
+    }
 
     // Cooldown arc
     if (this.projectileOnCooldown) {
@@ -290,7 +334,10 @@ export default class DragonBossScene extends Phaser.Scene {
          this.scene.pause()
          this.scene.launch("playerSelectAbility", { returnScene: this.scene.key });
        }
-    if (this.isAttacking) return;
+    if (this.isAttacking) {
+      this.updateWalkingSfx(false);
+      return;
+    }
 
     // ── Movement ─────────────────────────────────────────────
     if (this.cursors.left.isDown) {
@@ -306,9 +353,12 @@ export default class DragonBossScene extends Phaser.Scene {
       if (this.onGround) this.playerVisual.setTexture("player_still");
     }
 
+    this.updateWalkingSfx(this.onGround && (this.cursors.left.isDown || this.cursors.right.isDown));
+
     // ── Jump ─────────────────────────────────────────────────
     if (this.cursors.up.isDown &&
         (this.onGround || (time - this.lastGroundedTime < 100))) {
+      this.sound.play("jump", { volume: 0.125, seek: 0.425 });
       this.player.setVelocityY(-300);
       this.lastGroundedTime = 0;
       this.isJumping = true;
@@ -420,7 +470,6 @@ if (!poison){
   this.time.delayedCall(120,() => {
     if (this.dragon && this.dragon.active) this.dragon.clearTint();
   });
-
 }
 
     if (this.dragonHp <= 0) {
@@ -428,14 +477,16 @@ if (!poison){
       return;
     }
 
-    this.physics.world.pause();
-    this.anims.pauseAll();
-    this.time.delayedCall(80,() => {
-      if (!this.dragonDefeated) {
-        this.physics.world.resume();
-        this.anims.resumeAll();
-      }
-    });
+    if (!poison) {
+      this.physics.world.pause();
+      this.anims.pauseAll();
+      this.time.delayedCall(80,() => {
+        if (!this.dragonDefeated) {
+          this.physics.world.resume();
+          this.anims.resumeAll();
+        }
+      });
+    }
   }
 
   // ============================================================
@@ -492,6 +543,7 @@ if (!poison){
 
   _performAttack() {
     playerData.stats.meleeAttacks += 1;
+    this.sound.play("swordslash", { volume: 0.135 });
     this.isJumping    = false;
     this.isAttacking  = true;
     this.player.setVelocity(0, 0);
@@ -545,6 +597,7 @@ if (!poison){
     this._damageDragon(dmg,poison);
   }
   fireProjectile(time) {
+    this.sound.play("projectilesound", { seek: 0.2 });
     this.projectileOnCooldown    = true;
     this.projectileCooldownStart = time;
     this.lastFiredTime           = time;

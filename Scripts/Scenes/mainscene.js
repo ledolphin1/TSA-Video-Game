@@ -36,7 +36,9 @@ export default class MainScene extends Phaser.Scene {
     
     this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.S).on("down", () => {
       playerData.didBeatL1 = true;
-      this.sound.stopAll()
+      if (this.walkingSfx && this.walkingSfx.isPlaying) {
+        this.walkingSfx.stop();
+      }
       fadeToScene(this, "overworld");
     });
     
@@ -82,8 +84,9 @@ export default class MainScene extends Phaser.Scene {
     // Interaction Logic
     this.physics.add.overlap(this.player, this.gate, () => {
         if (Phaser.Input.Keyboard.JustDown(this.interactKey)) {
-            // Stop music before switching if needed
-            this.sound.stopAll();
+            if (this.walkingSfx && this.walkingSfx.isPlaying) {
+              this.walkingSfx.stop();
+            }
             playerData.didBeatL1 = true;
             fadeToScene(this, "overworld");
         }
@@ -153,10 +156,14 @@ export default class MainScene extends Phaser.Scene {
   update(time, delta) {
 
     if (this.playerIsDead) {
+      this.updateWalkingSfx(false);
       this.resetEnemies();
       return;
     }; // prevent movement while dead
-    if (this.isKnockedBack) return; // prevent movement while applying knockback force
+    if (this.isKnockedBack) {
+      this.updateWalkingSfx(false);
+      return;
+    } // prevent movement while applying knockback force
 
     if (this.projectileOnCooldown) {
       const elapsed = time - this.projectileCooldownStart;
@@ -210,7 +217,10 @@ export default class MainScene extends Phaser.Scene {
       }
     }
 
-    if (this.isAttacking) return;
+    if (this.isAttacking) {
+      this.updateWalkingSfx(false);
+      return;
+    }
 
     // Left/Right Movement
 
@@ -237,9 +247,12 @@ export default class MainScene extends Phaser.Scene {
       }
     }
 
+    this.updateWalkingSfx(this.onGround && (this.cursors.left.isDown || this.cursors.right.isDown));
+
     // Jumping
     if (this.cursors.up.isDown && (this.onGround || (time - this.lastGroundedTime < 100))) {
       customEmitter.emit("JUMPED")
+      this.sound.play("jump", { volume: 0.125, seek: 0.425 });
       this.player.setVelocityY(-300);
       this.lastGroundedTime = 0;
       this.isJumping = true;
@@ -260,7 +273,9 @@ export default class MainScene extends Phaser.Scene {
       playerData.didJump = true;
       playerData.didAttack = true;
       playerData.didMove = true;
-      this.music.stop()
+      if (this.walkingSfx && this.walkingSfx.isPlaying) {
+        this.walkingSfx.stop();
+      }
       playerData.didBeatL1 = true;
       fadeToScene(this, "overworld");
     }

@@ -2,6 +2,7 @@
   import { playerData } from "../playerdata.js";
   const performAttack = function() {
     playerData.stats.meleeAttacks += 1;
+    this.sound.play("swordslash", { volume: 0.135 });
     this.isJumping = false;//!
     this.isAttacking = true;//!
     this.player.setVelocityX(0); // Stop horizontal movement//!

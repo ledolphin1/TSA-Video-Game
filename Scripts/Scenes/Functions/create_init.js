@@ -108,11 +108,38 @@ const create_init = function(map,debug){
     this.coordText.setDepth(1000);
     
     //sidney asked for music//!
-    this.music = this.sound.add('background', {
+    if (this.scene.key !== "bt1") {
+      let sharedBgMusic = this.game.__sharedBackgroundMusic;
+      if (!sharedBgMusic || sharedBgMusic.key !== 'background' || sharedBgMusic.manager !== this.sound) {
+        sharedBgMusic = this.sound.add('background', {
+          loop: true,
+          volume: 0.3
+        });
+        this.game.__sharedBackgroundMusic = sharedBgMusic;
+      }
+      sharedBgMusic.loop = true;
+      sharedBgMusic.volume = 0.3;
+      if (!sharedBgMusic.isPlaying) {
+        sharedBgMusic.play();
+      }
+      this.music = sharedBgMusic;
+    }
+
+    this.walkingSfx = this.sound.add('walking', {
       loop: true,
-      volume: 0.65
+      rate: 1.5,
+      volume: 0.5
     });
-    this.music.play();
+    this.updateWalkingSfx = function(isWalking) {
+      if (!this.walkingSfx) return;
+      if (isWalking) {
+        if (!this.walkingSfx.isPlaying) {
+          this.walkingSfx.play();
+        }
+      } else if (this.walkingSfx.isPlaying) {
+        this.walkingSfx.stop();
+      }
+    };
     
     this.lastFiredTime = 0; // Initialize cooldown timer//!
 
@@ -141,5 +168,14 @@ const create_init = function(map,debug){
     if (this.scene && this.scene.key !== "boss" && this.scene.key !== "bt1" && this.scene.key !== "dragonBoss") {
       setupSceneFade(this, { pauseGameplay: true, duration: 350 });
     }
+
+    this.events.once('shutdown', () => {
+      if (this.walkingSfx && this.walkingSfx.isPlaying) {
+        this.walkingSfx.stop();
+      }
+      if (this.walkingSfx) {
+        this.walkingSfx.destroy();
+      }
+    });
 }
 export default create_init;

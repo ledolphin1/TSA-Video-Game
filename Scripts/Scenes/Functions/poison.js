@@ -1,5 +1,6 @@
   import { playerData } from "../playerdata.js";
   const poison = function (time) {
+    this.sound.play("projectilesound", { seek: 0.2 });
     this.projectileOnCooldown = true;
     this.projectileCooldownStart = time;
 

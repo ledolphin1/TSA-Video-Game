@@ -31,7 +31,8 @@ export default class arcade_exterior extends Phaser.Scene {
         })
          this.load.video("begin", "public/assets/Arcade_Exterior_begin.mp4", true)
          this.load.video("loop", "public/assets/Arcade_Exterior_loop.mp4", true)
-        this.load.audio("background", "public/assets/audio/background_music_filler.mp3");
+        this.load.audio("background", "public/assets/audio/epicbackground.mp3");
+        this.load.audio("walking", "public/assets/audio/walking2.mp3");
 
         this.load.spritesheet("arrow", "public/assets/arrow.png", {
             frameWidth: 55,
@@ -131,12 +132,27 @@ export default class arcade_exterior extends Phaser.Scene {
         this.coordText.setDepth(1000);
         
     
-        const music = this.sound.add("background", {
+        let music = this.game.__sharedBackgroundMusic;
+        if (!music || music.key !== "background" || music.manager !== this.sound) {
+            music = this.sound.add("background", {
+                loop: true,
+                volume: 0.3
+            });
+            this.game.__sharedBackgroundMusic = music;
+        }
+        music.loop = true;
+        music.volume = 0.3;
+
+        this.walkingSfx = this.sound.add("walking", {
             loop: true,
-            volume: 0.65
+            rate: 1.5,
+            volume: 0.5
         });
         
-        music.play();
+        if (!music.isPlaying) {
+            music.play();
+        }
+        this.music = music;
         this.player.x = 60;
         this.player.y = 200;
         // Post-Update Sync (Fixes Lag/Blur)
@@ -148,18 +164,39 @@ export default class arcade_exterior extends Phaser.Scene {
                 this.playerVisual.flipX = this.player.flipX;
             }
         });
+
+        this.events.once("shutdown", () => {
+            if (this.walkingSfx && this.walkingSfx.isPlaying) {
+                this.walkingSfx.stop();
+            }
+            if (this.walkingSfx) {
+                this.walkingSfx.destroy();
+            }
+        });
         
         
         
     }
     
     update(time, delta) {
+        if (this.walkingSfx) {
+            const isWalking = this.onGround && (this.cursors.left.isDown || this.cursors.right.isDown);
+            if (isWalking) {
+                if (!this.walkingSfx.isPlaying) {
+                    this.walkingSfx.play();
+                }
+            } else if (this.walkingSfx.isPlaying) {
+                this.walkingSfx.stop();
+            }
+        }
         this.dialogue.x = this.playerVisual.x;
         this.dialogue2.x = this.playerVisual.x;
         if (this.player.x >= 226 && this.player.x <= 245) {
             if (Phaser.Input.Keyboard.JustDown(this.interactKey)) {
         
-                this.sound.stopAll();   
+                if (this.walkingSfx && this.walkingSfx.isPlaying) {
+                    this.walkingSfx.stop();
+                }
                 fadeToScene(this, "overworld");
             }    
     }
@@ -176,6 +213,9 @@ export default class arcade_exterior extends Phaser.Scene {
         
         
         if (Phaser.Input.Keyboard.JustDown(this.menuKey)) {
+            if (this.walkingSfx && this.walkingSfx.isPlaying) {
+                this.walkingSfx.stop();
+            }
             this.scene.pause()
             this.scene.launch("Pause", { returnScene: this.scene.key });
         }

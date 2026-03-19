@@ -51,7 +51,9 @@ export default class LevelTwo extends Phaser.Scene {
     const map = this.make.tilemap({ key: "leveltwo_map" });
 
     this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.S).on("down", () => {
-      this.sound.stopAll();
+      if (this.walkingSfx && this.walkingSfx.isPlaying) {
+        this.walkingSfx.stop();
+      }
       playerData.didBeatL2 = true;
       fadeToScene(this, "overworld");
     });
@@ -211,9 +213,13 @@ respawn() {
   // ──────────────────────────────────── UPDATE ──────────────────────────────
   update(time, delta) {
     if (this.playerIsDead) {
+      this.updateWalkingSfx(false);
       return;
     }
-    if (this.isKnockedBack) return;
+    if (this.isKnockedBack) {
+      this.updateWalkingSfx(false);
+      return;
+    }
     // Cooldown arc
     if (this.projectileOnCooldown) {
       const elapsed  = time - this.projectileCooldownStart;
@@ -263,7 +269,10 @@ respawn() {
       }
     }
 
-    if (this.isAttacking) return;
+    if (this.isAttacking) {
+      this.updateWalkingSfx(false);
+      return;
+    }
 
     // Movement
     if (this.cursors.left.isDown) {
@@ -279,8 +288,11 @@ respawn() {
       if (this.onGround) this.playerVisual.setTexture("player_still");
     }
 
+    this.updateWalkingSfx(this.onGround && (this.cursors.left.isDown || this.cursors.right.isDown));
+
     // Jump
     if (this.cursors.up.isDown && (this.onGround || (time - this.lastGroundedTime < 100))) {
+      this.sound.play("jump", { volume: 0.125, seek: 0.425 });
       this.player.setVelocityY(-300);
       this.lastGroundedTime = 0;
       this.isJumping = true;
@@ -397,6 +409,7 @@ respawn() {
   }
    performAttack() {
     playerData.stats.meleeAttacks += 1;
+    this.sound.play("swordslash", { volume: 0.135 });
     this.isJumping = false;//!
     this.isAttacking = true;//!
     this.player.setVelocityX(0); // Stop horizontal movement//!
@@ -636,11 +649,12 @@ respawn() {
 
   // ──────────────────────────────── GATEWAY ────────────────────────────────
   _enterGateway() {
-    if (this.music) { try { this.music.stop(); } catch(e) {} }
+    if (this.walkingSfx && this.walkingSfx.isPlaying) {
+      this.walkingSfx.stop();
+    }
     if (this._glitchTimer) this._glitchTimer.remove();
 
     this.time.delayedCall(400, () => {
-      this.sound.stopAll();
       playerData.didBeatL2 = true;
       fadeToScene(this, "overworld");
     });

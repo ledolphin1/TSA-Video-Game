@@ -13,6 +13,20 @@ export default class BossScene extends Phaser.Scene {
     this.freeze = false;
   }
 
+  _fadeOutBackgroundMusic(duration = 350) {
+    if (this._bgMusicFading) return;
+    if (!this.music || !this.music.isPlaying) return;
+    this._bgMusicFading = true;
+    this.tweens.add({
+      targets: this.music,
+      volume: 0,
+      duration,
+      onComplete: () => {
+        try { this.music.stop(); } catch (e) {}
+      }
+    });
+  }
+
   preload() {
     customEmitter.emit("SNAKEBOSS_BEGIN")
     preload_init.call(this);
@@ -111,8 +125,14 @@ export default class BossScene extends Phaser.Scene {
       }
     }
 
-    if (this.playerIsDead) return;
-    if (this.isKnockedBack) return;
+    if (this.playerIsDead) {
+      this.updateWalkingSfx(false);
+      return;
+    }
+    if (this.isKnockedBack) {
+      this.updateWalkingSfx(false);
+      return;
+    }
 
     this.enemies.children.iterate((enemy) => {
       this.updateEnemy(time, enemy);
@@ -146,7 +166,10 @@ export default class BossScene extends Phaser.Scene {
       this.enemy.hp = 0;
       this._updateEnemyHpBar(this.enemy.hp);
     }
-    if (this.isAttacking) return;
+    if (this.isAttacking) {
+      this.updateWalkingSfx(false);
+      return;
+    }
     if (Phaser.Input.Keyboard.JustDown(this.attackKey) && !this.isAttacking && time > this.lastAttackEndTime + 10) {
       this.performAttack();
     }
@@ -177,7 +200,10 @@ export default class BossScene extends Phaser.Scene {
       }
     }
 
+    this.updateWalkingSfx(this.onGround && (this.cursors.left.isDown || this.cursors.right.isDown));
+
     if (this.cursors.up.isDown && (this.onGround || (time - this.lastGroundedTime < 100))) {
+      this.sound.play("jump", { volume: 0.125, seek: 0.425 });
       this.player.setVelocityY(-300);
       this.lastGroundedTime = 0;
       this.isJumping = true;
@@ -193,6 +219,7 @@ export default class BossScene extends Phaser.Scene {
 
   performAttack() {
     playerData.stats.meleeAttacks += 1;
+    this.sound.play("swordslash", { volume: 0.135 });
     this.isJumping = false;
     this.isAttacking = true;
     this.player.setVelocityX(0);
@@ -232,7 +259,7 @@ export default class BossScene extends Phaser.Scene {
       this._updateEnemyHpBar(enemy.hp);
 
       if (enemy.hp <= 0) {
-        this.sound.stopAll()
+        this._fadeOutBackgroundMusic(350);
         playerData.stats.enemyKills += 1;
         playerData.stats.bossesDefeated += 1;
         customEmitter.emit("stage_1_defeat")
@@ -474,6 +501,7 @@ export default class BossScene extends Phaser.Scene {
     }
 
     if (this.cursors.up.isDown && (this.onGround || (time - this.lastGroundedTime < 100))) {
+      this.sound.play("jump", { volume: 0.125, seek: 0.425 });
       this.player.setVelocityY(-300);
       this.lastGroundedTime = 0;
       this.isJumping = true;
@@ -510,7 +538,7 @@ export default class BossScene extends Phaser.Scene {
       
       this._updateEnemyHpBar(enemy.hp);
       if (enemy.hp <= 0) {
-        this.sound.stopAll()
+        this._fadeOutBackgroundMusic(350);
         playerData.stats.enemyKills += 1;
         playerData.stats.bossesDefeated += 1;
         customEmitter.emit("stage_1_defeat")

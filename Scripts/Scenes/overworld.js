@@ -55,7 +55,8 @@ export default class Overworld extends Phaser.Scene {
             frameWidth: 16,
             frameHeight: 16
         })
-        this.load.audio('background', 'public/assets/audio/background_music_filler.mp3');
+        this.load.audio('background', 'public/assets/audio/epicbackground.mp3');
+        this.load.audio('walking', 'public/assets/audio/walking2.mp3');
         this.load.tilemapTiledJSON('overworld_level', 'public/assets/Map/overworld.tmj');
         this.load.image('tiles', 'public/assets/Map/tileset.png');
         
@@ -208,7 +209,9 @@ export default class Overworld extends Phaser.Scene {
                 this.player.setVelocityX(0)
                 this.time.delayedCall(1220,function(){
                     this.isTransitioning = false;
-                    this.sound.stopAll();
+                    if (this.walkingSfx && this.walkingSfx.isPlaying) {
+                        this.walkingSfx.stop();
+                    }
                     fadeToScene(this, "codeSpooky");
                 }.bind(this))
             }
@@ -244,7 +247,9 @@ export default class Overworld extends Phaser.Scene {
                 this.player.setVelocityX(0)
                 this.time.delayedCall(1220,function(){
                     this.isTransitioning = false;
-                    this.sound.stopAll();
+                    if (this.walkingSfx && this.walkingSfx.isPlaying) {
+                        this.walkingSfx.stop();
+                    }
                     fadeToScene(this, "LevelTwo");
                 }.bind(this))
                 } 
@@ -285,7 +290,9 @@ export default class Overworld extends Phaser.Scene {
                 this.player.setVelocityX(0)
                 this.time.delayedCall(1220,function(){
                     this.isTransitioning = false;
-                    this.sound.stopAll();
+                    if (this.walkingSfx && this.walkingSfx.isPlaying) {
+                        this.walkingSfx.stop();
+                    }
                     fadeToScene(this, "boss");
                 }.bind(this))
                 }
@@ -316,12 +323,27 @@ export default class Overworld extends Phaser.Scene {
         this.coordText.setDepth(1000);
         
         //sidney asked for music
-        const music = this.sound.add('background', {
+        let music = this.game.__sharedBackgroundMusic;
+        if (!music || music.key !== 'background' || music.manager !== this.sound) {
+            music = this.sound.add('background', {
+                loop: true,
+                volume: 0.3
+            });
+            this.game.__sharedBackgroundMusic = music;
+        }
+        music.loop = true;
+        music.volume = 0.3;
+
+        this.walkingSfx = this.sound.add('walking', {
             loop: true,
-            volume: 0.65
+            rate: 1.5,
+            volume: 0.5
         });
         
-        music.play();
+        if (!music.isPlaying) {
+            music.play();
+        }
+        this.music = music;
         // --- Post-Update Sync (Fixes Lag/Blur) ---
         // Sync runs AFTER physics, ensuring visual matches actual body position for this frame
         this.events.on('postupdate', () => {
@@ -329,6 +351,15 @@ export default class Overworld extends Phaser.Scene {
                 this.playerVisual.x = this.player.x;
                 this.playerVisual.y = this.player.y;
                 this.playerVisual.flipX = this.player.flipX;
+            }
+        });
+
+        this.events.once('shutdown', () => {
+            if (this.walkingSfx && this.walkingSfx.isPlaying) {
+                this.walkingSfx.stop();
+            }
+            if (this.walkingSfx) {
+                this.walkingSfx.destroy();
             }
         });
         
@@ -360,7 +391,21 @@ export default class Overworld extends Phaser.Scene {
         //switched onGround to a property (just in case)
         this.onGround = this.player.body.blocked.down;
 
+        if (this.walkingSfx) {
+            const isWalking = this.onGround && (this.cursors.left.isDown || this.cursors.right.isDown);
+            if (isWalking) {
+                if (!this.walkingSfx.isPlaying) {
+                    this.walkingSfx.play();
+                }
+            } else if (this.walkingSfx.isPlaying) {
+                this.walkingSfx.stop();
+            }
+        }
+
         if (Phaser.Input.Keyboard.JustDown(this.menuKey)) {
+            if (this.walkingSfx && this.walkingSfx.isPlaying) {
+                this.walkingSfx.stop();
+            }
             this.scene.pause()
             this.scene.launch("Pause", { returnScene: this.scene.key });
         }
