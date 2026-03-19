@@ -82,7 +82,10 @@ export default class Overworld extends Phaser.Scene {
         this.load.image('arcadeMachineGreenLocked', 'public/assets/arcadeLocked_green.png');  
         this.load.image('arcadeMachinePurpleLocked', 'public/assets/arcadeLocked_purple.png');  
         this.load.image('lock', 'public/assets/lock.png');  
-
+        this.load.spritesheet("arrow", "public/assets/arrow.png", {
+            frameWidth: 55,
+            frameHeight: 16
+        });
     }
 
     create() {
@@ -258,12 +261,14 @@ export default class Overworld extends Phaser.Scene {
         
         if (!playerData.didBeatL2){
             this.rMechImg = "arcadeMachineRedLocked";
-        }else if (playerData.didBeatL2){
+        }else if (playerData.didBeatL2 && !playerData.didBeatBoss){
             this.rMechImg = "arcadeMachineRedBlank";
         } else {
             this.rMechImg = "arcadeMachineRedBroken"
+            this.canLeaveOverWorld = true;
+            customEmitter.emit("CANLEAVEOVERWORLD")
         }
-        this.rUsable = playerData.didBeatL2;
+        this.rUsable = (playerData.didBeatL2 && !playerData.didBeatBoss);
         this.arcadeMachineRed = this.physics.add.sprite(270, 273, this.rMechImg);
         this.arcadeMachineRed.setImmovable(true);
         this.arcadeMachineRed.body.allowGravity = false; // Or let it fall to ground if needed
@@ -302,7 +307,6 @@ export default class Overworld extends Phaser.Scene {
         
         
         
-
         
         
         // --- Controls ---
@@ -324,7 +328,7 @@ export default class Overworld extends Phaser.Scene {
         stopSharedIfPlaying(this.game.__sharedBackgroundMusic);
         stopSharedIfPlaying(this.game.__sharedLevelMusic);
         stopSharedIfPlaying(this.game.__sharedBossMusic);
-
+        
         let music = this.game.__sharedScaryMusic;
         if (!music || music.key !== 'scary' || music.manager !== this.sound) {
             music = this.sound.add('scary', {
@@ -335,7 +339,7 @@ export default class Overworld extends Phaser.Scene {
         }
         music.loop = true;
         music.volume = 0.3;
-
+        
         this.walkingSfx = this.sound.add('walking', {
             loop: true,
             rate: 1.5,
@@ -355,7 +359,7 @@ export default class Overworld extends Phaser.Scene {
                 this.playerVisual.flipX = this.player.flipX;
             }
         });
-
+        
         this.events.once('shutdown', () => {
             if (this.walkingSfx && this.walkingSfx.isPlaying) {
                 this.walkingSfx.stop();
@@ -364,7 +368,9 @@ export default class Overworld extends Phaser.Scene {
                 this.walkingSfx.destroy();
             }
         });
-        
+        if(this.canLeaveOverWorld){
+            this.add.sprite(35,266,"arrow_anim").play("arrow_anim")
+        }
         
         
     }
@@ -377,7 +383,10 @@ export default class Overworld extends Phaser.Scene {
         if (this.isTransitioning){
             return;
         }
-
+        
+        if (this.canLeaveOverWorld && this.player.x < 20){
+            fadeToScene(this,"arcade_exterior_outro")
+        }
         if (!this.physics.overlap(this.player, this.arcadeMachinePurple) && !playerData.didBeatL1) {
             this.arcadeMachinePurple.setTexture("arcadeMachinePurpleBlank");
         }

@@ -4,9 +4,9 @@ import { playerData } from "./playerdata.js";
 import { customEmitter } from "./events.js";
 import { setupSceneFade, fadeToScene } from "./Functions/sceneFade.js";
 
-export default class arcade_exterior extends Phaser.Scene {
+export default class arcade_exterior_outro extends Phaser.Scene {
     constructor() {
-        super({ key: "arcade_exterior" });
+        super({ key: "arcade_exterior_outro" });
 
         constructor_init.call(this);
 
@@ -15,7 +15,7 @@ export default class arcade_exterior extends Phaser.Scene {
 
     preload() {
         this.load.bitmapFont("game_font", "public/assets/pixel_fonts/fonts/square_6x6.png", "public/assets/pixel_fonts/fonts/square_6x6.xml")
-        customEmitter.emit("ARCADE_EXTERIOR_BEGIN");
+        customEmitter.emit("ARCADE_EXTERIOR_OUTRO");
         this.physics.world.roundPixels = true;
         this.cameras.main.setRoundPixels(true);
         this.load.image("frame", "public/assets/ARCADE_BORDER.png")
@@ -42,8 +42,8 @@ export default class arcade_exterior extends Phaser.Scene {
     }
 
     create() {
-        setupSceneFade(this, { pauseGameplay: false, duration: 350 });
-        playerData.currentScene = "arcade_exterior";
+        setupSceneFade(this, { pauseGameplay: true, duration: 350 });
+        playerData.currentScene = "arcade_exterior_outro";
         console.log(playerData);
         this.physics.world.setBounds(0, 0, this.scale.width,this.scale.height - 36);
         // this.game.canvas.style.filter = "contrast(1) saturate(1.5) brightness(1.5)";
@@ -84,7 +84,7 @@ export default class arcade_exterior extends Phaser.Scene {
         
         
         
-        const arrow = this.add.sprite(243,120,"arrow").setOrigin(0,0).play("arrow_anim",true);
+        const arrow = this.add.sprite(28,130,"arrow").setOrigin(0,0).play("arrow_anim",true);
         // --- Create Player ---
         this.player = this.physics.add.sprite(60, 296, "ow_player_still");
         this.player.setVisible(false); // Hide physics body sprite
@@ -107,13 +107,11 @@ export default class arcade_exterior extends Phaser.Scene {
             this.player.setCollideWorldBounds(true);
             this.cameras.main.setRoundPixels(true);
             
-            this.dialogue = this.add.bitmapText(this.playerVisual.x, 90, "game_font", "\"I can't believe it's", 10).setOrigin(0.5, 0)
-            this.dialogue2 = this.add.bitmapText(this.playerVisual.x, 100, "game_font", "finally closing. I'd like to ", 10).setOrigin(0.5, 0)
-            this.dialogue3 = this.add.bitmapText(this.playerVisual.x, 110, "game_font", "play some games one last time!\"", 10).setOrigin(0.5, 0)
-            this.time.delayedCall(7000,function (){
+            this.dialogue = this.add.bitmapText(this.playerVisual.x, 100, "game_font", "", 10).setOrigin(0.5, 0)
+            this.dialogue2 = this.add.bitmapText(this.playerVisual.x, 110, "game_font", "\"Let me out of here!\"", 10).setOrigin(0.5, 0)
+            this.time.delayedCall(5000,function (){
                     this.dialogue.destroy();
                     this.dialogue2.destroy();
-                    this.dialogue3.destroy();
                 }.bind(this))
             
             // --- Controls ---
@@ -124,7 +122,14 @@ export default class arcade_exterior extends Phaser.Scene {
             this.interactKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.Z)
             
             //cords for debug
-
+        this.coordText = this.add.text(this.cameras.main.width - 10, this.cameras.main.height - 10, "X: 0 Y: 0", {
+            fontFamily: "./code_fonts/melodica.regular.otf",
+            fontSize: "16px",
+            fill: "#ffffff"
+        });
+        this.coordText.setOrigin(1, 1);
+        this.coordText.setScrollFactor(0);
+        this.coordText.setDepth(1000);
         
     
         const stopSharedIfPlaying = (musicRef) => {
@@ -193,9 +198,11 @@ export default class arcade_exterior extends Phaser.Scene {
                 this.walkingSfx.stop();
             }
         }
+        if (this.player.x < 20){
+            fadeToScene(this,"WinCredits")
+        }
         this.dialogue.x = this.playerVisual.x;
         this.dialogue2.x = this.playerVisual.x;
-        this.dialogue3.x = this.playerVisual.x;
         if (this.player.x >= 226 && this.player.x <= 245) {
             if (Phaser.Input.Keyboard.JustDown(this.interactKey)) {
         
@@ -266,6 +273,6 @@ export default class arcade_exterior extends Phaser.Scene {
 
 
         // Update Coordinate Display
-
+        this.coordText.setText(`X: ${Math.round(this.player.x)} Y: ${Math.round(this.player.y)}`);
     }
 }

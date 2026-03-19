@@ -40,7 +40,11 @@
 
       if (enemy.hp <= 0) {
         playerData.stats.enemyKills += 1;
-        enemy.destroy();
+        enemy.play("enemy_end")
+        enemy.body.enable = false;
+        this.time.delayedCall(350,function(){
+          enemy.destroy();
+        })
         this.physics.world.pause();
         this.anims.pauseAll();
         setTimeout(() => {
