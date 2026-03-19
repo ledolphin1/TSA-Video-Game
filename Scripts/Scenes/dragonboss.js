@@ -6,7 +6,7 @@ import waveProj from "./Functions/wave.js";
 import hyper from "./Functions/hyper.js";
 import poison from "./Functions/poison.js";
 import selectAbility from "./Functions/selectAbility.js";
-import { fadeToScene } from "./Functions/sceneFade.js";
+import { fadeToScene, setupSceneFade } from "./Functions/sceneFade.js";
 
 export default class DragonBossScene extends Phaser.Scene {
   constructor() {
@@ -78,6 +78,7 @@ export default class DragonBossScene extends Phaser.Scene {
 
   create() {
     this.scene.bringToTop("Narator");
+    setupSceneFade(this, { pauseGameplay: false, duration: 350 });
     // ── Background ──────────────────────────────────────────
     this.add.image(160, 247, "bossbg");
     
@@ -233,17 +234,26 @@ export default class DragonBossScene extends Phaser.Scene {
     });
     
     // ── Music ────────────────────────────────────────────────
-    let sharedBgMusic = this.game.__sharedBackgroundMusic;
-    if (!sharedBgMusic || sharedBgMusic.key !== "background" || sharedBgMusic.manager !== this.sound) {
-      sharedBgMusic = this.sound.add("background", { loop: true, volume: 0.3 });
-      this.game.__sharedBackgroundMusic = sharedBgMusic;
+    const stopSharedIfPlaying = (musicRef) => {
+      if (musicRef && musicRef.isPlaying) {
+        musicRef.stop();
+      }
+    };
+    stopSharedIfPlaying(this.game.__sharedScaryMusic);
+    stopSharedIfPlaying(this.game.__sharedBackgroundMusic);
+    stopSharedIfPlaying(this.game.__sharedLevelMusic);
+
+    let sharedBossMusic = this.game.__sharedBossMusic;
+    if (!sharedBossMusic || sharedBossMusic.key !== "bosssound" || sharedBossMusic.manager !== this.sound) {
+      sharedBossMusic = this.sound.add("bosssound", { loop: true, volume: 0.3 });
+      this.game.__sharedBossMusic = sharedBossMusic;
     }
-    sharedBgMusic.loop = true;
-    sharedBgMusic.volume = 0.3;
-    if (!sharedBgMusic.isPlaying) {
-      sharedBgMusic.play();
+    sharedBossMusic.loop = true;
+    sharedBossMusic.volume = 0.3;
+    if (!sharedBossMusic.isPlaying) {
+      sharedBossMusic.play();
     }
-    this.music = sharedBgMusic;
+    this.music = sharedBossMusic;
     this.walkingSfx = this.sound.add("walking", {
       loop: true,
       rate: 1.5,

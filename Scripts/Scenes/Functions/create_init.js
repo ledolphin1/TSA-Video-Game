@@ -107,27 +107,49 @@ const create_init = function(map,debug){
     this.coordText.setScrollFactor(0);
     this.coordText.setDepth(1000);
 
-    const sharedScaryMusic = this.game.__sharedScaryMusic;
-    if (sharedScaryMusic && sharedScaryMusic.isPlaying) {
-      sharedScaryMusic.stop();
-    }
+    const stopSharedIfPlaying = (musicRef) => {
+      if (musicRef && musicRef.isPlaying) {
+        musicRef.stop();
+      }
+    };
     
     //sidney asked for music//!
     if (this.scene.key !== "bt1") {
-      let sharedBgMusic = this.game.__sharedBackgroundMusic;
-      if (!sharedBgMusic || sharedBgMusic.key !== 'background' || sharedBgMusic.manager !== this.sound) {
-        sharedBgMusic = this.sound.add('background', {
+      let sharedMusicRefKey = "__sharedLevelMusic";
+      let musicAssetKey = "levelsound";
+
+      if (this.scene.key === "boss") {
+        sharedMusicRefKey = "__sharedBossMusic";
+        musicAssetKey = "bosssound";
+      }
+
+      const sharedMusicRefs = [
+        "__sharedScaryMusic",
+        "__sharedBackgroundMusic",
+        "__sharedLevelMusic",
+        "__sharedBossMusic"
+      ];
+
+      sharedMusicRefs.forEach((refKey) => {
+        if (refKey !== sharedMusicRefKey) {
+          stopSharedIfPlaying(this.game[refKey]);
+        }
+      });
+
+      let sharedSceneMusic = this.game[sharedMusicRefKey];
+      if (!sharedSceneMusic || sharedSceneMusic.key !== musicAssetKey || sharedSceneMusic.manager !== this.sound) {
+        sharedSceneMusic = this.sound.add(musicAssetKey, {
           loop: true,
           volume: 0.3
         });
-        this.game.__sharedBackgroundMusic = sharedBgMusic;
+        this.game[sharedMusicRefKey] = sharedSceneMusic;
       }
-      sharedBgMusic.loop = true;
-      sharedBgMusic.volume = 0.3;
-      if (!sharedBgMusic.isPlaying) {
-        sharedBgMusic.play();
+      sharedSceneMusic.loop = true;
+      sharedSceneMusic.volume = 0.3;
+      if (!sharedSceneMusic.isPlaying) {
+        sharedSceneMusic.play();
       }
-      this.music = sharedBgMusic;
+      this.music = sharedSceneMusic;
     }
 
     this.walkingSfx = this.sound.add('walking', {

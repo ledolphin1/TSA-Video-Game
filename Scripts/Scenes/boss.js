@@ -4,6 +4,7 @@ import preload_init from "./Functions/preload_init.js";
 import create_init from "./Functions/create_init.js";
 import { customEmitter } from "./events.js";
 import { playerData } from "./playerdata.js";
+import { fadeToScene, setupSceneFade } from "./Functions/sceneFade.js";
 export default class BossScene extends Phaser.Scene {
   constructor() {
     super({ key: "boss" });
@@ -40,6 +41,7 @@ export default class BossScene extends Phaser.Scene {
   }
 
   create() {
+    setupSceneFade(this, { pauseGameplay: false, duration: 350 });
     this.killKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.K)
     this._bossTransitioned = false;
     this.add.image(160, 220, "bossbg");
@@ -62,8 +64,10 @@ export default class BossScene extends Phaser.Scene {
       console.log(this.enemy.y,"enemyy")
       playerData.transitionX= this.player.x;
       playerData.transitionY= this.player.y;
-      this.sound.stopAll();
-      this.scene.start("bt1");
+      if (this.walkingSfx && this.walkingSfx.isPlaying) {
+        this.walkingSfx.stop();
+      }
+      fadeToScene(this, "bt1");
 
     });
  
@@ -434,10 +438,12 @@ export default class BossScene extends Phaser.Scene {
     this._bossTransitioned = true;
 
     this.time.delayedCall(1000, () => {
-      try { this.music.stop(); } catch (e) {}
       playerData.transitionX= this.player.x;
       playerData.transitionY= this.player.y;
-      this.scene.start("bt1");
+      if (this.walkingSfx && this.walkingSfx.isPlaying) {
+        this.walkingSfx.stop();
+      }
+      fadeToScene(this, "bt1");
     });
   }
   respawnPlayer() {

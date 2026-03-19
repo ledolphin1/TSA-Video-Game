@@ -18,10 +18,14 @@ export default class codeSpooky extends Phaser.Scene {
     this._isExiting = false;
     const { width, height } = this.scale;
 
-    const sharedBgMusic = this.game.__sharedBackgroundMusic;
-    if (sharedBgMusic && sharedBgMusic.isPlaying) {
-      sharedBgMusic.stop();
-    }
+    const stopSharedIfPlaying = (musicRef) => {
+      if (musicRef && musicRef.isPlaying) {
+        musicRef.stop();
+      }
+    };
+    stopSharedIfPlaying(this.game.__sharedBackgroundMusic);
+    stopSharedIfPlaying(this.game.__sharedLevelMusic);
+    stopSharedIfPlaying(this.game.__sharedBossMusic);
 
     let music = this.game.__sharedScaryMusic;
     if (!music || music.key !== "scary" || music.manager !== this.sound) {

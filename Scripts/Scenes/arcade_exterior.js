@@ -132,10 +132,14 @@ export default class arcade_exterior extends Phaser.Scene {
         this.coordText.setDepth(1000);
         
     
-        const sharedBgMusic = this.game.__sharedBackgroundMusic;
-        if (sharedBgMusic && sharedBgMusic.isPlaying) {
-            sharedBgMusic.stop();
-        }
+        const stopSharedIfPlaying = (musicRef) => {
+            if (musicRef && musicRef.isPlaying) {
+                musicRef.stop();
+            }
+        };
+        stopSharedIfPlaying(this.game.__sharedBackgroundMusic);
+        stopSharedIfPlaying(this.game.__sharedLevelMusic);
+        stopSharedIfPlaying(this.game.__sharedBossMusic);
 
         let music = this.game.__sharedScaryMusic;
         if (!music || music.key !== "scary" || music.manager !== this.sound) {

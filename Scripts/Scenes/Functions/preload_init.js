@@ -21,6 +21,8 @@ const preload_init = function (){
     })
     this.load.audio('background', "public/assets/audio/epicbackground.mp3");
     this.load.audio('scary', "public/assets/audio/scary.mp3");
+    this.load.audio('levelsound', "public/assets/audio/levelsound.mp3");
+    this.load.audio('bosssound', "public/assets/audio/bosssound.mp3");
     this.load.audio('scarysuspense', "public/assets/audio/scarysuspense.mp3");
     this.load.audio('swordslash', "public/assets/audio/swordslash.mp3");
     this.load.audio('walking', "public/assets/audio/walking2.mp3");

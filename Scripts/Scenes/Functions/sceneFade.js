@@ -1,14 +1,18 @@
 import * as Phaser from "phaser";
 
-const SCARY_MUSIC_SCENES = new Set(["overworld", "arcade_exterior", "codeSpooky", "CarSfIntro"]);
-const EPIC_MUSIC_SCENES = new Set(["MainScene", "LevelTwo", "boss", "dragonBoss"]);
+const SCARY_MUSIC_SCENES = new Set(["overworld", "arcade_exterior", "codeSpooky"]);
+const LEVEL_MUSIC_SCENES = new Set(["MainScene", "LevelTwo"]);
+const BOSS_MUSIC_SCENES = new Set(["boss", "dragonBoss"]);
 
 function getMusicGroup(sceneKey) {
   if (SCARY_MUSIC_SCENES.has(sceneKey)) {
     return "scary";
   }
-  if (EPIC_MUSIC_SCENES.has(sceneKey)) {
-    return "epic";
+  if (LEVEL_MUSIC_SCENES.has(sceneKey)) {
+    return "level";
+  }
+  if (BOSS_MUSIC_SCENES.has(sceneKey)) {
+    return "boss";
   }
   return null;
 }
@@ -37,17 +41,14 @@ export function setupSceneFade(scene, options = {}) {
   });
 }
 
-export function fadeToScene(scene, targetKey, data = undefined, duration = 350) {
+export function fadeToScene(scene, targetKey, data = undefined, duration = 350, options = {}) {
   if (scene._isSceneTransitioning) {
     return;
   }
 
   const sourceMusicGroup = getMusicGroup(scene.scene.key);
   const targetMusicGroup = getMusicGroup(targetKey);
-  const shouldFadeMusic =
-    sourceMusicGroup &&
-    targetMusicGroup &&
-    sourceMusicGroup !== targetMusicGroup;
+  const shouldFadeMusic = sourceMusicGroup && sourceMusicGroup !== targetMusicGroup;
   const transitionDuration = shouldFadeMusic ? Math.max(duration, 1000) : duration;
 
   scene._isSceneTransitioning = true;
@@ -59,6 +60,12 @@ export function fadeToScene(scene, targetKey, data = undefined, duration = 350) 
   }
   if (scene.input) {
     scene.input.enabled = false;
+  }
+
+  const noVisualFade = options.noVisualFade === true;
+  if (noVisualFade) {
+    scene.scene.start(targetKey, data);
+    return;
   }
 
   if (shouldFadeMusic && scene.music && scene.music.isPlaying && scene.tweens) {

@@ -4,7 +4,7 @@ import preload_init from "./Functions/preload_init.js";
 import create_init from "./Functions/create_init.js";
 import { customEmitter } from "./events.js";
 import { playerData } from "./playerdata.js";
-import { fadeToScene } from "./Functions/sceneFade.js";
+import { fadeToScene, setupSceneFade } from "./Functions/sceneFade.js";
 export default class boss_transition extends Phaser.Scene {
   constructor() {
     super({ key: "bt1" });
@@ -28,6 +28,7 @@ export default class boss_transition extends Phaser.Scene {
 
   create() {
     this.scene.bringToTop("Narator");
+    setupSceneFade(this, { pauseGameplay: false, duration: 350 });
     this.add.image(160, 220, "bossbg");
     const map = this.make.tilemap({ key: "boss_level" });
     create_init.call(this, map,1) 
