@@ -1,1 +1,0 @@
-body{display:flex;flex-direction:column;align-items:center}h1{font-family:monospace;font-size:37px;font-weight:400}#game-container{width:1600px;height:900px;justify-content:center;position:relative;display:flex;align-items:center;margin:10px;border:7px;border-style:solid;border-color:#00ff7f}canvas{image-rendering:pixelated;image-rendering:crisp-edges}
