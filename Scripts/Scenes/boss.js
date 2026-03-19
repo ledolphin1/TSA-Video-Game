@@ -161,8 +161,12 @@ export default class BossScene extends Phaser.Scene {
       if (!playerData.isAbleToUseEMenu){
           return;
         }
+         if (this.walkingSfx && this.walkingSfx.isPlaying) {
+           this.walkingSfx.stop();
+         }
          this.scene.pause()
          this.scene.launch("playerSelectAbility", { returnScene: this.scene.key });
+         return;
        }
     if (Phaser.Input.Keyboard.JustDown(this.killKey)) {
       console.log("i am pressed bro")

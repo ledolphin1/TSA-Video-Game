@@ -24,6 +24,10 @@ export default class playerSelectAbility extends Phaser.Scene {
   create() {
     customEmitter.emit("playerSelect")
     this.scene.bringToTop("Narator")
+    const pausedScene = this.scene.manager.getScene(this.returnScene);
+    if (pausedScene && pausedScene.walkingSfx && pausedScene.walkingSfx.isPlaying) {
+      pausedScene.walkingSfx.stop();
+    }
     const { width, height } = this.scale;
     this.backButton = this.add.image(width / 2, height / 2 + 50, "back").setScale(1.25).setOrigin(0.5).setInteractive({ useHandCursor: true });
     this.add.image(width/2,height/2,"bg").setScale(10)

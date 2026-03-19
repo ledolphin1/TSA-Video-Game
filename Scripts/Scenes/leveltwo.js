@@ -260,8 +260,12 @@ respawn() {
       if (!playerData.isAbleToUseEMenu){
           return;
         }
+         if (this.walkingSfx && this.walkingSfx.isPlaying) {
+           this.walkingSfx.stop();
+         }
          this.scene.pause()
          this.scene.launch("playerSelectAbility", { returnScene: this.scene.key });
+         return;
        }
     if (Phaser.Input.Keyboard.JustDown(this.fireKey) && !this.projectileOnCooldown) {
       if (time > this.lastFiredTime + 3000) {

@@ -162,10 +162,10 @@ export default class Narator extends Phaser.Scene {
     function onOpenChest(){
         switch(playerData.weapon){
             case "wave":
-                this.setNarrator("Waves pass through walls and enemies.","However they are short range.");
+                this.setNarrator("Waves pass through walls and enemies.","However, they are short ranged.");
                 break;
             case "hyper":
-                this.setNarrator("Hyper Cannon is like the Cyber Cannon.","However it deals more damage on impact.");
+                this.setNarrator("Hyper Cannon is like the Cyber Cannon.","However, it deals more damage on impact.");
                 break;
             case "poison":
                 this.setNarrator("Poison Cannons deal damage over time.","Very useful for damaging enemies.")
