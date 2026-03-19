@@ -34,13 +34,7 @@ export default class MainScene extends Phaser.Scene {
       key: "map"
     })
 
-    this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.E).on("down", () => {
-      playerData.didBeatL1 = true;
-      if (this.walkingSfx && this.walkingSfx.isPlaying) {
-        this.walkingSfx.stop();
-      }
-      fadeToScene(this, "overworld");
-    });
+
 
     create_init.call(this, map);
     activate_anims.call(this);
@@ -155,8 +149,7 @@ export default class MainScene extends Phaser.Scene {
     // chest.setImmovable(true); 
 
 
-    //Skip Key for debug
-    this.skipKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.E);
+
 
 
   }
@@ -282,20 +275,6 @@ export default class MainScene extends Phaser.Scene {
     }
 
     // Update Coordinate Display
-    this.coordText.setText(`X: ${Math.round(this.player.x)} Y: ${Math.round(this.player.y)}`);
-
-
-
-    if (this.skipKey.isDown) {
-      playerData.didJump = true;
-      playerData.didAttack = true;
-      playerData.didMove = true;
-      if (this.walkingSfx && this.walkingSfx.isPlaying) {
-        this.walkingSfx.stop();
-      }
-      playerData.didBeatL1 = true;
-      fadeToScene(this, "overworld");
-    }
 
   }
 

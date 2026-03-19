@@ -104,19 +104,11 @@ const create_init = function(map,debug){
     this.fireKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.F);
     this.menuKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.ESC)
     this.interactKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.Z);
-    this.skipKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.E);
+
     this.abilityTwoKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.G);
 
 
-    //Coords for debug//!
-    this.coordText = this.add.text(this.cameras.main.width - 10, this.cameras.main.height - 10, 'X: 0 Y: 0', {
-      fontFamily: "./code_fonts/melodica.regular.otf",
-      fontSize: "16px",
-      fill: "#ffffff"
-    });
-    this.coordText.setOrigin(1, 1);
-    this.coordText.setScrollFactor(0);
-    this.coordText.setDepth(1000);
+
 
     const stopSharedIfPlaying = (musicRef) => {
       if (musicRef && musicRef.isPlaying) {

@@ -50,13 +50,7 @@ export default class LevelTwo extends Phaser.Scene {
   create() {
     const map = this.make.tilemap({ key: "leveltwo_map" });
 
-    this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.E).on("down", () => {
-      if (this.walkingSfx && this.walkingSfx.isPlaying) {
-        this.walkingSfx.stop();
-      }
-      playerData.didBeatL2 = true;
-      fadeToScene(this, "overworld");
-    });
+
     // ── Base setup (player, camera, ground, controls, HUD) ──────────────────
     create_init.call(this, map);
     this.add.tileSprite(0, 0, map.widthInPixels, map.heightInPixels, "main_bg").setOrigin(0, 0).setDepth(-7)
@@ -307,8 +301,7 @@ export default class LevelTwo extends Phaser.Scene {
       this.player.setVelocityY(this.player.body.velocity.y * 0.5);
     }
 
-    // Coord display
-    this.coordText.setText(`X: ${Math.round(this.player.x)} Y: ${Math.round(this.player.y)}`);
+
 
     // ── Gateway proximity check ───────────────────────────────────────────────
     const gatX = this.gatewayZone.x;

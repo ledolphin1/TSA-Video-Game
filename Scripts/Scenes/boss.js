@@ -59,17 +59,7 @@ export default class BossScene extends Phaser.Scene {
     const map = this.make.tilemap({ key: "boss_level" });
     create_init.call(this, map,1) 
     
-    this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.E).on("down", () => {
-      console.log(this.enemy.x,"enemyx")
-      console.log(this.enemy.y,"enemyy")
-      playerData.transitionX= this.player.x;
-      playerData.transitionY= this.player.y;
-      if (this.walkingSfx && this.walkingSfx.isPlaying) {
-        this.walkingSfx.stop();
-      }
-      fadeToScene(this, "bt1");
 
-    });
  
     
     this.cameras.main.setScroll(0, 200);
@@ -227,7 +217,7 @@ export default class BossScene extends Phaser.Scene {
       this.player.setVelocityY(this.player.body.velocity.y * 0.5);
     }
 
-    this.coordText.setText(`X: ${Math.round(this.player.x)} Y: ${Math.round(this.player.y)}`);
+
   }
 
   performAttack() {
@@ -527,7 +517,7 @@ export default class BossScene extends Phaser.Scene {
       this.player.setVelocityY(this.player.body.velocity.y * 0.5);
     }
 
-    this.coordText.setText(`X: ${Math.round(this.player.x)} Y: ${Math.round(this.player.y)}`);
+
   
   }
   boss_to_center_one_call(enemy){

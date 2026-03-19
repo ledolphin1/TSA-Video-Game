@@ -86,7 +86,6 @@ const updateInit = function(time){
       this.player.setVelocityY(this.player.body.velocity.y * 0.5);
     }
 
-    // Update Coordinate Display
-    this.coordText.setText(`X: ${Math.round(this.player.x)} Y: ${Math.round(this.player.y)}`);
+
 }
 export default updateInit;
