@@ -96,7 +96,11 @@ export default class DragonBossScene extends Phaser.Scene {
     this.cameras.main.setBounds(0, 0, map.widthInPixels, map.heightInPixels);
     this.cameras.main.setScroll(0, 200);
     this.physics.world.setBounds(0, 0, map.widthInPixels, map.heightInPixels);
-
+    this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.S).on("down", () => {
+          if (this.walkingSfx && this.walkingSfx.isPlaying) {
+            this._defeatDragon();
+          }
+        });
 
     // Dragon flying animation (4 frames = wing flap cycle)
     this.anims.create({
@@ -511,13 +515,13 @@ if (!poison){
     this.dragonDefeated = true;
     playerData.stats.enemyKills += 1;
     playerData.stats.bossesDefeated += 1;
-
+    this.player.body.enable = false;
     customEmitter.emit("DRAGONBOSS_CLEAR");
     this.sound.stopAll()
     this.dragon.setTint(0xff4400);
     this.physics.world.pause();
     this.anims.pauseAll();
-
+    playerData.didBeatBoss = true;
 
     setTimeout(() => {
       if (this.dragon && this.dragon.active) this.dragon.destroy();
@@ -527,7 +531,7 @@ if (!poison){
       this.anims.resumeAll();
 
       this.time.delayedCall(1100, () => {
-        fadeToScene(this, "WinCredits", undefined, 450);
+        fadeToScene(this, "overworld", undefined, 450);
       });
     }, 800);
   }
