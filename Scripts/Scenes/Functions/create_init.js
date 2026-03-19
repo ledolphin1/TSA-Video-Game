@@ -5,11 +5,19 @@ import drawCooldown from './drawCooldown.js';
 import * as playerFuncs from './playerFuncs.js'
 import * as Phaser from "phaser";
 import waveProj from './wave.js';
+import hyper from './hyper.js';
+import poison from './poison.js';
+import selectAbility from './selectAbility.js';
+import { setupSceneFade } from './sceneFade.js';
+
 const {updatePlayerHitboxUnbound, flashPlayerUnbound, killPlayerUnbound} = playerFuncs;
 const create_init = function(map,debug){
 
     //Import Functions
+    this.selectAbility = selectAbility.bind(this)
     this.waveProj = waveProj.bind(this)
+    this.poison = poison.bind(this)
+    this.hyper = hyper.bind(this);
     this.drawCooldown = drawCooldown.bind(this)
     this.drawHealthBar = drawHealthBarUnbound.bind(this);
     this.updatePlayerHitbox = updatePlayerHitboxUnbound.bind(this);
@@ -72,7 +80,6 @@ const create_init = function(map,debug){
     this.physics.add.collider(this.player, this.ground)
     
     //Camera configurations (also adapts to the given map)//!
-    this.cameras.main.startFollow(this.player, false, 1, 1);//ALWAYS THIS SETTING
     this.cameras.main.setBounds(0, 0, map.widthInPixels, map.heightInPixels);
     this.physics.world.setBounds(0, 0, map.widthInPixels, map.heightInPixels);
     this.player.setCollideWorldBounds(true);
@@ -86,6 +93,9 @@ const create_init = function(map,debug){
     this.fireKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.F);
     this.menuKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.ESC)
     this.interactKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.Z);
+    this.skipKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.S);
+    this.selectAbilityKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.E);
+
 
     //Coords for debug//!
     this.coordText = this.add.text(this.cameras.main.width - 10, this.cameras.main.height - 10, 'X: 0 Y: 0', {
@@ -96,27 +106,77 @@ const create_init = function(map,debug){
     this.coordText.setOrigin(1, 1);
     this.coordText.setScrollFactor(0);
     this.coordText.setDepth(1000);
+
+    const stopSharedIfPlaying = (musicRef) => {
+      if (musicRef && musicRef.isPlaying) {
+        musicRef.stop();
+      }
+    };
     
     //sidney asked for music//!
-    this.music = this.sound.add('background', {
+    if (this.scene.key !== "bt1") {
+      let sharedMusicRefKey = "__sharedLevelMusic";
+      let musicAssetKey = "levelsound";
+
+      if (this.scene.key === "boss") {
+        sharedMusicRefKey = "__sharedBossMusic";
+        musicAssetKey = "bosssound";
+      }
+
+      const sharedMusicRefs = [
+        "__sharedScaryMusic",
+        "__sharedBackgroundMusic",
+        "__sharedLevelMusic",
+        "__sharedBossMusic"
+      ];
+
+      sharedMusicRefs.forEach((refKey) => {
+        if (refKey !== sharedMusicRefKey) {
+          stopSharedIfPlaying(this.game[refKey]);
+        }
+      });
+
+      let sharedSceneMusic = this.game[sharedMusicRefKey];
+      if (!sharedSceneMusic || sharedSceneMusic.key !== musicAssetKey || sharedSceneMusic.manager !== this.sound) {
+        sharedSceneMusic = this.sound.add(musicAssetKey, {
+          loop: true,
+          volume: 0.3
+        });
+        this.game[sharedMusicRefKey] = sharedSceneMusic;
+      }
+      sharedSceneMusic.loop = true;
+      sharedSceneMusic.volume = 0.3;
+      if (!sharedSceneMusic.isPlaying) {
+        sharedSceneMusic.play();
+      }
+      this.music = sharedSceneMusic;
+    }
+
+    this.walkingSfx = this.sound.add('walking', {
       loop: true,
-      volume: 0.65
+      rate: 1.5,
+      volume: 0.5
     });
-    this.music.play();
+    this.updateWalkingSfx = function(isWalking) {
+      if (!this.walkingSfx) return;
+      if (isWalking) {
+        if (!this.walkingSfx.isPlaying) {
+          this.walkingSfx.play();
+        }
+      } else if (this.walkingSfx.isPlaying) {
+        this.walkingSfx.stop();
+      }
+    };
     
     this.lastFiredTime = 0; // Initialize cooldown timer//!
 
     
-    // --- Post-Update Sync (Fixes Lag/Blur) ---//!
-    // Sync runs AFTER physics, ensuring visual matches actual body position for this frame
     this.events.on('postupdate', () => {
         if (this.playerVisual && this.player) {
-        let vX = Math.round(this.player.x);
-        let vY = Math.round(this.player.y);
+      let vX = this.player.x;
+      let vY = this.player.y;
 
-        // Apply Visual Offsets when attacking
         if (this.playerVisual.texture.key === 'player_attack_sheet') {
-            // Invert X offset if facing left
             if (this.player.flipX) {
             vX -= this.attackVisualOffset.x;
             } else {
@@ -130,6 +190,19 @@ const create_init = function(map,debug){
 
 
         }
+    });
+
+    if (this.scene && this.scene.key !== "boss" && this.scene.key !== "bt1" && this.scene.key !== "dragonBoss") {
+      setupSceneFade(this, { pauseGameplay: true, duration: 350 });
+    }
+
+    this.events.once('shutdown', () => {
+      if (this.walkingSfx && this.walkingSfx.isPlaying) {
+        this.walkingSfx.stop();
+      }
+      if (this.walkingSfx) {
+        this.walkingSfx.destroy();
+      }
     });
 }
 export default create_init;

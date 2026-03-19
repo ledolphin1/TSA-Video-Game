@@ -19,9 +19,20 @@ const preload_init = function (){
       frameWidth: 16,
       frameHeight: 16
     })
-    this.load.audio('background', "public/assets/audio/background_music_filler.mp3");
+    this.load.audio('background', "public/assets/audio/epicbackground.mp3");
+    this.load.audio('scary', "public/assets/audio/scary.mp3");
+    this.load.audio('levelsound', "public/assets/audio/levelsound.mp3");
+    this.load.audio('bosssound', "public/assets/audio/bosssound.mp3");
+    this.load.audio('scarysuspense', "public/assets/audio/scarysuspense.mp3");
+    this.load.audio('swordslash', "public/assets/audio/swordslash.mp3");
+    this.load.audio('walking', "public/assets/audio/walking2.mp3");
+    this.load.audio('jump', "public/assets/audio/jump.mp3");
+    this.load.audio('projectilesound', "public/assets/audio/projectilesound.mp3");
     this.load.image('tiles', "public/assets/Map/tileset.png");
     this.load.image('lpProjectile',"public/assets/projectile.png")
     this.load.image('wave',"public/assets/wave.png")
+    this.load.image('hyper',"public/assets/high-power-proj.png")
+    this.load.image('poison',"public/assets/poison_proj.png")
+    this.load.image('main_bg',"public/assets/bg_repeat_main.png")
 }
 export default preload_init;

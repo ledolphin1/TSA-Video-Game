@@ -4,6 +4,8 @@ import activate_anims from "./Functions/activate_anims.js";
 import constructor_init from "./Functions/constructor_init.js";
 import preload_init from "./Functions/preload_init.js";
 import { customEmitter } from "./events.js";
+import { playerData } from "./playerdata.js";
+import { fadeToScene } from "./Functions/sceneFade.js";
 
 
 //  Enemies are brute robot/virus thingies that chase the player.
@@ -49,12 +51,16 @@ export default class LevelTwo extends Phaser.Scene {
     const map = this.make.tilemap({ key: "leveltwo_map" });
 
     this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.S).on("down", () => {
-    this.scene.start("boss");
+      if (this.walkingSfx && this.walkingSfx.isPlaying) {
+        this.walkingSfx.stop();
+      }
+      playerData.didBeatL2 = true;
+      fadeToScene(this, "overworld");
     });
-
     // ── Base setup (player, camera, ground, controls, HUD) ──────────────────
     create_init.call(this, map);
-    this.cameras.main.startFollow(this.player, false, 1, 1);
+        this.add.tileSprite(0,0,map.widthInPixels,map.heightInPixels,"main_bg").setOrigin(0,0).setDepth(-7)
+    this.cameras.main.startFollow(this.player, false, 1, 1);//ALWAYS THIS SETTING
     // ── Extra animations ────────────────────────────────────────────────────
     this.anims.create({
       key: "virus_idle",
@@ -107,11 +113,13 @@ export default class LevelTwo extends Phaser.Scene {
 
     // ── Player body vs enemy ─────────────────────────────────────────────────
     this.physics.add.overlap(this.player, this.enemies, (player, enemy) => {
+      if (this._isSceneTransitioning) return;
       if (enemy.isAttackingPlayer) return;
       if (this.playerIsDead) return;
       if (this.isInvincible) return;
 
       this.health -= 1;
+      playerData.stats.damageTaken += 1;
       this.health = Math.max(0, this.health);
       this.drawHealthBar();
       this.isInvincible = true;
@@ -173,6 +181,7 @@ export default class LevelTwo extends Phaser.Scene {
   die() {
     if (this.playerIsDead) return;
     this.playerIsDead = true;
+    playerData.stats.deaths += 1;
     this.isJumping    = false;
 
     this.player.setVelocity(0, 0);
@@ -204,10 +213,13 @@ respawn() {
   // ──────────────────────────────────── UPDATE ──────────────────────────────
   update(time, delta) {
     if (this.playerIsDead) {
+      this.updateWalkingSfx(false);
       return;
     }
-    if (this.isKnockedBack) return;
-
+    if (this.isKnockedBack) {
+      this.updateWalkingSfx(false);
+      return;
+    }
     // Cooldown arc
     if (this.projectileOnCooldown) {
       const elapsed  = time - this.projectileCooldownStart;
@@ -219,6 +231,9 @@ respawn() {
     // Update all viruses
     this.enemies.children.iterate(enemy => {
       if (enemy && enemy.active) this._updateVirus(enemy, time);
+      if(enemy.isPoisoned){
+        enemy.setTintFill(0x00ff00)
+      }
     });
 
     // ── Standard player logic (mirrors mainscene.js) ─────────────────────────
@@ -240,14 +255,28 @@ respawn() {
       this.scene.pause();
       this.scene.launch("Pause", { returnScene: this.scene.key });
     }
-
+    
+    if (Phaser.Input.Keyboard.JustDown(this.selectAbilityKey)) {
+      if (!playerData.isAbleToUseEMenu){
+          return;
+        }
+         if (this.walkingSfx && this.walkingSfx.isPlaying) {
+           this.walkingSfx.stop();
+         }
+         this.scene.pause()
+         this.scene.launch("playerSelectAbility", { returnScene: this.scene.key });
+         return;
+       }
     if (Phaser.Input.Keyboard.JustDown(this.fireKey) && !this.projectileOnCooldown) {
       if (time > this.lastFiredTime + 3000) {
-        this.waveProj(time);
+        this.selectAbility(time);
       }
     }
 
-    if (this.isAttacking) return;
+    if (this.isAttacking) {
+      this.updateWalkingSfx(false);
+      return;
+    }
 
     // Movement
     if (this.cursors.left.isDown) {
@@ -263,8 +292,11 @@ respawn() {
       if (this.onGround) this.playerVisual.setTexture("player_still");
     }
 
+    this.updateWalkingSfx(this.onGround && (this.cursors.left.isDown || this.cursors.right.isDown));
+
     // Jump
     if (this.cursors.up.isDown && (this.onGround || (time - this.lastGroundedTime < 100))) {
+      this.sound.play("jump", { volume: 0.125, seek: 0.425 });
       this.player.setVelocityY(-300);
       this.lastGroundedTime = 0;
       this.isJumping = true;
@@ -295,7 +327,7 @@ respawn() {
   _spawnVirus(x, y) {
     const enemy = this.enemies.create(x, y, "virusEnemy");
     enemy.setScale(2);        // scale up for visibility at 16px base size
-    enemy.hp = 4;             // 4 melee or 2 ranged to kill
+    enemy.hp = 8;             // 4 melee or 2 ranged to kill
     enemy.isKnockedBack   = false;
     enemy.hitCooldown     = false;
     enemy.isAttackingPlayer = false;  // true during the 250ms pre-swing pause
@@ -380,6 +412,8 @@ respawn() {
     }
   }
    performAttack() {
+    playerData.stats.meleeAttacks += 1;
+    this.sound.play("swordslash", { volume: 0.135 });
     this.isJumping = false;//!
     this.isAttacking = true;//!
     this.player.setVelocityX(0); // Stop horizontal movement//!
@@ -490,8 +524,10 @@ respawn() {
     const dx = Math.abs(this.player.x - enemy.x);
     const dy = Math.abs(this.player.y - enemy.y);
     if (dx <= 22 && dy <= 20) {
+      if (this._isSceneTransitioning) return;
       if (!this.playerIsDead && !this.isInvincible) {
         this.health -= 2;
+        playerData.stats.damageTaken += 2;
         this.health = Math.max(0, this.health);
         this.drawHealthBar();
         this.isInvincible = true;
@@ -559,19 +595,19 @@ respawn() {
   }
 
   // ──────────────────────────────── DAMAGE VIRUS ────────────────────────────
-  projectileEnemyCollisionHandle(projectile,enemy,dmg){
-      this._damageVirus(enemy,dmg)
+  projectileEnemyCollisionHandle(projectile,enemy,dmg,poison){
+      this._damageVirus(enemy,dmg,poison)
   }
-  _damageVirus(enemy, amount) {
+  _damageVirus(enemy, amount,poison) {
     console.log("virus has been hit")
     if (!enemy.active) return;
     console.log("enemy passed active check")
-    if (enemy.hitCooldown) return;
+    // if (enemy.hitCooldown) return;
     console.log("enemy passed cooldown check")
 
     enemy.hitCooldown = true;
     enemy.hp -= amount;
-
+    console.log("virus hp", enemy.hp);
     // Glitch flash
     this._triggerVirusGlitch(enemy);
 
@@ -586,9 +622,12 @@ respawn() {
         this.time.delayedCall(150 + i * 60, () => { if (spark.active) spark.destroy(); });
       }
       enemy.destroy();
+      playerData.stats.enemyKills += 1;
       return;
     }
-
+    if (poison){
+      return;
+    }
     // Knockback (white flash)
     enemy.setTintFill(0xffffff);
     enemy.isKnockedBack = true;
@@ -614,11 +653,14 @@ respawn() {
 
   // ──────────────────────────────── GATEWAY ────────────────────────────────
   _enterGateway() {
-    if (this.music) { try { this.music.stop(); } catch(e) {} }
+    if (this.walkingSfx && this.walkingSfx.isPlaying) {
+      this.walkingSfx.stop();
+    }
     if (this._glitchTimer) this._glitchTimer.remove();
 
     this.time.delayedCall(400, () => {
-      this.scene.start("boss");
+      playerData.didBeatL2 = true;
+      fadeToScene(this, "overworld");
     });
   }
 

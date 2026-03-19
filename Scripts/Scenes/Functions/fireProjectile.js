@@ -1,8 +1,11 @@
+  import { playerData } from "../playerdata.js";
   const fireProjectile = function (time) {
+    this.sound.play("projectilesound", { seek: 0.2 });
     this.projectileOnCooldown = true;
     this.projectileCooldownStart = time;
 
     this.lastFiredTime = time;
+    playerData.stats.projectilesFired += 1;
     const proj = this.physics.add.sprite(this.player.x,this.player.y,"lpProjectile");
     proj.flipX = this.player.flipX ? true : false;
     this.physics.add.existing(proj);
@@ -18,7 +21,7 @@
     });
 
     // Add collision with enemies
-    this.physics.add.overlap(this.playerProjectiles, this.enemies, (projectile, enemy) => {
+    this.physics.add.overlap(proj, this.enemies, (projectile, enemy) => {
       console.log(projectile.body)
       this.projectileEnemyCollisionHandle(projectile,enemy,this.projectileDamage)
       projectile.destroy()

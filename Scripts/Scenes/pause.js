@@ -22,6 +22,12 @@ export default class Pause extends Phaser.Scene {
   create() {
     this.scene.bringToTop();
     const { width, height } = this.scale;
+
+    const pausedScene = this.scene.manager.getScene(this.returnScene);
+    if (pausedScene && pausedScene.walkingSfx && pausedScene.walkingSfx.isPlaying) {
+      pausedScene.walkingSfx.stop();
+    }
+
     this.anims.create({
       key: "knob_anim",
       frames: this.anims.generateFrameNumbers("knob"),

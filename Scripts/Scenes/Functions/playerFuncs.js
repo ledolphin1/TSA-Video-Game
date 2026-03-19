@@ -1,4 +1,5 @@
 import * as Phaser from "phaser";
+import { playerData } from "../playerdata.js";
   export const updatePlayerHitboxUnbound = function() {
     if (!this.player || !this.player.body) return;
 
@@ -34,6 +35,7 @@ import * as Phaser from "phaser";
     export const killPlayerUnbound = function() {
     if (this.playerIsDead) return;
     this.playerIsDead = true;
+    playerData.stats.deaths += 1;
     this.isJumping = false
 
     this.player.setVelocity(0, 0);

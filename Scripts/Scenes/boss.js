@@ -4,6 +4,7 @@ import preload_init from "./Functions/preload_init.js";
 import create_init from "./Functions/create_init.js";
 import { customEmitter } from "./events.js";
 import { playerData } from "./playerdata.js";
+import { fadeToScene, setupSceneFade } from "./Functions/sceneFade.js";
 export default class BossScene extends Phaser.Scene {
   constructor() {
     super({ key: "boss" });
@@ -11,6 +12,20 @@ export default class BossScene extends Phaser.Scene {
     constructor_init.call(this);
     this._bossTransitioned = false;
     this.freeze = false;
+  }
+
+  _fadeOutBackgroundMusic(duration = 350) {
+    if (this._bgMusicFading) return;
+    if (!this.music || !this.music.isPlaying) return;
+    this._bgMusicFading = true;
+    this.tweens.add({
+      targets: this.music,
+      volume: 0,
+      duration,
+      onComplete: () => {
+        try { this.music.stop(); } catch (e) {}
+      }
+    });
   }
 
   preload() {
@@ -26,6 +41,7 @@ export default class BossScene extends Phaser.Scene {
   }
 
   create() {
+    setupSceneFade(this, { pauseGameplay: false, duration: 350 });
     this.killKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.K)
     this._bossTransitioned = false;
     this.add.image(160, 220, "bossbg");
@@ -48,7 +64,10 @@ export default class BossScene extends Phaser.Scene {
       console.log(this.enemy.y,"enemyy")
       playerData.transitionX= this.player.x;
       playerData.transitionY= this.player.y;
-    this.scene.start("bt1");
+      if (this.walkingSfx && this.walkingSfx.isPlaying) {
+        this.walkingSfx.stop();
+      }
+      fadeToScene(this, "bt1");
 
     });
  
@@ -110,8 +129,14 @@ export default class BossScene extends Phaser.Scene {
       }
     }
 
-    if (this.playerIsDead) return;
-    if (this.isKnockedBack) return;
+    if (this.playerIsDead) {
+      this.updateWalkingSfx(false);
+      return;
+    }
+    if (this.isKnockedBack) {
+      this.updateWalkingSfx(false);
+      return;
+    }
 
     this.enemies.children.iterate((enemy) => {
       this.updateEnemy(time, enemy);
@@ -131,20 +156,35 @@ export default class BossScene extends Phaser.Scene {
       this.scene.pause();
       this.scene.launch("Pause", { returnScene: this.scene.key });
     }
+    
+    if (Phaser.Input.Keyboard.JustDown(this.selectAbilityKey)) {
+      if (!playerData.isAbleToUseEMenu){
+          return;
+        }
+         if (this.walkingSfx && this.walkingSfx.isPlaying) {
+           this.walkingSfx.stop();
+         }
+         this.scene.pause()
+         this.scene.launch("playerSelectAbility", { returnScene: this.scene.key });
+         return;
+       }
     if (Phaser.Input.Keyboard.JustDown(this.killKey)) {
       console.log("i am pressed bro")
       console.log(this.enemy.hp)
       this.enemy.hp = 0;
       this._updateEnemyHpBar(this.enemy.hp);
     }
-    if (this.isAttacking) return;
+    if (this.isAttacking) {
+      this.updateWalkingSfx(false);
+      return;
+    }
     if (Phaser.Input.Keyboard.JustDown(this.attackKey) && !this.isAttacking && time > this.lastAttackEndTime + 10) {
       this.performAttack();
     }
 
     if (Phaser.Input.Keyboard.JustDown(this.fireKey)) {
       if (!this.projectileOnCooldown) {
-        this.waveProj(time);
+        this.selectAbility(time);
       }
     }
 
@@ -168,7 +208,10 @@ export default class BossScene extends Phaser.Scene {
       }
     }
 
+    this.updateWalkingSfx(this.onGround && (this.cursors.left.isDown || this.cursors.right.isDown));
+
     if (this.cursors.up.isDown && (this.onGround || (time - this.lastGroundedTime < 100))) {
+      this.sound.play("jump", { volume: 0.125, seek: 0.425 });
       this.player.setVelocityY(-300);
       this.lastGroundedTime = 0;
       this.isJumping = true;
@@ -183,6 +226,8 @@ export default class BossScene extends Phaser.Scene {
   }
 
   performAttack() {
+    playerData.stats.meleeAttacks += 1;
+    this.sound.play("swordslash", { volume: 0.135 });
     this.isJumping = false;
     this.isAttacking = true;
     this.player.setVelocityX(0);
@@ -222,6 +267,9 @@ export default class BossScene extends Phaser.Scene {
       this._updateEnemyHpBar(enemy.hp);
 
       if (enemy.hp <= 0) {
+        this._fadeOutBackgroundMusic(350);
+        playerData.stats.enemyKills += 1;
+        playerData.stats.bossesDefeated += 1;
         customEmitter.emit("stage_1_defeat")
         this.boss_to_center_one_call(enemy)
         this.freeze = true;
@@ -365,14 +413,12 @@ export default class BossScene extends Phaser.Scene {
     const bw = 120, bh = 8, bx = 100, by = 6;
     this.enemyHpBarBg   = this.add.graphics().setScrollFactor(0).setDepth(1000);
     this.enemyHpBarFill = this.add.graphics().setScrollFactor(0).setDepth(1000);
-    this.enemyHpLabel   = this.add.text(160, 8, "SNAKE BOSS", { fontSize: "8px", color: "#ffffff" })
-      .setOrigin(0.5, 0).setScrollFactor(0).setDepth(1001);
 
     // Draw initial full bar
     this.enemyHpBarBg.lineStyle(1, 0xff0000);
     this.enemyHpBarBg.strokeRect(bx, by, bw, bh);
     this.enemyHpBarFill.fillStyle(0xdd0000);
-    this.enemyHpBarFill.fillRect(bx + 1, by + 1, bw - 2, bh - 2);
+    this.enemyHpBarFill.fillRect(bx + 1, by + 1.5, bw - 2.5, bh - 2.5);
   }
 
   _updateEnemyHpBar(currentHp) {
@@ -388,7 +434,7 @@ export default class BossScene extends Phaser.Scene {
     this.enemyHpBarBg.strokeRect(bx, by, bw, bh);
 
     this.enemyHpBarFill.fillStyle(0xdd0000);
-    this.enemyHpBarFill.fillRect(bx + 1, by + 1, (bw - 2) * pct, bh - 2);
+    this.enemyHpBarFill.fillRect(bx + 1, by + 1.5, (bw - 2.5) * pct, bh - 2.5);
   }
 
   _onBossDefeated() {
@@ -396,12 +442,12 @@ export default class BossScene extends Phaser.Scene {
     this._bossTransitioned = true;
 
     this.time.delayedCall(1000, () => {
-      try { this.music.stop(); } catch (e) {}
-      this.scene.start("bt1");
-      console.log(this.enemy.x,"enemyx")
-      console.log(this.enemy.y,"enemyy")
       playerData.transitionX= this.player.x;
       playerData.transitionY= this.player.y;
+      if (this.walkingSfx && this.walkingSfx.isPlaying) {
+        this.walkingSfx.stop();
+      }
+      fadeToScene(this, "bt1");
     });
   }
   respawnPlayer() {
@@ -465,6 +511,7 @@ export default class BossScene extends Phaser.Scene {
     }
 
     if (this.cursors.up.isDown && (this.onGround || (time - this.lastGroundedTime < 100))) {
+      this.sound.play("jump", { volume: 0.125, seek: 0.425 });
       this.player.setVelocityY(-300);
       this.lastGroundedTime = 0;
       this.isJumping = true;
@@ -494,39 +541,44 @@ export default class BossScene extends Phaser.Scene {
       enemy.body.setVelocityX(50)
     }
   }
-   projectileEnemyCollisionHandle(projectile,enemy,dmg){
+   projectileEnemyCollisionHandle(projectile,enemy,dmg,poison){
       if (!this.scene.isActive()) return;
       enemy.hp -= dmg;
       console.log(enemy.hp)
       
       this._updateEnemyHpBar(enemy.hp);
       if (enemy.hp <= 0) {
+        this._fadeOutBackgroundMusic(350);
+        playerData.stats.enemyKills += 1;
+        playerData.stats.bossesDefeated += 1;
         customEmitter.emit("stage_1_defeat")
         this.boss_to_center_one_call(enemy)
         this.freeze = true;
         return;
       } else {
-      
-        // Flash white
-        enemy.setTintFill(0xffffff);
+        if (!poison){
 
-        enemy.isKnockedBack = true;
-        // projectile direction
-        const kbDir = (projectile.body.velocity.x > 0) ? 1 : -1;
-        enemy.setVelocity(kbDir * this.knockbackSpeedX, -this.knockbackSpeedY);
+          // Flash white
+          enemy.setTintFill(0xffffff);
+  
+          enemy.isKnockedBack = true;
+          // projectile direction
+          const kbDir = (projectile.body.velocity.x > 0) ? 1 : -1;
+          enemy.setVelocity(kbDir * this.knockbackSpeedX, -this.knockbackSpeedY);
+          setTimeout(() => {
+            if (enemy.active) {
+              enemy.clearTint();
+              enemy.isKnockedBack = false;
+              enemy.hitCooldown = false;
+  
+              // Face Player and Move
+              const recoverDir = (this.player.x < enemy.x) ? -1 : 1;
+              enemy.setVelocityX(recoverDir * 50);
+              enemy.flipX = (recoverDir === 1);
+            }
+          }, 400);
+        }
 
-        setTimeout(() => {
-          if (enemy.active) {
-            enemy.clearTint();
-            enemy.isKnockedBack = false;
-            enemy.hitCooldown = false;
-
-            // Face Player and Move
-            const recoverDir = (this.player.x < enemy.x) ? -1 : 1;
-            enemy.setVelocityX(recoverDir * 50);
-            enemy.flipX = (recoverDir === 1);
-          }
-        }, 400);
     }
   }
 }

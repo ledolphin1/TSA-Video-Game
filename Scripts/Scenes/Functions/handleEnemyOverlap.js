@@ -1,10 +1,13 @@
   import * as Phaser from "phaser";
+  import { playerData } from "../playerdata.js";
   const handleEnemyOverlap = function(player, enemy) {
+    if (this._isSceneTransitioning) return;
     if (this.playerIsDead || this.isInvincible) return;
     if (enemy.isKnockedBack) return; // enemy cannot hurt player while stunned
 
     // Common Damage Logic
     this.health--;
+    playerData.stats.damageTaken += 1;
     this.drawHealthBar();
 
     // Super Armor Case: attacking players don't freeze or get knocked back

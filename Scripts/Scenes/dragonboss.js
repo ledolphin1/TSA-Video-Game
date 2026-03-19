@@ -3,10 +3,17 @@ import preload_init from "./Functions/preload_init.js";
 import { customEmitter } from "./events.js";
 import { playerData } from "./playerdata.js";
 import waveProj from "./Functions/wave.js";
+import hyper from "./Functions/hyper.js";
+import poison from "./Functions/poison.js";
+import selectAbility from "./Functions/selectAbility.js";
+import { fadeToScene, setupSceneFade } from "./Functions/sceneFade.js";
+
 export default class DragonBossScene extends Phaser.Scene {
   constructor() {
     super({ key: "dragonBoss" });
-
+    this.waveProj = waveProj.bind(this);
+    this.hyper = hyper.bind(this);
+    this.poison = poison.bind(this);
     // Health & State — player has TWICE as much health as in boss/mainscene
     this.maxHealth = 10;
     this.health = this.maxHealth;
@@ -71,10 +78,10 @@ export default class DragonBossScene extends Phaser.Scene {
 
   create() {
     this.scene.bringToTop("Narator");
+    setupSceneFade(this, { pauseGameplay: false, duration: 350 });
     // ── Background ──────────────────────────────────────────
     this.add.image(160, 247, "bossbg");
-
-    this.physics.world.roundPixels = false;
+    
     // this.physics.world.drawDebug = false;
     // if (this.physics.world.debugGraphic) {
     //   this.physics.world.debugGraphic.setVisible(false);
@@ -140,7 +147,7 @@ export default class DragonBossScene extends Phaser.Scene {
     // Dragon movement bookkeeping
     this.dragon.moveDir = -1;          // -1 = left, 1 = right
     this.dragon.lastFireTime = 0;
-    this.dragon.fireCooldown = 2200;   // ms between breath bursts
+    this.dragon.fireCooldown = 1900;   // ms between breath bursts
     this.dragon.burstCount = 0;
     
     // Dragon health bar (drawn above the dragon)
@@ -156,6 +163,7 @@ export default class DragonBossScene extends Phaser.Scene {
     
     // Fire hits player → damage (one hit per fireball)
     this.physics.add.overlap(this.player, this.fireBalls, (player, fb) => {
+      if (this._isSceneTransitioning) return;
       if (!fb.active || fb._hit) return;
       fb._hit = true;
       fb.destroy();
@@ -171,6 +179,7 @@ export default class DragonBossScene extends Phaser.Scene {
     // Player touching dragon body → damage with cooldown (prevents per-frame drain)
     this._dragonContactCooldown = false;
     this.physics.add.overlap(this.player, this.dragon, () => {
+      if (this._isSceneTransitioning) return;
       if (this._dragonContactCooldown) return;
       this._dragonContactCooldown = true;
       setTimeout(() => { this._dragonContactCooldown = false; }, 600);
@@ -187,7 +196,7 @@ export default class DragonBossScene extends Phaser.Scene {
     this.attackKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE);
     this.fireKey   = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.F);
     this.menuKey   = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.ESC);
-    
+    this.selectAbilityKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.E)
     this.lastFiredTime = 0;
     
     // ── HUD: Player Health Bar ───────────────────────────────
@@ -215,10 +224,51 @@ export default class DragonBossScene extends Phaser.Scene {
       this.playerVisual.setPosition(vX, vY);
       this.playerVisual.setFlipX(this.player.flipX);
     });
+    this.events.once("shutdown", () => {
+      if (this.walkingSfx && this.walkingSfx.isPlaying) {
+        this.walkingSfx.stop();
+      }
+      if (this.walkingSfx) {
+        this.walkingSfx.destroy();
+      }
+    });
     
     // ── Music ────────────────────────────────────────────────
-    this.music = this.sound.add("background", { loop: true, volume: 0.65 });
-    this.music.play();
+    const stopSharedIfPlaying = (musicRef) => {
+      if (musicRef && musicRef.isPlaying) {
+        musicRef.stop();
+      }
+    };
+    stopSharedIfPlaying(this.game.__sharedScaryMusic);
+    stopSharedIfPlaying(this.game.__sharedBackgroundMusic);
+    stopSharedIfPlaying(this.game.__sharedLevelMusic);
+
+    let sharedBossMusic = this.game.__sharedBossMusic;
+    if (!sharedBossMusic || sharedBossMusic.key !== "bosssound" || sharedBossMusic.manager !== this.sound) {
+      sharedBossMusic = this.sound.add("bosssound", { loop: true, volume: 0.3 });
+      this.game.__sharedBossMusic = sharedBossMusic;
+    }
+    sharedBossMusic.loop = true;
+    sharedBossMusic.volume = 0.3;
+    if (!sharedBossMusic.isPlaying) {
+      sharedBossMusic.play();
+    }
+    this.music = sharedBossMusic;
+    this.walkingSfx = this.sound.add("walking", {
+      loop: true,
+      rate: 1.5,
+      volume: 0.5
+    });
+    this.updateWalkingSfx = function(isWalking) {
+      if (!this.walkingSfx) return;
+      if (isWalking) {
+        if (!this.walkingSfx.isPlaying) {
+          this.walkingSfx.play();
+        }
+      } else if (this.walkingSfx.isPlaying) {
+        this.walkingSfx.stop();
+      }
+    };
     
     // ── Victory / defeat text (hidden until triggered) ───────
     this.outcomeText = this.add.text(
@@ -233,9 +283,22 @@ export default class DragonBossScene extends Phaser.Scene {
     //  UPDATE
     // ============================================================
   update(time, delta) {
-    if (this.dragonDefeated) return;
-    if (this.playerIsDead) return;
-    if (this.isKnockedBack) return;
+    if (this._isSceneTransitioning) {
+      this.updateWalkingSfx(false);
+      return;
+    }
+    if (this.dragonDefeated) {
+      this.updateWalkingSfx(false);
+      return;
+    }
+    if (this.playerIsDead) {
+      this.updateWalkingSfx(false);
+      return;
+    }
+    if (this.isKnockedBack) {
+      this.updateWalkingSfx(false);
+      return;
+    }
 
     // Cooldown arc
     if (this.projectileOnCooldown) {
@@ -266,15 +329,29 @@ export default class DragonBossScene extends Phaser.Scene {
     }
 
     if (Phaser.Input.Keyboard.JustDown(this.fireKey) && !this.projectileOnCooldown) {
-      waveProj.call(this,time);
+      selectAbility.call(this,time);
     }
 
     if (Phaser.Input.Keyboard.JustDown(this.menuKey)) {
       this.scene.pause();
       this.scene.launch("Pause", { returnScene: this.scene.key });
     }
-
-    if (this.isAttacking) return;
+    
+    if (Phaser.Input.Keyboard.JustDown(this.selectAbilityKey)) {
+        if (!playerData.isAbleToUseEMenu){
+          return;
+        }
+         if (this.walkingSfx && this.walkingSfx.isPlaying) {
+           this.walkingSfx.stop();
+         }
+         this.scene.pause()
+         this.scene.launch("playerSelectAbility", { returnScene: this.scene.key });
+         return;
+       }
+    if (this.isAttacking) {
+      this.updateWalkingSfx(false);
+      return;
+    }
 
     // ── Movement ─────────────────────────────────────────────
     if (this.cursors.left.isDown) {
@@ -290,9 +367,12 @@ export default class DragonBossScene extends Phaser.Scene {
       if (this.onGround) this.playerVisual.setTexture("player_still");
     }
 
+    this.updateWalkingSfx(this.onGround && (this.cursors.left.isDown || this.cursors.right.isDown));
+
     // ── Jump ─────────────────────────────────────────────────
     if (this.cursors.up.isDown &&
         (this.onGround || (time - this.lastGroundedTime < 100))) {
+      this.sound.play("jump", { volume: 0.125, seek: 0.425 });
       this.player.setVelocityY(-300);
       this.lastGroundedTime = 0;
       this.isJumping = true;
@@ -347,8 +427,8 @@ export default class DragonBossScene extends Phaser.Scene {
   _breathFire() {
     if (!this.dragon || !this.dragon.active) return;
 
-    const numShots   = 4;
-    const spreadStep = 150; // ms between each ball in a burst
+    const numShots   = 6;
+    const spreadStep = 200; // ms between each ball in a burst
 
     for (let i = 0; i < numShots; i++) {
       this.time.delayedCall(i * spreadStep, () => {
@@ -388,36 +468,39 @@ export default class DragonBossScene extends Phaser.Scene {
   // ============================================================
   //  DAMAGE DRAGON (melee or projectile)
   // ============================================================
-  _damageDragon(amount) {
+  _damageDragon(amount,poison) {
     console.log("ouch")
     if (!this.dragon || !this.dragon.active) return;
     if (this.dragonDefeated) return;
-    if (this._dragonHitLock) return;
+    // if (this._dragonHitLock) return;
 
-    this._dragonHitLock = true;
-    setTimeout(() => { this._dragonHitLock = false; }, 300);
+    // this._dragonHitLock = true;
+    // setTimeout(() => { this._dragonHitLock = false; }, 300);
 
     this.dragonHp = Math.max(0, this.dragonHp - amount);
     this._updateDragonHpBar();
-
-    this.dragon.setTintFill(0xffffff);
-    setTimeout(() => {
-      if (this.dragon && this.dragon.active) this.dragon.clearTint();
-    }, 120);
+if (!poison){
+  this.dragon.setTintFill(0xffffff);
+  this.time.delayedCall(120,() => {
+    if (this.dragon && this.dragon.active) this.dragon.clearTint();
+  });
+}
 
     if (this.dragonHp <= 0) {
       this._defeatDragon();
       return;
     }
 
-    this.physics.world.pause();
-    this.anims.pauseAll();
-    setTimeout(() => {
-      if (!this.dragonDefeated) {
-        this.physics.world.resume();
-        this.anims.resumeAll();
-      }
-    }, 80);
+    if (!poison) {
+      this.physics.world.pause();
+      this.anims.pauseAll();
+      this.time.delayedCall(80,() => {
+        if (!this.dragonDefeated) {
+          this.physics.world.resume();
+          this.anims.resumeAll();
+        }
+      });
+    }
   }
 
   // ============================================================
@@ -426,13 +509,16 @@ export default class DragonBossScene extends Phaser.Scene {
   _defeatDragon() {
     if (this.dragonDefeated) return;
     this.dragonDefeated = true;
+    playerData.stats.enemyKills += 1;
+    playerData.stats.bossesDefeated += 1;
 
+    customEmitter.emit("DRAGONBOSS_CLEAR");
+    this.sound.stopAll()
     this.dragon.setTint(0xff4400);
     this.physics.world.pause();
     this.anims.pauseAll();
 
-    // Use setTimeout (not this.time.delayedCall) so the paused Phaser clock
-    // doesn"t prevent this from ever firing
+
     setTimeout(() => {
       if (this.dragon && this.dragon.active) this.dragon.destroy();
       try { this.music.stop(); } catch (e) {}
@@ -440,22 +526,19 @@ export default class DragonBossScene extends Phaser.Scene {
       this.physics.world.resume();
       this.anims.resumeAll();
 
-      this.outcomeText.setText("YOU WIN!\nPress ENTER to continue");
-      this.outcomeText.setVisible(true);
-
-      this.input.keyboard.once("keydown-ENTER", () => {
-        this.scene.start("Menu");
+      this.time.delayedCall(1100, () => {
+        fadeToScene(this, "WinCredits", undefined, 450);
       });
     }, 800);
   }
 
-  // ============================================================
-  //  PLAYER TAKES DRAGON DAMAGE
-  // ============================================================
+
   _handleDragonHit() {
+    if (this._isSceneTransitioning) return;
     if (this.playerIsDead || this.isInvincible) return;
 
     this.health--;
+    playerData.stats.damageTaken += 1;
     this._drawPlayerHpBar();
     this.isInvincible = true;
 
@@ -464,19 +547,17 @@ export default class DragonBossScene extends Phaser.Scene {
       return;
     }
 
-    // Apply knockback immediately — no world pause so there"s no freeze
     this.isKnockedBack = true;
     const dir = (this.player.x < this.dragon.x) ? -1 : 1;
     this.player.setVelocity(dir * 110, -60);
 
-    setTimeout(() => { this.isKnockedBack = false; }, 250);
+    this.time.delayedCall(250,() => { this.isKnockedBack = false; });
     this._flashPlayer();
   }
 
-  // ============================================================
-  //  PLAYER ATTACK (melee)
-  // ============================================================
   _performAttack() {
+    playerData.stats.meleeAttacks += 1;
+    this.sound.play("swordslash", { volume: 0.135 });
     this.isJumping    = false;
     this.isAttacking  = true;
     this.player.setVelocity(0, 0);
@@ -494,15 +575,14 @@ export default class DragonBossScene extends Phaser.Scene {
 
     this.playerVisual.play("player_attack", true);
 
-    // Check overlap with dragon
+
     this.physics.add.overlap(attackHitbox, this.dragon, (hb, dragon) => {
       if (this.dragon._hitCooldown) return;
       this.dragon._hitCooldown = true;
-      setTimeout(() => { if (this.dragon) this.dragon._hitCooldown = false; }, 300);
+      this.time.delayedCall(300,() => { if (this.dragon) this.dragon._hitCooldown = false; });
       this._damageDragon(this.slashDamage);
     });
 
-    // Also deflect incoming fireballs
     this.physics.add.overlap(attackHitbox, this.fireBalls, (hb, fb) => {
       if (fb && fb.active) fb.destroy();
     });
@@ -527,16 +607,15 @@ export default class DragonBossScene extends Phaser.Scene {
     );
   }
 
-  // ============================================================
-  //  PLAYER PROJECTILE  (mirrors boss.js pattern exactly)
-  // ============================================================
-  projectileEnemyCollisionHandle(projectile,enemy,dmg){
-    this._damageDragon(dmg);
+  projectileEnemyCollisionHandle(projectile,enemy,dmg,poison){
+    this._damageDragon(dmg,poison);
   }
-  _fireProjectile(time) {
+  fireProjectile(time) {
+    this.sound.play("projectilesound", { seek: 0.2 });
     this.projectileOnCooldown    = true;
     this.projectileCooldownStart = time;
     this.lastFiredTime           = time;
+    playerData.stats.projectilesFired += 1;
 
     const proj = this.physics.add.sprite(this.player.x, this.player.y, "lpProjectile");
     proj.flipX = this.player.flipX ? true : false;
@@ -550,7 +629,7 @@ export default class DragonBossScene extends Phaser.Scene {
       if (proj.active) proj.destroy();
     });
 
-    // Per-shot overlap registered directly on proj — same as boss.js
+
     this.physics.add.overlap(proj, this.dragon, (projectile, dragon) => {
       if (!this.scene.isActive()) return;
       if (!dragon || !dragon.active) return;
@@ -563,12 +642,10 @@ export default class DragonBossScene extends Phaser.Scene {
     });
   }
 
-  // ============================================================
-  //  PLAYER DEATH / RESPAWN
-  // ============================================================
   _killPlayer() {
     if (this.playerIsDead) return;
     this.playerIsDead = true;
+    playerData.stats.deaths += 1;
     this.isJumping    = false;
 
     this.player.setVelocity(0, 0);
@@ -606,9 +683,7 @@ export default class DragonBossScene extends Phaser.Scene {
     });
   }
 
-  // ============================================================
-  //  HUD HELPERS
-  // ============================================================
+
   _drawPlayerHpBar() {
     const pct = Phaser.Math.Clamp(this.health / this.maxHealth, 0, 1);
     this.healthBarBg.clear();
@@ -629,9 +704,6 @@ export default class DragonBossScene extends Phaser.Scene {
     // Fixed position at top-center
     this.dragonHpBarBg   = this.add.graphics().setScrollFactor(0).setDepth(1000);
     this.dragonHpBarFill = this.add.graphics().setScrollFactor(0).setDepth(1000);
-    this.dragonHpLabel   = this.add.text(
-      160, 8, "DRAGON BOSS", { fontSize: "8px", color: "#ffffff" }
-    ).setOrigin(0.5, 0).setScrollFactor(0).setDepth(1001);
     this._updateDragonHpBar();
   }
 
@@ -649,11 +721,10 @@ export default class DragonBossScene extends Phaser.Scene {
     this.dragonHpBarBg.strokeRect(bx, by, bw, bh);
 
     this.dragonHpBarFill.fillStyle(0xff2200);
-    this.dragonHpBarFill.fillRect(bx + 1, by + 1, (bw - 2) * pct, bh - 2);
+    this.dragonHpBarFill.fillRect(bx + 1, by + 1.5, (bw - 2.5) * pct, bh - 2.5);
   }
 
   _updateDragonHpBarPos() {
-    // Label stays fixed via setScrollFactor(0); bar is already fixed
   }
 
   _drawCooldown(progress) {
@@ -679,8 +750,8 @@ export default class DragonBossScene extends Phaser.Scene {
     this.isInvincible = false;
     // Reset Player Position and Physics
     this.playerVisual.clearTint();
-    this.playerVisual.setTexture("player_still"); // Reset animation to idle
-    this.player.enableBody(true, 270, 888, true, false); // Reset to start pos, keep hidden
+    this.playerVisual.setTexture("player_still"); // Reset animation
+    this.player.enableBody(true, 270, 888, true, false); 
     this.playerVisual.setAlpha(1);
     this.player.setVelocity(0, 0);
     this.lastFiredTime = 0;

@@ -4,6 +4,7 @@ import preload_init from "./Functions/preload_init.js";
 import create_init from "./Functions/create_init.js";
 import { customEmitter } from "./events.js";
 import { playerData } from "./playerdata.js";
+import { fadeToScene, setupSceneFade } from "./Functions/sceneFade.js";
 export default class boss_transition extends Phaser.Scene {
   constructor() {
     super({ key: "bt1" });
@@ -27,15 +28,19 @@ export default class boss_transition extends Phaser.Scene {
 
   create() {
     this.scene.bringToTop("Narator");
+    setupSceneFade(this, { pauseGameplay: false, duration: 350 });
     this.add.image(160, 220, "bossbg");
     const map = this.make.tilemap({ key: "boss_level" });
     create_init.call(this, map,1) 
+    if (this.music && this.music.isPlaying) {
+      this.music.stop();
+    }
     
-    this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.S).on("down", () => {
-        this.scene.start("dragonBoss");
-        playerData.transitionX= this.player.x;
-        playerData.transitionY= this.player.y;
-    });
+    // this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.S).on("down", () => {
+    //   fadeToScene(this, "dragonBoss");
+    //     playerData.transitionX= this.player.x;
+    //     playerData.transitionY= this.player.y;
+    // });
         this.anims.create({
             key: "boss_transform",
             frames: this.anims.generateFrameNumbers("boss_transition"),
@@ -55,16 +60,63 @@ export default class boss_transition extends Phaser.Scene {
 
     this.player.x = playerData.transitionX;
     this.player.y = playerData.transitionY;
+
+    const transformDelayMs = 200;
+    const targetHp = 20;
+    const startHp = 1;
+    const fadeToDragonMs = 350;
+    const sceneDurationMs = ((targetHp - startHp) + 1) * transformDelayMs + fadeToDragonMs;
+
+    this.scarySuspense = this.sound.add("scarysuspense", {
+      loop: false,
+      volume: 0.3,
+      rate: 1
+    });
+    this.scarySuspense.play();
+
+    const fadeDurationMs = Math.min(3000, sceneDurationMs);
+    const fadeStartMs = Math.max(0, sceneDurationMs - fadeDurationMs);
+    this.time.delayedCall(fadeStartMs, () => {
+      if (!this.scarySuspense || !this.scarySuspense.isPlaying) return;
+      this.tweens.add({
+        targets: this.scarySuspense,
+        volume: 0,
+        duration: fadeDurationMs,
+        onComplete: () => {
+          if (this.scarySuspense && this.scarySuspense.isPlaying) {
+            this.scarySuspense.stop();
+          }
+        }
+      });
+    });
+
+    this.events.once("shutdown", () => {
+      if (this.scarySuspense && this.scarySuspense.isPlaying) {
+        this.scarySuspense.stop();
+      }
+      if (this.scarySuspense) {
+        this.scarySuspense.destroy();
+      }
+    });
+
     console.log("timetimetime")
     this.enemy.body.setAllowGravity(false)
     this.enemy.body.setVelocityY(-80);
-    setInterval(function () {
-        if(this.enemy.hp == 20){
-            this.scene.start("dragonBoss")
+    this._transformEvent = this.time.addEvent({
+      delay: 200,
+      loop: true,
+      callback: () => {
+        if (this.enemy.hp >= 20) {
+          this._transformEvent.remove(false);
+          playerData.transitionX = this.player.x
+          playerData.transitionY = this.player.y
+          fadeToScene(this, "dragonBoss");
+          return;
         }
-        this.enemy.hp++;
-        this._updateEnemyHpBar(this.enemy.hp)
-    }.bind(this), 200);
+        this.enemy.hp += 1;
+        this._updateEnemyHpBar(this.enemy.hp);
+      }
+    });
   }
 
 
@@ -110,7 +162,10 @@ export default class boss_transition extends Phaser.Scene {
       }
     }
 
+    this.updateWalkingSfx(this.onGround && (this.cursors.left.isDown || this.cursors.right.isDown));
+
     if (this.cursors.up.isDown && (this.onGround || (time - this.lastGroundedTime < 100))) {
+      this.sound.play("jump", { volume: 0.125, seek: 0.425 });
       this.player.setVelocityY(-300);
       this.lastGroundedTime = 0;
       this.isJumping = true;
@@ -159,14 +214,11 @@ export default class boss_transition extends Phaser.Scene {
     const bw = 120, bh = 8, bx = 100, by = 6;
     this.enemyHpBarBg   = this.add.graphics().setScrollFactor(0).setDepth(1000);
     this.enemyHpBarFill = this.add.graphics().setScrollFactor(0).setDepth(1000);
-    this.enemyHpLabel   = this.add.text(160, 8, "SNAKE BOSS", { fontSize: "8px", color: "#ffffff" })
-      .setOrigin(0.5, 0).setScrollFactor(0).setDepth(1001);
-
     // Draw initial full bar
     this.enemyHpBarBg.lineStyle(1, 0xff0000);
     this.enemyHpBarBg.strokeRect(bx, by, bw, bh);
     this.enemyHpBarFill.fillStyle(0xdd0000);
-    this.enemyHpBarFill.fillRect(bx + 1, by + 1, bw - 2, bh - 2);
+    this.enemyHpBarFill.fillRect(bx + 1, by + 1.5, bw - 2.5, bh - 2.5);
   }
 
   _updateEnemyHpBar(currentHp) {
@@ -182,7 +234,7 @@ export default class boss_transition extends Phaser.Scene {
     this.enemyHpBarBg.strokeRect(bx, by, bw, bh);
 
     this.enemyHpBarFill.fillStyle(0xdd0000);
-    this.enemyHpBarFill.fillRect(bx + 1, by + 1, (bw - 2) * pct, bh - 2);
+    this.enemyHpBarFill.fillRect(bx + 1, by + 1.5, (bw - 2.5) * pct, bh - 2.5);
   }
 
 

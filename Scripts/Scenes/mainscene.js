@@ -8,6 +8,7 @@ import preload_init from "./Functions/preload_init.js";
 import performAttack from "./Functions/performAttack.js";
 import { customEmitter } from "./events.js";
 import { playerData } from "./playerdata.js";
+import { fadeToScene } from "./Functions/sceneFade.js";
 export default class MainScene extends Phaser.Scene {
   constructor() {
     super({ key: "MainScene" });
@@ -32,13 +33,20 @@ export default class MainScene extends Phaser.Scene {
     const map = this.make.tilemap({
       key: "map"
     })
-
+    
     this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.S).on("down", () => {
-    this.scene.start("LevelTwo");
+      playerData.didBeatL1 = true;
+      if (this.walkingSfx && this.walkingSfx.isPlaying) {
+        this.walkingSfx.stop();
+      }
+      fadeToScene(this, "overworld");
     });
-
+    
     create_init.call(this, map);
     activate_anims.call(this);
+    this.add.tileSprite(0,0,map.widthInPixels,map.heightInPixels,"main_bg").setOrigin(0,0).setDepth(-7)
+    
+    this.cameras.main.startFollow(this.player, false, 1, 1);//ALWAYS THIS SETTING
      // --- Post-Update Sync (Fixes Lag/Blur) ---
     // Sync runs AFTER physics, ensuring visual matches actual body position for this frame
     this.events.on('postupdate', () => {
@@ -76,9 +84,11 @@ export default class MainScene extends Phaser.Scene {
     // Interaction Logic
     this.physics.add.overlap(this.player, this.gate, () => {
         if (Phaser.Input.Keyboard.JustDown(this.interactKey)) {
-            // Stop music before switching if needed
-            this.sound.stopAll();
-            this.scene.start("LevelTwo");
+            if (this.walkingSfx && this.walkingSfx.isPlaying) {
+              this.walkingSfx.stop();
+            }
+            playerData.didBeatL1 = true;
+            fadeToScene(this, "overworld");
         }
     });
     
@@ -132,6 +142,10 @@ export default class MainScene extends Phaser.Scene {
     this.physics.add.overlap(this.player, this.chests, (player, chest) => {
       this.handleChestOverlap(player, chest);
     });
+    const chest2 = this.chests.create(1266, 312, "chests", 0); // Frame 0 = closed
+    chest2.body.setAllowGravity(false); // assuming chest stays in place
+    // chest.setImmovable(true); 
+
 
     //Skip Key for debug
     this.skipKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.G);
@@ -142,10 +156,14 @@ export default class MainScene extends Phaser.Scene {
   update(time, delta) {
 
     if (this.playerIsDead) {
+      this.updateWalkingSfx(false);
       this.resetEnemies();
       return;
     }; // prevent movement while dead
-    if (this.isKnockedBack) return; // prevent movement while applying knockback force
+    if (this.isKnockedBack) {
+      this.updateWalkingSfx(false);
+      return;
+    } // prevent movement while applying knockback force
 
     if (this.projectileOnCooldown) {
       const elapsed = time - this.projectileCooldownStart;
@@ -182,16 +200,31 @@ export default class MainScene extends Phaser.Scene {
       this.scene.pause()
       this.scene.launch("Pause", { returnScene: this.scene.key });
     }
+    
+    if (Phaser.Input.Keyboard.JustDown(this.selectAbilityKey)) {
+      if (!playerData.isAbleToUseEMenu){
+          return;
+        }
+         if (this.walkingSfx && this.walkingSfx.isPlaying) {
+           this.walkingSfx.stop();
+         }
+         this.scene.pause()
+         this.scene.launch("playerSelectAbility", { returnScene: this.scene.key });
+         return;
+       }
 
     // Ranged Attack Input
     if (Phaser.Input.Keyboard.JustDown(this.fireKey) && !this.projectileOnCooldown && playerData.didAttack) {
       if (time > this.lastFiredTime + this.projectileCooldown) { // 3s cooldown
-        this.waveProj(time);
+        this.selectAbility(time);
         customEmitter.emit("LPFIRED")
       }
     }
 
-    if (this.isAttacking) return;
+    if (this.isAttacking) {
+      this.updateWalkingSfx(false);
+      return;
+    }
 
     // Left/Right Movement
 
@@ -218,9 +251,12 @@ export default class MainScene extends Phaser.Scene {
       }
     }
 
+    this.updateWalkingSfx(this.onGround && (this.cursors.left.isDown || this.cursors.right.isDown));
+
     // Jumping
     if (this.cursors.up.isDown && (this.onGround || (time - this.lastGroundedTime < 100))) {
       customEmitter.emit("JUMPED")
+      this.sound.play("jump", { volume: 0.125, seek: 0.425 });
       this.player.setVelocityY(-300);
       this.lastGroundedTime = 0;
       this.isJumping = true;
@@ -241,8 +277,11 @@ export default class MainScene extends Phaser.Scene {
       playerData.didJump = true;
       playerData.didAttack = true;
       playerData.didMove = true;
-      this.music.stop()
-      this.scene.start("LevelTwo");
+      if (this.walkingSfx && this.walkingSfx.isPlaying) {
+        this.walkingSfx.stop();
+      }
+      playerData.didBeatL1 = true;
+      fadeToScene(this, "overworld");
     }
 
   }
@@ -294,14 +333,15 @@ export default class MainScene extends Phaser.Scene {
   }
 
   handleChestOverlap(player, chest) {
-
+    
     chest.setFrame(1);
     chest.disableBody();
-    const text = this.add.text(chest.x, chest.y - 20, "Special Unlocked! Press F to Use", { fontSize: "12px", fill: "#fff" });
+    // const text = this.add.text(chest.x, chest.y - 20, "Special Unlocked! Press F to Use", { fontSize: "12px", fill: "#fff" });
+    this.scene.pause();
+    this.scene.launch("pickAbility", { returnScene: this.scene.key });
     this.projectileCooldownStart = 0; 
     // Fade out text and destroy chest after delay
     this.time.delayedCall(2000, () => {
-      text.destroy();
       chest.destroy();
     });
   }
@@ -355,7 +395,7 @@ export default class MainScene extends Phaser.Scene {
     this.lastFiredTime = 0;
     this.isAttacking = false;
   }
-  projectileEnemyCollisionHandle(projectile,enemy,dmg){
+  projectileEnemyCollisionHandle(projectile,enemy,dmg,poison){
     console.log(projectile.body)
         if (enemy.hitCooldown) {
             return;
@@ -364,8 +404,12 @@ export default class MainScene extends Phaser.Scene {
         enemy.hp -= dmg;
         console.log("hp")
           if (enemy.hp <= 0) {
+        playerData.stats.enemyKills += 1;
         enemy.destroy();
       } else {
+        if (poison){
+          return;
+        }
         // Flash white
         enemy.setTintFill(0xffffff);
 

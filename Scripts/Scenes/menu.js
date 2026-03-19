@@ -1,4 +1,6 @@
 import * as Phaser from 'phaser';
+import { playerData } from './playerdata.js';
+import { setupSceneFade, fadeToScene } from './Functions/sceneFade.js';
 
 export default class Menu extends Phaser.Scene {
   constructor() {
@@ -13,6 +15,7 @@ export default class Menu extends Phaser.Scene {
     this.load.image("play_yellow", "public/assets/play_unhighlighted.png")
   }
   create() {
+    setupSceneFade(this, { pauseGameplay: false, duration: 350 });
     const { width, height } = this.scale;
 
     // Title text
@@ -35,7 +38,10 @@ export default class Menu extends Phaser.Scene {
     });
 
     playButton.on('pointerdown', () => {
-      this.scene.start('arcade_exterior');
+      playButton.disableInteractive();
+      optionsbutton.disableInteractive();
+      playerData.resetRunStats();
+      fadeToScene(this, 'CarSfIntro', undefined, 350);
     });
     // Hover effects
     optionsbutton.on('pointerover', () => {
