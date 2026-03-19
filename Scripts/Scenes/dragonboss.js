@@ -341,8 +341,12 @@ export default class DragonBossScene extends Phaser.Scene {
         if (!playerData.isAbleToUseEMenu){
           return;
         }
+         if (this.walkingSfx && this.walkingSfx.isPlaying) {
+           this.walkingSfx.stop();
+         }
          this.scene.pause()
          this.scene.launch("playerSelectAbility", { returnScene: this.scene.key });
+         return;
        }
     if (this.isAttacking) {
       this.updateWalkingSfx(false);

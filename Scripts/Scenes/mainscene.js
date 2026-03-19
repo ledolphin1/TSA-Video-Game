@@ -205,8 +205,12 @@ export default class MainScene extends Phaser.Scene {
       if (!playerData.isAbleToUseEMenu){
           return;
         }
+         if (this.walkingSfx && this.walkingSfx.isPlaying) {
+           this.walkingSfx.stop();
+         }
          this.scene.pause()
          this.scene.launch("playerSelectAbility", { returnScene: this.scene.key });
+         return;
        }
 
     // Ranged Attack Input
