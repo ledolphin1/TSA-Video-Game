@@ -107,11 +107,13 @@ export default class arcade_exterior extends Phaser.Scene {
             this.player.setCollideWorldBounds(true);
             this.cameras.main.setRoundPixels(true);
             
-            this.dialogue = this.add.bitmapText(this.playerVisual.x, 100, "game_font", "I can't believe it's finally closing", 10).setOrigin(0.5, 0)
-            this.dialogue2 = this.add.bitmapText(this.playerVisual.x, 110, "game_font", "I'd like to play some games one last time!", 10).setOrigin(0.5, 0)
-            this.time.delayedCall(5000,function (){
+            this.dialogue = this.add.bitmapText(this.playerVisual.x, 90, "game_font", "\"I can't believe it's", 10).setOrigin(0.5, 0)
+            this.dialogue2 = this.add.bitmapText(this.playerVisual.x, 100, "game_font", "finally closing. I'd like to ", 10).setOrigin(0.5, 0)
+            this.dialogue3 = this.add.bitmapText(this.playerVisual.x, 110, "game_font", "play some games one last time!\"", 10).setOrigin(0.5, 0)
+            this.time.delayedCall(7000,function (){
                     this.dialogue.destroy();
                     this.dialogue2.destroy();
+                    this.dialogue3.destroy();
                 }.bind(this))
             
             // --- Controls ---
@@ -200,6 +202,7 @@ export default class arcade_exterior extends Phaser.Scene {
         }
         this.dialogue.x = this.playerVisual.x;
         this.dialogue2.x = this.playerVisual.x;
+        this.dialogue3.x = this.playerVisual.x;
         if (this.player.x >= 226 && this.player.x <= 245) {
             if (Phaser.Input.Keyboard.JustDown(this.interactKey)) {
         

@@ -107,8 +107,8 @@ export default class arcade_exterior_outro extends Phaser.Scene {
             this.player.setCollideWorldBounds(true);
             this.cameras.main.setRoundPixels(true);
             
-            this.dialogue = this.add.bitmapText(this.playerVisual.x, 100, "game_font", "\"Let me out of here!\"", 10).setOrigin(0.5, 0)
-            this.dialogue2 = this.add.bitmapText(this.playerVisual.x, 110, "game_font", "\"RUN!\"", 10).setOrigin(0.5, 0)
+            this.dialogue = this.add.bitmapText(this.playerVisual.x, 100, "game_font", "", 10).setOrigin(0.5, 0)
+            this.dialogue2 = this.add.bitmapText(this.playerVisual.x, 110, "game_font", "\"Let me out of here!\"", 10).setOrigin(0.5, 0)
             this.time.delayedCall(5000,function (){
                     this.dialogue.destroy();
                     this.dialogue2.destroy();
