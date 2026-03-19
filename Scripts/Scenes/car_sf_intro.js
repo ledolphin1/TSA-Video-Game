@@ -9,11 +9,32 @@ export default class CarSfIntro extends Phaser.Scene {
   preload() {
     this.load.image("car_sf_intro", "public/assets/car_sf_intro.png");
     this.load.bitmapFont("arcade_font", "public/assets/PressStart.png", "public/assets/PressStart.xml");
+    this.load.audio("scary", "public/assets/audio/scary.mp3");
   }
 
   create() {
     this._isExiting = false;
     const { width, height } = this.scale;
+
+    const sharedBgMusic = this.game.__sharedBackgroundMusic;
+    if (sharedBgMusic && sharedBgMusic.isPlaying) {
+      sharedBgMusic.stop();
+    }
+
+    let music = this.game.__sharedScaryMusic;
+    if (!music || music.key !== "scary" || music.manager !== this.sound) {
+      music = this.sound.add("scary", {
+        loop: true,
+        volume: 0.3
+      });
+      this.game.__sharedScaryMusic = music;
+    }
+    music.loop = true;
+    music.volume = 0.3;
+    if (!music.isPlaying) {
+      music.play();
+    }
+    this.music = music;
 
     this.add
       .image(0, 0, "car_sf_intro")

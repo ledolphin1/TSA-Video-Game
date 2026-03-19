@@ -31,7 +31,7 @@ export default class arcade_exterior extends Phaser.Scene {
         })
          this.load.video("begin", "public/assets/Arcade_Exterior_begin.mp4", true)
          this.load.video("loop", "public/assets/Arcade_Exterior_loop.mp4", true)
-        this.load.audio("background", "public/assets/audio/epicbackground.mp3");
+        this.load.audio("scary", "public/assets/audio/scary.mp3");
         this.load.audio("walking", "public/assets/audio/walking2.mp3");
 
         this.load.spritesheet("arrow", "public/assets/arrow.png", {
@@ -132,13 +132,18 @@ export default class arcade_exterior extends Phaser.Scene {
         this.coordText.setDepth(1000);
         
     
-        let music = this.game.__sharedBackgroundMusic;
-        if (!music || music.key !== "background" || music.manager !== this.sound) {
-            music = this.sound.add("background", {
+        const sharedBgMusic = this.game.__sharedBackgroundMusic;
+        if (sharedBgMusic && sharedBgMusic.isPlaying) {
+            sharedBgMusic.stop();
+        }
+
+        let music = this.game.__sharedScaryMusic;
+        if (!music || music.key !== "scary" || music.manager !== this.sound) {
+            music = this.sound.add("scary", {
                 loop: true,
                 volume: 0.3
             });
-            this.game.__sharedBackgroundMusic = music;
+            this.game.__sharedScaryMusic = music;
         }
         music.loop = true;
         music.volume = 0.3;

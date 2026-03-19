@@ -106,6 +106,11 @@ const create_init = function(map,debug){
     this.coordText.setOrigin(1, 1);
     this.coordText.setScrollFactor(0);
     this.coordText.setDepth(1000);
+
+    const sharedScaryMusic = this.game.__sharedScaryMusic;
+    if (sharedScaryMusic && sharedScaryMusic.isPlaying) {
+      sharedScaryMusic.stop();
+    }
     
     //sidney asked for music//!
     if (this.scene.key !== "bt1") {
