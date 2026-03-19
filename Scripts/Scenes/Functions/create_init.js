@@ -40,12 +40,23 @@ const create_init = function(map,debug){
     
     //Cooldown Bar//!
     this.cooldownRadius = 8;
+    this.cooldownRadius = 8;
     this.cooldownX = 30;
     this.cooldownY = 50;
     this.cooldownGraphic = this.add.graphics();
     this.cooldownGraphic.setScrollFactor(0);
     this.cooldownGraphic.setDepth(1000);
     this.cooldownGraphic.setVisible(false);
+
+    this.cooldown2Y = 70;
+    this.cooldown2Graphic = this.add.graphics();
+    this.cooldown2Graphic.setScrollFactor(0);
+    this.cooldown2Graphic.setDepth(1000);
+    this.cooldown2Graphic.setVisible(false);
+
+    this.secondaryOnCooldown = false;
+    this.secondaryCooldownStart = 0;
+    this.lastSecondaryFiredTime = 0;
     
     //Draw Health Bar//!
     this.drawHealthBar();
@@ -93,8 +104,8 @@ const create_init = function(map,debug){
     this.fireKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.F);
     this.menuKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.ESC)
     this.interactKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.Z);
-    this.skipKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.S);
-    this.selectAbilityKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.E);
+    this.skipKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.E);
+    this.abilityTwoKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.G);
 
 
     //Coords for debug//!

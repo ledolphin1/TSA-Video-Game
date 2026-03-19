@@ -34,7 +34,7 @@ export default class MainScene extends Phaser.Scene {
       key: "map"
     })
 
-    this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.S).on("down", () => {
+    this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.E).on("down", () => {
       playerData.didBeatL1 = true;
       if (this.walkingSfx && this.walkingSfx.isPlaying) {
         this.walkingSfx.stop();
@@ -150,13 +150,13 @@ export default class MainScene extends Phaser.Scene {
     this.physics.add.overlap(this.player, this.chests, (player, chest) => {
       this.handleChestOverlap(player, chest);
     });
-    const chest2 = this.chests.create(1266, 312, "chests", 0); // Frame 0 = closed
+    const chest2 = this.chests.create(1250, 360, "chests", 0); // Frame 0 = closed
     chest2.body.setAllowGravity(false); // assuming chest stays in place
     // chest.setImmovable(true); 
 
 
     //Skip Key for debug
-    this.skipKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.G);
+    this.skipKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.E);
 
 
   }
@@ -176,11 +176,17 @@ export default class MainScene extends Phaser.Scene {
     if (this.projectileOnCooldown) {
       const elapsed = time - this.projectileCooldownStart;
       const progress = Phaser.Math.Clamp(elapsed / this.projectileCooldown, 0, 1);
-
-      this.drawCooldown(progress);
-
+      this.drawCooldown(progress, 1);
       if (progress >= 1) {
         this.projectileOnCooldown = false;
+      }
+    }
+    if (this.secondaryOnCooldown) {
+      const elapsed = time - this.secondaryCooldownStart;
+      const progress = Phaser.Math.Clamp(elapsed / this.projectileCooldown, 0, 1);
+      this.drawCooldown(progress, 2);
+      if (progress >= 1) {
+        this.secondaryOnCooldown = false;
       }
     }
 
@@ -209,22 +215,21 @@ export default class MainScene extends Phaser.Scene {
       this.scene.launch("Pause", { returnScene: this.scene.key });
     }
 
-    if (Phaser.Input.Keyboard.JustDown(this.selectAbilityKey)) {
-      if (!playerData.isAbleToUseEMenu) {
-        return;
+    const primaryWep = playerData.weapons.length > 1 ? playerData.weapons[1] : playerData.weapons[0];
+    const secondaryWep = playerData.weapons.length > 2 ? playerData.weapons[2] : null;
+
+    // Secondary Attack Input (G)
+    if (Phaser.Input.Keyboard.JustDown(this.abilityTwoKey) && !this.secondaryOnCooldown && playerData.didAttack) {
+      if (time > this.lastSecondaryFiredTime + this.projectileCooldown && secondaryWep) {
+        this.selectAbility(time, secondaryWep, 2);
+        customEmitter.emit("LPFIRED")
       }
-      if (this.walkingSfx && this.walkingSfx.isPlaying) {
-        this.walkingSfx.stop();
-      }
-      this.scene.pause()
-      this.scene.launch("playerSelectAbility", { returnScene: this.scene.key });
-      return;
     }
 
-    // Ranged Attack Input
+    // Ranged Attack Input (F)
     if (Phaser.Input.Keyboard.JustDown(this.fireKey) && !this.projectileOnCooldown && playerData.didAttack) {
       if (time > this.lastFiredTime + this.projectileCooldown) { // 3s cooldown
-        this.selectAbility(time);
+        this.selectAbility(time, primaryWep, 1);
         customEmitter.emit("LPFIRED")
       }
     }
@@ -349,9 +354,7 @@ export default class MainScene extends Phaser.Scene {
     this.scene.launch("pickAbility", { returnScene: this.scene.key });
     this.projectileCooldownStart = 0;
     // Fade out text and destroy chest after delay
-    this.time.delayedCall(2000, () => {
-      chest.destroy();
-    });
+    chest.destroy();
   }
 
 

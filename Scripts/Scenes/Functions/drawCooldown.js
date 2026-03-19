@@ -1,29 +1,30 @@
 import * as Phaser from "phaser";
- const drawCooldown = function(progress) {
-    this.cooldownGraphic.clear();
+ const drawCooldown = function(progress, slot = 1) {
+    let g = slot === 1 ? this.cooldownGraphic : (this.cooldown2Graphic || this.cooldownGraphic);
+    let y = slot === 1 ? this.cooldownY : (this.cooldown2Y || this.cooldownY);
+
+    g.clear();
 
     if (progress >= 1) {
-      this.cooldownGraphic.setVisible(false);
+      g.setVisible(false);
       return;
     }
 
-    this.cooldownGraphic.setVisible(true);
+    g.setVisible(true);
+    g.fillStyle(0x00ffff, 1);
+    g.beginPath();
+    g.moveTo(this.cooldownX, y);
 
-    this.cooldownGraphic.fillStyle(0x00ffff, 1);
-
-    this.cooldownGraphic.beginPath();
-    this.cooldownGraphic.moveTo(this.cooldownX, this.cooldownY);
-
-    this.cooldownGraphic.arc(
+    g.arc(
       this.cooldownX,
-      this.cooldownY,
+      y,
       this.cooldownRadius,
       Phaser.Math.DegToRad(-90),
       Phaser.Math.DegToRad(-90 + 360 * (1 - progress)),
       false
     );
 
-    this.cooldownGraphic.closePath();
-    this.cooldownGraphic.fillPath();
+    g.closePath();
+    g.fillPath();
   }
   export default drawCooldown

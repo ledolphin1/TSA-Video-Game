@@ -50,7 +50,7 @@ export default class LevelTwo extends Phaser.Scene {
   create() {
     const map = this.make.tilemap({ key: "leveltwo_map" });
 
-    this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.S).on("down", () => {
+    this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.E).on("down", () => {
       if (this.walkingSfx && this.walkingSfx.isPlaying) {
         this.walkingSfx.stop();
       }
@@ -137,8 +137,8 @@ export default class LevelTwo extends Phaser.Scene {
 
     // ── Gateway ─────────────────────────────────────────────────────────────
     // tile, column -> 55, 16
-    const GATEWAY_X = 928;
-    const GATEWAY_Y = 256;
+    const GATEWAY_X = 1110;
+    const GATEWAY_Y = 120;
 
     this.gatewaySprite = this.add.image(GATEWAY_X, GATEWAY_Y, "gate");
     this.gatewaySprite.setDepth(-5);
@@ -218,12 +218,18 @@ export default class LevelTwo extends Phaser.Scene {
       this.updateWalkingSfx(false);
       return;
     }
-    // Cooldown arc
+    // Cooldown arcs
     if (this.projectileOnCooldown) {
       const elapsed = time - this.projectileCooldownStart;
       const progress = Phaser.Math.Clamp(elapsed / this.projectileCooldown, 0, 1);
-      this.drawCooldown(progress);
+      this.drawCooldown(progress, 1);
       if (progress >= 1) this.projectileOnCooldown = false;
+    }
+    if (this.secondaryOnCooldown) {
+      const elapsed = time - this.secondaryCooldownStart;
+      const progress = Phaser.Math.Clamp(elapsed / this.projectileCooldown, 0, 1);
+      this.drawCooldown(progress, 2);
+      if (progress >= 1) this.secondaryOnCooldown = false;
     }
 
     // Update all viruses
@@ -254,20 +260,17 @@ export default class LevelTwo extends Phaser.Scene {
       this.scene.launch("Pause", { returnScene: this.scene.key });
     }
 
-    if (Phaser.Input.Keyboard.JustDown(this.selectAbilityKey)) {
-      if (!playerData.isAbleToUseEMenu) {
-        return;
+    const primaryWep = playerData.weapons.length > 1 ? playerData.weapons[1] : playerData.weapons[0];
+    const secondaryWep = playerData.weapons.length > 2 ? playerData.weapons[2] : null;
+
+    if (Phaser.Input.Keyboard.JustDown(this.abilityTwoKey) && !this.secondaryOnCooldown) {
+      if (time > this.lastSecondaryFiredTime + 3000 && secondaryWep) {
+        this.selectAbility(time, secondaryWep, 2);
       }
-      if (this.walkingSfx && this.walkingSfx.isPlaying) {
-        this.walkingSfx.stop();
-      }
-      this.scene.pause()
-      this.scene.launch("playerSelectAbility", { returnScene: this.scene.key });
-      return;
     }
     if (Phaser.Input.Keyboard.JustDown(this.fireKey) && !this.projectileOnCooldown) {
       if (time > this.lastFiredTime + 3000) {
-        this.selectAbility(time);
+        this.selectAbility(time, primaryWep, 1);
       }
     }
 
@@ -367,6 +370,8 @@ export default class LevelTwo extends Phaser.Scene {
     const dy = this.player.y - enemy.y;
     const dist = Math.sqrt(dx * dx + dy * dy);
 
+
+
     // ── Attack threshold: close enough to swing ───────────────────────────
     // "right in front" = within ~18px horizontally, similar Y level
     const ATTACK_RANGE = 18;
@@ -391,7 +396,19 @@ export default class LevelTwo extends Phaser.Scene {
     const spikeTile = this._spikesLayer.getTileAtWorldXY(checkX, checkY);
     const dangerAhead = spikeTile && spikeTile.index !== -1;
 
-    if (!dangerAhead) {
+    let cliffAhead = false;
+    if (enemy.body.blocked.down) {
+      const xOffset = movingRight ? enemy.body.width + 5 : -5;
+      const checkCliffX = enemy.body.x + xOffset;
+      const checkCliffY = enemy.body.bottom + 2;
+
+      const tile = this.ground.getTileAtWorldXY(checkCliffX, checkCliffY);
+      if (!tile || tile.index === -1) {
+        cliffAhead = true;
+      }
+    }
+
+    if (!dangerAhead && !cliffAhead) {
       if (dx > 0) {
         enemy.setVelocityX(SPEED);
         enemy.flipX = false;
@@ -404,7 +421,7 @@ export default class LevelTwo extends Phaser.Scene {
     }
 
     // Wall bounce — only if not near spikes
-    if (!dangerAhead) {
+    if (!dangerAhead && !cliffAhead) {
       if (enemy.body.blocked.right) enemy.setVelocityX(-SPEED);
       if (enemy.body.blocked.left) enemy.setVelocityX(SPEED);
     }

@@ -59,7 +59,7 @@ export default class BossScene extends Phaser.Scene {
     const map = this.make.tilemap({ key: "boss_level" });
     create_init.call(this, map,1) 
     
-    this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.S).on("down", () => {
+    this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.E).on("down", () => {
       console.log(this.enemy.x,"enemyx")
       console.log(this.enemy.y,"enemyy")
       playerData.transitionX= this.player.x;
@@ -123,9 +123,17 @@ export default class BossScene extends Phaser.Scene {
     if (this.projectileOnCooldown) {
       const elapsed = time - this.projectileCooldownStart;
       const progress = Phaser.Math.Clamp(elapsed / this.projectileCooldown, 0, 1);
-      this.drawCooldown(progress);
+      this.drawCooldown(progress, 1);
       if (progress >= 1) {
         this.projectileOnCooldown = false;
+      }
+    }
+    if (this.secondaryOnCooldown) {
+      const elapsed = time - this.secondaryCooldownStart;
+      const progress = Phaser.Math.Clamp(elapsed / this.projectileCooldown, 0, 1);
+      this.drawCooldown(progress, 2);
+      if (progress >= 1) {
+        this.secondaryOnCooldown = false;
       }
     }
 
@@ -157,17 +165,14 @@ export default class BossScene extends Phaser.Scene {
       this.scene.launch("Pause", { returnScene: this.scene.key });
     }
     
-    if (Phaser.Input.Keyboard.JustDown(this.selectAbilityKey)) {
-      if (!playerData.isAbleToUseEMenu){
-          return;
-        }
-         if (this.walkingSfx && this.walkingSfx.isPlaying) {
-           this.walkingSfx.stop();
-         }
-         this.scene.pause()
-         this.scene.launch("playerSelectAbility", { returnScene: this.scene.key });
-         return;
-       }
+    const primaryWep = playerData.weapons.length > 1 ? playerData.weapons[1] : playerData.weapons[0];
+    const secondaryWep = playerData.weapons.length > 2 ? playerData.weapons[2] : null;
+
+    if (Phaser.Input.Keyboard.JustDown(this.abilityTwoKey) && !this.secondaryOnCooldown) {
+      if (secondaryWep) {
+        this.selectAbility(time, secondaryWep, 2);
+      }
+    }
     if (Phaser.Input.Keyboard.JustDown(this.killKey)) {
       console.log("i am pressed bro")
       console.log(this.enemy.hp)
@@ -184,7 +189,7 @@ export default class BossScene extends Phaser.Scene {
 
     if (Phaser.Input.Keyboard.JustDown(this.fireKey)) {
       if (!this.projectileOnCooldown) {
-        this.selectAbility(time);
+        this.selectAbility(time, primaryWep, 1);
       }
     }
 
