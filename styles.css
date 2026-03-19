@@ -15,10 +15,10 @@ h1{
     position: relative;
     display: flex;
     align-items: center;
-    margin: 10px;
-    border: 7px;
+    /* margin: 10px; */
+    /* border: 7px;
     border-style: solid;
-    border-color: springgreen;
+    border-color: springgreen; */
 }
 canvas {
   image-rendering: pixelated;
