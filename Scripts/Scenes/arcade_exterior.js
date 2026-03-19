@@ -122,14 +122,7 @@ export default class arcade_exterior extends Phaser.Scene {
             this.interactKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.Z)
             
             //cords for debug
-        this.coordText = this.add.text(this.cameras.main.width - 10, this.cameras.main.height - 10, "X: 0 Y: 0", {
-            fontFamily: "./code_fonts/melodica.regular.otf",
-            fontSize: "16px",
-            fill: "#ffffff"
-        });
-        this.coordText.setOrigin(1, 1);
-        this.coordText.setScrollFactor(0);
-        this.coordText.setDepth(1000);
+
         
     
         const stopSharedIfPlaying = (musicRef) => {
@@ -270,6 +263,6 @@ export default class arcade_exterior extends Phaser.Scene {
 
 
         // Update Coordinate Display
-        this.coordText.setText(`X: ${Math.round(this.player.x)} Y: ${Math.round(this.player.y)}`);
+
     }
 }

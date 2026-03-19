@@ -50,16 +50,10 @@ export default class LevelTwo extends Phaser.Scene {
   create() {
     const map = this.make.tilemap({ key: "leveltwo_map" });
 
-    this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.S).on("down", () => {
-      if (this.walkingSfx && this.walkingSfx.isPlaying) {
-        this.walkingSfx.stop();
-      }
-      playerData.didBeatL2 = true;
-      fadeToScene(this, "overworld");
-    });
+
     // ── Base setup (player, camera, ground, controls, HUD) ──────────────────
     create_init.call(this, map);
-        this.add.tileSprite(0,0,map.widthInPixels,map.heightInPixels,"main_bg").setOrigin(0,0).setDepth(-7)
+    this.add.tileSprite(0, 0, map.widthInPixels, map.heightInPixels, "main_bg").setOrigin(0, 0).setDepth(-7)
     this.cameras.main.startFollow(this.player, false, 1, 1);//ALWAYS THIS SETTING
     // ── Extra animations ────────────────────────────────────────────────────
     this.anims.create({
@@ -85,7 +79,7 @@ export default class LevelTwo extends Phaser.Scene {
 
     // ── Spikes layer ────────────────────────────────────────────────────────
     const spikeTileset = map.addTilesetImage("spikes", "spikes");
-    const spikesLayer  = map.createLayer("spikes", spikeTileset);
+    const spikesLayer = map.createLayer("spikes", spikeTileset);
     spikesLayer.setCollisionByExclusion([-1]);
     this.physics.add.collider(this.player, spikesLayer, this._handleSpikeOverlap, null, this);
 
@@ -96,12 +90,10 @@ export default class LevelTwo extends Phaser.Scene {
 
     // Spawn viruses across the map
     const spawnPoints = [
-      { x: 176, y: 240 }, // near start
-      { x: 750, y: 240},
-      { x: 1000, y: 240 },// near end
-      { x: 384, y: 80 },   // upper middle
-      { x: 704, y: 80 }, // upper right
-      { x: 1072, y: 80 }
+      { x: 340, y: 260 },
+      { x: 554, y: 150 },
+      { x: 1000, y: 264 },
+      { x: 940, y: 180 },
     ];
     spawnPoints.forEach(pt => this._spawnVirus(pt.x, pt.y));
 
@@ -139,14 +131,14 @@ export default class LevelTwo extends Phaser.Scene {
 
     // ── Gateway ─────────────────────────────────────────────────────────────
     // tile, column -> 55, 16
-    const GATEWAY_X = 928;
-    const GATEWAY_Y = 256;
+    const GATEWAY_X = 1110;
+    const GATEWAY_Y = 120;
 
     this.gatewaySprite = this.add.image(GATEWAY_X, GATEWAY_Y, "gate");
     this.gatewaySprite.setDepth(-5);
 
     // Physics zone for gateway interaction
-    this.gatewayZone = this.add.zone(GATEWAY_X, GATEWAY_Y, 28, 28);
+    this.gatewayZone = this.add.zone(GATEWAY_X, GATEWAY_Y, 1110, 120);
     this.physics.world.enable(this.gatewayZone);
     this.gatewayZone.body.allowGravity = false;
     this.gatewayZone.body.immovable = true;
@@ -162,10 +154,10 @@ export default class LevelTwo extends Phaser.Scene {
     this.interactKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.Z);
 
     // ── Reposition player spawn to map left ──────────────────────────────────
-    this.player.x         = 50;
-    this.player.y         = 240;
-    this.playerVisual.x   = 50;
-    this.playerVisual.y   = 240;
+    this.player.x = 50;
+    this.player.y = 240;
+    this.playerVisual.x = 50;
+    this.playerVisual.y = 240;
 
     // ── Enemy spawn tracking (for reset on death) ────────────────────────────
     this._enemySpawnPoints = spawnPoints;
@@ -182,7 +174,7 @@ export default class LevelTwo extends Phaser.Scene {
     if (this.playerIsDead) return;
     this.playerIsDead = true;
     playerData.stats.deaths += 1;
-    this.isJumping    = false;
+    this.isJumping = false;
 
     this.player.setVelocity(0, 0);
     this.player.body.enable = false;
@@ -190,25 +182,25 @@ export default class LevelTwo extends Phaser.Scene {
 
     setTimeout(() => { this.respawn(); }, 250);
   }
-respawn() {
-  this.health       = this.maxHealth;
-  this.playerIsDead = false;
-  this.isInvincible = false;
-  this.isAttacking  = false;
-  this.isKnockedBack = false;
+  respawn() {
+    this.health = this.maxHealth;
+    this.playerIsDead = false;
+    this.isInvincible = false;
+    this.isAttacking = false;
+    this.isKnockedBack = false;
 
-  this.player.body.enable = true;
-  this.player.body.reset(50,240);   // reset snaps position AND clears velocity
-  this.player.setVelocity(0, 0);
+    this.player.body.enable = true;
+    this.player.body.reset(50, 240);   // reset snaps position AND clears velocity
+    this.player.setVelocity(0, 0);
 
-  this.playerVisual.x = 50;
-  this.playerVisual.y = 240;
-  this.playerVisual.clearTint();
-  this.playerVisual.setTexture("player_still");
-  this.playerVisual.setAlpha(1);
+    this.playerVisual.x = 50;
+    this.playerVisual.y = 240;
+    this.playerVisual.clearTint();
+    this.playerVisual.setTexture("player_still");
+    this.playerVisual.setAlpha(1);
 
-  this.drawHealthBar();
-}
+    this.drawHealthBar();
+  }
 
   // ──────────────────────────────────── UPDATE ──────────────────────────────
   update(time, delta) {
@@ -220,18 +212,24 @@ respawn() {
       this.updateWalkingSfx(false);
       return;
     }
-    // Cooldown arc
+    // Cooldown arcs
     if (this.projectileOnCooldown) {
-      const elapsed  = time - this.projectileCooldownStart;
+      const elapsed = time - this.projectileCooldownStart;
       const progress = Phaser.Math.Clamp(elapsed / this.projectileCooldown, 0, 1);
-      this.drawCooldown(progress);
+      this.drawCooldown(progress, 1);
       if (progress >= 1) this.projectileOnCooldown = false;
+    }
+    if (this.secondaryOnCooldown) {
+      const elapsed = time - this.secondaryCooldownStart;
+      const progress = Phaser.Math.Clamp(elapsed / this.projectileCooldown, 0, 1);
+      this.drawCooldown(progress, 2);
+      if (progress >= 1) this.secondaryOnCooldown = false;
     }
 
     // Update all viruses
     this.enemies.children.iterate(enemy => {
       if (enemy && enemy.active) this._updateVirus(enemy, time);
-      if(enemy.isPoisoned){
+      if (enemy.isPoisoned) {
         enemy.setTintFill(0x00ff00)
       }
     });
@@ -255,21 +253,18 @@ respawn() {
       this.scene.pause();
       this.scene.launch("Pause", { returnScene: this.scene.key });
     }
-    
-    if (Phaser.Input.Keyboard.JustDown(this.selectAbilityKey)) {
-      if (!playerData.isAbleToUseEMenu){
-          return;
-        }
-         if (this.walkingSfx && this.walkingSfx.isPlaying) {
-           this.walkingSfx.stop();
-         }
-         this.scene.pause()
-         this.scene.launch("playerSelectAbility", { returnScene: this.scene.key });
-         return;
-       }
+
+    const primaryWep = playerData.weapons.length > 1 ? playerData.weapons[1] : playerData.weapons[0];
+    const secondaryWep = playerData.weapons.length > 2 ? playerData.weapons[2] : null;
+
+    if (Phaser.Input.Keyboard.JustDown(this.abilityTwoKey) && !this.secondaryOnCooldown) {
+      if (time > this.lastSecondaryFiredTime + 3000 && secondaryWep) {
+        this.selectAbility(time, secondaryWep, 2);
+      }
+    }
     if (Phaser.Input.Keyboard.JustDown(this.fireKey) && !this.projectileOnCooldown) {
       if (time > this.lastFiredTime + 3000) {
-        this.selectAbility(time);
+        this.selectAbility(time, primaryWep, 1);
       }
     }
 
@@ -306,12 +301,11 @@ respawn() {
       this.player.setVelocityY(this.player.body.velocity.y * 0.5);
     }
 
-    // Coord display
-    this.coordText.setText(`X: ${Math.round(this.player.x)} Y: ${Math.round(this.player.y)}`);
+
 
     // ── Gateway proximity check ───────────────────────────────────────────────
-    const gatX  = this.gatewayZone.x;
-    const gatY  = this.gatewayZone.y;
+    const gatX = this.gatewayZone.x;
+    const gatY = this.gatewayZone.y;
     const distX = Math.abs(this.player.x - gatX);
     const distY = Math.abs(this.player.y - gatY);
     const nearGateway = distX < 24 && distY < 24;
@@ -328,15 +322,15 @@ respawn() {
     const enemy = this.enemies.create(x, y, "virusEnemy");
     enemy.setScale(2);        // scale up for visibility at 16px base size
     enemy.hp = 8;             // 4 melee or 2 ranged to kill
-    enemy.isKnockedBack   = false;
-    enemy.hitCooldown     = false;
+    enemy.isKnockedBack = false;
+    enemy.hitCooldown = false;
     enemy.isAttackingPlayer = false;  // true during the 250ms pre-swing pause
-    enemy.hasSwung        = false;    // ensures one swing per approach
-    enemy._swingTimer     = null;
+    enemy.hasSwung = false;    // ensures one swing per approach
+    enemy._swingTimer = null;
 
     // Glitch tint cycling state
     enemy._glitchPhase = 0;
-    enemy._nextGlitch  = Phaser.Math.Between(800, 2400);
+    enemy._nextGlitch = Phaser.Math.Between(800, 2400);
     enemy._glitchAccum = 0;
 
     enemy.play("virus_idle");
@@ -359,7 +353,7 @@ respawn() {
     enemy._glitchAccum += 16;   // ~1 frame at 60fps
     if (enemy._glitchAccum >= enemy._nextGlitch) {
       enemy._glitchAccum = 0;
-      enemy._nextGlitch  = Phaser.Math.Between(3000, 5000);
+      enemy._nextGlitch = Phaser.Math.Between(3000, 5000);
       this._triggerVirusGlitch(enemy);
     }
 
@@ -368,6 +362,8 @@ respawn() {
     const dx = this.player.x - enemy.x;
     const dy = this.player.y - enemy.y;
     const dist = Math.sqrt(dx * dx + dy * dy);
+
+
 
     // ── Attack threshold: close enough to swing ───────────────────────────
     // "right in front" = within ~18px horizontally, similar Y level
@@ -393,7 +389,19 @@ respawn() {
     const spikeTile = this._spikesLayer.getTileAtWorldXY(checkX, checkY);
     const dangerAhead = spikeTile && spikeTile.index !== -1;
 
-    if (!dangerAhead) {
+    let cliffAhead = false;
+    if (enemy.body.blocked.down) {
+      const xOffset = movingRight ? enemy.body.width + 5 : -5;
+      const checkCliffX = enemy.body.x + xOffset;
+      const checkCliffY = enemy.body.bottom + 2;
+
+      const tile = this.ground.getTileAtWorldXY(checkCliffX, checkCliffY);
+      if (!tile || tile.index === -1) {
+        cliffAhead = true;
+      }
+    }
+
+    if (!dangerAhead && !cliffAhead) {
       if (dx > 0) {
         enemy.setVelocityX(SPEED);
         enemy.flipX = false;
@@ -406,12 +414,12 @@ respawn() {
     }
 
     // Wall bounce — only if not near spikes
-    if (!dangerAhead) {
+    if (!dangerAhead && !cliffAhead) {
       if (enemy.body.blocked.right) enemy.setVelocityX(-SPEED);
-      if (enemy.body.blocked.left)  enemy.setVelocityX(SPEED);
+      if (enemy.body.blocked.left) enemy.setVelocityX(SPEED);
     }
   }
-   performAttack() {
+  performAttack() {
     playerData.stats.meleeAttacks += 1;
     this.sound.play("swordslash", { volume: 0.135 });
     this.isJumping = false;//!
@@ -442,7 +450,7 @@ respawn() {
     // Check overlap with enemies
     this.physics.add.overlap(attackHitbox, this.enemies, (hitbox, enemy) => {
       this.playerVisual.play("player_attack", true);
-      this._damageVirus(enemy,this.slashDamage)
+      this._damageVirus(enemy, this.slashDamage)
       // Hitstop effect
       this.physics.world.pause();
       this.anims.pauseAll();
@@ -571,7 +579,7 @@ respawn() {
     const jitterAmt = Phaser.Math.Between(1, 3) * (Math.random() < 0.5 ? 1 : -1);
     enemy.x += jitterAmt;
 
-    this.time.delayedCall(120, ()=> {
+    this.time.delayedCall(120, () => {
       if (enemy.active) {
         enemy.clearTint();
         enemy.x = origX;   // snap back
@@ -595,10 +603,10 @@ respawn() {
   }
 
   // ──────────────────────────────── DAMAGE VIRUS ────────────────────────────
-  projectileEnemyCollisionHandle(projectile,enemy,dmg,poison){
-      this._damageVirus(enemy,dmg,poison)
+  projectileEnemyCollisionHandle(projectile, enemy, dmg, poison) {
+    this._damageVirus(enemy, dmg, poison)
   }
-  _damageVirus(enemy, amount,poison) {
+  _damageVirus(enemy, amount, poison) {
     console.log("virus has been hit")
     if (!enemy.active) return;
     console.log("enemy passed active check")
@@ -617,7 +625,7 @@ respawn() {
         const spark = this.add.rectangle(
           enemy.x + Phaser.Math.Between(-8, 8),
           enemy.y + Phaser.Math.Between(-8, 8),
-          3, 3, [0xff00ff,0x00ffff,0x00ff41,0xffff00][i % 4]
+          3, 3, [0xff00ff, 0x00ffff, 0x00ff41, 0xffff00][i % 4]
         ).setDepth(20);
         this.time.delayedCall(150 + i * 60, () => { if (spark.active) spark.destroy(); });
       }
@@ -625,7 +633,7 @@ respawn() {
       playerData.stats.enemyKills += 1;
       return;
     }
-    if (poison){
+    if (poison) {
       return;
     }
     // Knockback (white flash)
@@ -638,7 +646,7 @@ respawn() {
       if (!enemy.active) return;
       enemy.clearTint();
       enemy.isKnockedBack = false;
-      enemy.hitCooldown   = false;
+      enemy.hitCooldown = false;
     });
   }
 

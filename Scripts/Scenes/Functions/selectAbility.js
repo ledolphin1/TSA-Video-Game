@@ -1,18 +1,18 @@
 import { playerData } from "../playerdata.js";
 
-  const selectAbility = function (time) {
-    switch (playerData.weapon){
+  const selectAbility = function (time, weaponName, slot = 2) {
+    switch (weaponName){
         case "lp":
-            this.fireProjectile(time);
+            this.fireProjectile(time, slot);
             break;
         case "wave":
-            this.waveProj(time);
+            this.waveProj(time, slot);
             break;
         case "poison":
-            this.poison(time);
+            this.poison(time, slot);
             break;
         case "hyper":
-            this.hyper(time);
+            this.hyper(time, slot);
             break;
     }
   }

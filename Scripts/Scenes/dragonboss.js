@@ -196,7 +196,7 @@ export default class DragonBossScene extends Phaser.Scene {
     this.attackKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE);
     this.fireKey   = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.F);
     this.menuKey   = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.ESC);
-    this.selectAbilityKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.E)
+    this.abilityTwoKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.G);
     this.lastFiredTime = 0;
     
     // ── HUD: Player Health Bar ───────────────────────────────
@@ -211,6 +211,13 @@ export default class DragonBossScene extends Phaser.Scene {
     this.cooldownX = 30;
     this.cooldownY  = 50;
     this.cooldownGraphic = this.add.graphics().setScrollFactor(0).setDepth(1000).setVisible(false);
+
+    this.cooldown2Y = 70;
+    this.cooldown2Graphic = this.add.graphics().setScrollFactor(0).setDepth(1000).setVisible(false);
+
+    this.secondaryOnCooldown = false;
+    this.secondaryCooldownStart = 0;
+    this.lastSecondaryFiredTime = 0;
     
     // ── Post-update visual sync ──────────────────────────────
     this.events.on("postupdate", () => {
@@ -300,12 +307,18 @@ export default class DragonBossScene extends Phaser.Scene {
       return;
     }
 
-    // Cooldown arc
+    // Cooldown arcs
     if (this.projectileOnCooldown) {
       const elapsed  = time - this.projectileCooldownStart;
       const progress = Phaser.Math.Clamp(elapsed / this.projectileCooldown, 0, 1);
-      this._drawCooldown(progress);
+      this._drawCooldown(progress, 1);
       if (progress >= 1) this.projectileOnCooldown = false;
+    }
+    if (this.secondaryOnCooldown) {
+      const elapsed  = time - this.secondaryCooldownStart;
+      const progress = Phaser.Math.Clamp(elapsed / this.projectileCooldown, 0, 1);
+      this._drawCooldown(progress, 2);
+      if (progress >= 1) this.secondaryOnCooldown = false;
     }
 
     // ── Dragon AI ───────────────────────────────────────────
@@ -328,26 +341,23 @@ export default class DragonBossScene extends Phaser.Scene {
       this._performAttack();
     }
 
+    const primaryWep = playerData.weapons.length > 1 ? playerData.weapons[1] : playerData.weapons[0];
+    const secondaryWep = playerData.weapons.length > 2 ? playerData.weapons[2] : null;
+
+    if (Phaser.Input.Keyboard.JustDown(this.abilityTwoKey) && !this.secondaryOnCooldown) {
+      if (secondaryWep) {
+        selectAbility.call(this, time, secondaryWep, 2);
+      }
+    }
+
     if (Phaser.Input.Keyboard.JustDown(this.fireKey) && !this.projectileOnCooldown) {
-      selectAbility.call(this,time);
+      selectAbility.call(this, time, primaryWep, 1);
     }
 
     if (Phaser.Input.Keyboard.JustDown(this.menuKey)) {
       this.scene.pause();
       this.scene.launch("Pause", { returnScene: this.scene.key });
     }
-    
-    if (Phaser.Input.Keyboard.JustDown(this.selectAbilityKey)) {
-        if (!playerData.isAbleToUseEMenu){
-          return;
-        }
-         if (this.walkingSfx && this.walkingSfx.isPlaying) {
-           this.walkingSfx.stop();
-         }
-         this.scene.pause()
-         this.scene.launch("playerSelectAbility", { returnScene: this.scene.key });
-         return;
-       }
     if (this.isAttacking) {
       this.updateWalkingSfx(false);
       return;
@@ -610,11 +620,17 @@ if (!poison){
   projectileEnemyCollisionHandle(projectile,enemy,dmg,poison){
     this._damageDragon(dmg,poison);
   }
-  fireProjectile(time) {
+  fireProjectile(time, slot = 1) {
     this.sound.play("projectilesound", { seek: 0.2 });
-    this.projectileOnCooldown    = true;
-    this.projectileCooldownStart = time;
-    this.lastFiredTime           = time;
+    if (slot === 1) {
+      this.projectileOnCooldown    = true;
+      this.projectileCooldownStart = time;
+      this.lastFiredTime           = time;
+    } else {
+      this.secondaryOnCooldown    = true;
+      this.secondaryCooldownStart = time;
+      this.lastSecondaryFiredTime = time;
+    }
     playerData.stats.projectilesFired += 1;
 
     const proj = this.physics.add.sprite(this.player.x, this.player.y, "lpProjectile");
@@ -727,21 +743,23 @@ if (!poison){
   _updateDragonHpBarPos() {
   }
 
-  _drawCooldown(progress) {
-    this.cooldownGraphic.clear();
-    if (progress >= 1) { this.cooldownGraphic.setVisible(false); return; }
-    this.cooldownGraphic.setVisible(true);
-    this.cooldownGraphic.fillStyle(0x00ffff, 1);
-    this.cooldownGraphic.beginPath();
-    this.cooldownGraphic.moveTo(this.cooldownX, this.cooldownY);
-    this.cooldownGraphic.arc(
-      this.cooldownX, this.cooldownY, this.cooldownRadius,
+  _drawCooldown(progress, slot = 1) {
+    let g = slot === 1 ? this.cooldownGraphic : this.cooldown2Graphic;
+    let y = slot === 1 ? this.cooldownY : this.cooldown2Y;
+    g.clear();
+    if (progress >= 1) { g.setVisible(false); return; }
+    g.setVisible(true);
+    g.fillStyle(0x00ffff, 1);
+    g.beginPath();
+    g.moveTo(this.cooldownX, y);
+    g.arc(
+      this.cooldownX, y, this.cooldownRadius,
       Phaser.Math.DegToRad(-90),
       Phaser.Math.DegToRad(-90 + 360 * (1 - progress)),
       false
     );
-    this.cooldownGraphic.closePath();
-    this.cooldownGraphic.fillPath();
+    g.closePath();
+    g.fillPath();
   }
   respawnPlayer() {
     this.health = this.maxHealth;

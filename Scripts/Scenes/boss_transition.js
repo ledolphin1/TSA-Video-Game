@@ -176,7 +176,7 @@ export default class boss_transition extends Phaser.Scene {
       this.player.setVelocityY(this.player.body.velocity.y * 0.5);
     }
 
-    this.coordText.setText(`X: ${Math.round(this.player.x)} Y: ${Math.round(this.player.y)}`);
+
   }
 
  

@@ -1,10 +1,15 @@
   import { playerData } from "../playerdata.js";
-  const hyper = function (time) {
+  const hyper = function (time, slot = 1) {
     this.sound.play("projectilesound", { seek: 0.2 });
-    this.projectileOnCooldown = true;
-    this.projectileCooldownStart = time;
-
-    this.lastFiredTime = time;
+    if (slot === 1) {
+      this.projectileOnCooldown = true;
+      this.projectileCooldownStart = time;
+      this.lastFiredTime = time;
+    } else {
+      this.secondaryOnCooldown = true;
+      this.secondaryCooldownStart = time;
+      this.lastSecondaryFiredTime = time;
+    }
     playerData.stats.projectilesFired += 1;
     const proj = this.physics.add.sprite(this.player.x,this.player.y,"hyper");
     proj.flipX = this.player.flipX ? true : false;
